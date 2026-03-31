@@ -1,0 +1,78 @@
+version: "3.9"
+
+# ─── Production docker-compose ───────────────────────────────────────────────
+# Copy server/.env.example to server/.env and fill in all variables before
+# running `docker compose up --build`.
+#
+# Required env vars (set in a .env file at the project root or via your CI
+# secret store):
+#   POSTGRES_PASSWORD   — PostgreSQL superuser password
+#   TOKEN_SECRET        — Random 32+ character string (openssl rand -hex 32)
+#   ADMIN_SECRET        — Password for the /admin panel (leave empty to disable)
+#   CORS_ORIGIN         — The public URL of the client (e.g. https://your-domain.com)
+#
+# Optional:
+#   VITE_API_URL        — Override the client's API base URL (default: /api)
+#   CLIENT_PORT         — Host port to expose the client on (default: 80)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: spconfigurator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sp_net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-changeme}@db:5432/spconfigurator
+      TOKEN_SECRET: ${TOKEN_SECRET:?TOKEN_SECRET must be set}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      # Set ADMIN_SECRET to a strong random string to enable the /admin panel.
+      # Leave empty or omit to disable the admin panel entirely.
+      # Generate with: openssl rand -hex 24
+      ADMIN_SECRET: ${ADMIN_SECRET:-}
+    networks:
+      - sp_net
+    expose:
+      - "3001"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    networks:
+      - sp_net
+
+networks:
+  sp_net:
+    driver: bridge
+
+volumes:
+  postgres_data:

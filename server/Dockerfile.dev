@@ -1,0 +1,14 @@
+FROM node:20-alpine
+RUN apk add --no-cache openssl
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY prisma ./prisma
+RUN npx prisma generate
+COPY . .
+# Run unit tests at image-build time — image won't be created if tests fail
+RUN npm test
+EXPOSE 3001
+# Use migrate deploy (not migrate dev) so the container applies existing
+# migration files without trying to create new ones interactively.
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]

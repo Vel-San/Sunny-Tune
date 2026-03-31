@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid()) @db.Uuid
+  token          String          @unique @db.VarChar(128)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  lastSeenAt     DateTime        @default(now()) @updatedAt @map("last_seen_at")
+  configurations Configuration[]
+  ratings        Rating[]
+  comments       Comment[]
+
+  @@map("users")
+}
+
+model Configuration {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String    @db.VarChar(100)
+  description  String?   @db.VarChar(500)
+  vehicleMake  String?   @map("vehicle_make") @db.VarChar(50)
+  vehicleModel String?   @map("vehicle_model") @db.VarChar(100)
+  vehicleYear  Int?      @map("vehicle_year")
+  config       Json
+  tags         String[]  @default([])
+  category     String?   @db.VarChar(50)
+  isShared     Boolean   @default(false) @map("is_shared")
+  isReadOnly   Boolean   @default(false) @map("is_read_only")
+  shareToken   String?   @unique @map("share_token") @db.VarChar(32)
+  sharedAt     DateTime? @map("shared_at")
+  viewCount    Int            @default(0) @map("view_count")
+  cloneCount   Int            @default(0) @map("clone_count")
+  clonedFromId String?        @map("cloned_from_id") @db.Uuid
+  clonedFrom   Configuration? @relation("CloneTree", fields: [clonedFromId], references: [id], onDelete: SetNull)
+  clones       Configuration[] @relation("CloneTree")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  ratings      Rating[]
+  comments     Comment[]
+
+  @@index([userId])
+  @@index([shareToken])
+  @@index([vehicleMake])
+  @@index([category])
+  @@map("configurations")
+}
+
+model Rating {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  configId  String        @map("config_id") @db.Uuid
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config    Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  value     Int           // 1–5
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@unique([userId, configId])
+  @@index([configId])
+  @@map("ratings")
+}
+
+model Comment {
+  id         String        @id @default(uuid()) @db.Uuid
+  userId     String        @map("user_id") @db.Uuid
+  configId   String        @map("config_id") @db.Uuid
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config     Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  body       String        @db.VarChar(2000)
+  authorName String?       @map("author_name") @db.VarChar(50)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  @@index([configId])
+  @@map("comments")
+}
+
+/// Lightweight page-view event for the admin analytics dashboard.
+/// One row per request to a tracked path.
+model PageView {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// The URL path that was accessed (e.g. "/explore", "/shared/abc123")
+  path      String   @db.VarChar(256)
+  /// Coarse visitor identifier derived from the request IP (SHA-256 prefix, never raw IP)
+  visitorId String   @map("visitor_id") @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}

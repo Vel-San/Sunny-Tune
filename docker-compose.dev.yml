@@ -1,0 +1,78 @@
+version: "3.9"
+
+# ─── Development docker-compose ───────────────────────────────────────────────
+# Starts the full stack with hot-reload for both client and server.
+# All secrets here are intentionally weak dev-only values.
+#
+# To enable the admin panel in dev, set ADMIN_SECRET below or in a
+# .env file at the project root.  Access it at http://localhost:3001/admin
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: spconfigurator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sp_dev_net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:devpassword@db:5432/spconfigurator
+      TOKEN_SECRET: dev_secret_change_in_prod_32chars
+      CORS_ORIGIN: http://localhost:5173
+      # Set a value here to enable the /admin panel in dev.
+      # Access at http://localhost:3001/admin  (basic-auth password)
+      ADMIN_SECRET: ${ADMIN_SECRET:-dev_admin}
+    volumes:
+      - ./server/src:/app/src
+      - ./server/prisma:/app/prisma
+    ports:
+      - "3001:3001"
+    networks:
+      - sp_dev_net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3001
+    volumes:
+      - ./client/src:/app/src
+      - ./client/public:/app/public
+    ports:
+      - "5173:5173"
+    networks:
+      - sp_dev_net
+
+networks:
+  sp_dev_net:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:

@@ -1,0 +1,44 @@
+{
+  "name": "sp-configurator",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "dev:client": "npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "test": "npm run test --workspace=server && npm run test --workspace=client",
+    "test:server": "npm run test --workspace=server",
+    "test:client": "npm run test --workspace=client",
+    "docker:dev:build": "docker compose -p sp-dev -f docker-compose.dev.yml build",
+    "docker:dev:up": "docker compose -p sp-dev -f docker-compose.dev.yml up",
+    "docker:dev:up:d": "docker compose -p sp-dev -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker compose -p sp-dev -f docker-compose.dev.yml down",
+    "docker:dev:down:v": "docker compose -p sp-dev -f docker-compose.dev.yml down -v",
+    "docker:dev:restart": "docker compose -p sp-dev -f docker-compose.dev.yml restart",
+    "docker:dev:logs": "docker compose -p sp-dev -f docker-compose.dev.yml logs -f",
+    "docker:dev:upgrade": "docker compose -p sp-dev -f docker-compose.dev.yml pull && docker compose -p sp-dev -f docker-compose.dev.yml up --build -d",
+    "docker:dev:shell:server": "docker compose -p sp-dev -f docker-compose.dev.yml exec server sh",
+    "docker:dev:shell:db": "docker compose -p sp-dev -f docker-compose.dev.yml exec db psql -U postgres spconfigurator",
+    "docker:dev:migrate": "docker compose -p sp-dev -f docker-compose.dev.yml exec server npx prisma migrate dev",
+    "docker:dev:studio": "docker compose -p sp-dev -f docker-compose.dev.yml exec server npx prisma studio",
+    "docker:prod:build": "docker compose -p sp-prod -f docker-compose.yml build",
+    "docker:prod:up": "docker compose -p sp-prod -f docker-compose.yml up -d",
+    "docker:prod:down": "docker compose -p sp-prod -f docker-compose.yml down",
+    "docker:prod:down:v": "docker compose -p sp-prod -f docker-compose.yml down -v",
+    "docker:prod:restart": "docker compose -p sp-prod -f docker-compose.yml restart",
+    "docker:prod:logs": "docker compose -p sp-prod -f docker-compose.yml logs -f",
+    "docker:prod:upgrade": "docker compose -p sp-prod -f docker-compose.yml pull && docker compose -p sp-prod -f docker-compose.yml up --build -d",
+    "docker:prod:shell:server": "docker compose -p sp-prod -f docker-compose.yml exec server sh",
+    "docker:prod:shell:db": "docker compose -p sp-prod -f docker-compose.yml exec db psql -U postgres spconfigurator",
+    "docker:prod:migrate": "docker compose -p sp-prod -f docker-compose.yml exec server npx prisma migrate deploy",
+    "docker:prod:studio": "docker compose -p sp-prod -f docker-compose.yml exec server npx prisma studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
