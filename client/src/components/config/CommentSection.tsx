@@ -47,8 +47,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   });
 
   const addMutation = useMutation({
-    mutationFn: ({ body: text, authorName }: { body: string; authorName?: string }) =>
-      postComment(configId, text, authorName),
+    mutationFn: ({
+      body: text,
+      authorName,
+    }: {
+      body: string;
+      authorName?: string;
+    }) => postComment(configId, text, authorName),
     onSuccess: (newComment) => {
       qc.setQueryData<CommentRecord[]>(["comments", configId], (prev = []) => [
         ...prev,
@@ -78,7 +83,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!body.trim() || addMutation.isPending) return;
-    addMutation.mutate({ body: body.trim(), authorName: nickname.trim() || undefined });
+    addMutation.mutate({
+      body: body.trim(),
+      authorName: nickname.trim() || undefined,
+    });
   };
 
   return (

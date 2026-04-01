@@ -1,13 +1,13 @@
 import {
-    BookOpen,
-    Code2,
-    Container,
-    Database,
-    ExternalLink,
-    FlaskConical,
-    GitFork,
-    Server,
-    Star,
+  BookOpen,
+  Code2,
+  Container,
+  Database,
+  ExternalLink,
+  FlaskConical,
+  GitFork,
+  Server,
+  Star,
 } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";

@@ -1,15 +1,15 @@
 import { clsx } from "clsx";
 import {
-    AlertCircle,
-    Check,
-    ChevronDown,
-    Compass,
-    Copy,
-    GitFork,
-    Info,
-    KeyRound,
-    LayoutList,
-    Plus,
+  AlertCircle,
+  Check,
+  ChevronDown,
+  Compass,
+  Copy,
+  GitFork,
+  Info,
+  KeyRound,
+  LayoutList,
+  Plus,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";

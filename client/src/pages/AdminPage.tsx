@@ -15,31 +15,31 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    BarChart2,
-    FileText,
-    LayoutDashboard,
-    Loader2,
-    Lock,
-    LogOut,
-    RefreshCw,
-    Shield,
-    Trash2,
-    Unlink,
-    User,
-    Users,
+  BarChart2,
+  FileText,
+  LayoutDashboard,
+  Loader2,
+  Lock,
+  LogOut,
+  RefreshCw,
+  Shield,
+  Trash2,
+  Unlink,
+  User,
+  Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    deleteAdminConfig,
-    deleteAdminUser,
-    fetchAdminConfigs,
-    fetchAdminPageViews,
-    fetchAdminStats,
-    fetchAdminUsers,
-    unshareAdminConfig,
-    type AdminConfigSummary,
-    type AdminStats,
-    type AdminUser,
+  deleteAdminConfig,
+  deleteAdminUser,
+  fetchAdminConfigs,
+  fetchAdminPageViews,
+  fetchAdminStats,
+  fetchAdminUsers,
+  unshareAdminConfig,
+  type AdminConfigSummary,
+  type AdminStats,
+  type AdminUser,
 } from "../api/admin";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -637,7 +637,9 @@ function AdminLogin({
             {verifying ? "Verifying…" : "Enter Admin Panel"}
           </Button>
           {loginError && (
-            <p className="text-xs text-red-400 text-center mt-1">{loginError}</p>
+            <p className="text-xs text-red-400 text-center mt-1">
+              {loginError}
+            </p>
           )}
         </form>
 

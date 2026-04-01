@@ -439,7 +439,11 @@ describe("clone linkage — Prisma schema contract", () => {
     // The clonedFrom relation returned by the server must have these fields.
     // This mirrors the Prisma select in the clone/GET endpoints.
     const expectedFields = ["id", "name", "shareToken"];
-    const mockClonedFrom = { id: "abc", name: "Original Config", shareToken: "tok123" };
+    const mockClonedFrom = {
+      id: "abc",
+      name: "Original Config",
+      shareToken: "tok123",
+    };
     for (const field of expectedFields) {
       expect(
         Object.prototype.hasOwnProperty.call(mockClonedFrom, field),
@@ -450,7 +454,11 @@ describe("clone linkage — Prisma schema contract", () => {
 
   it("clonedFrom.shareToken may be null for unshared originals", () => {
     // When the original config was never shared, shareToken will be null.
-    const mockClonedFrom: { id: string; name: string; shareToken: string | null } = {
+    const mockClonedFrom: {
+      id: string;
+      name: string;
+      shareToken: string | null;
+    } = {
       id: "abc",
       name: "Private Config",
       shareToken: null,

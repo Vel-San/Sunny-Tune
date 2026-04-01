@@ -114,7 +114,8 @@ communityRouter.get(
         id: c.id,
         body: c.body,
         authorId: c.userId,
-        authorHandle: c.authorName ?? `usr_${c.user.id.replace(/-/g, "").slice(0, 8)}`,
+        authorHandle:
+          c.authorName ?? `usr_${c.user.id.replace(/-/g, "").slice(0, 8)}`,
         authorName: c.authorName ?? null,
         isOwn: c.userId === req.userId,
         createdAt: c.createdAt,
@@ -161,7 +162,9 @@ communityRouter.post(
         id: comment.id,
         body: comment.body,
         authorId: comment.userId,
-        authorHandle: comment.authorName ?? `usr_${comment.user.id.replace(/-/g, "").slice(0, 8)}`,
+        authorHandle:
+          comment.authorName ??
+          `usr_${comment.user.id.replace(/-/g, "").slice(0, 8)}`,
         authorName: comment.authorName ?? null,
         isOwn: true,
         createdAt: comment.createdAt,
@@ -221,7 +224,8 @@ publicCommentsRouter.get(
       const result = comments.map((c) => ({
         id: c.id,
         body: c.body,
-        authorHandle: c.authorName ?? `usr_${c.user.id.replace(/-/g, "").slice(0, 8)}`,
+        authorHandle:
+          c.authorName ?? `usr_${c.user.id.replace(/-/g, "").slice(0, 8)}`,
         authorName: c.authorName ?? null,
         isOwn: false,
         createdAt: c.createdAt,

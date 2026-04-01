@@ -1,30 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    BarChart3,
-    Car,
-    ChevronDown,
-    ChevronUp,
-    Clock,
-    Copy,
-    Eye,
-    Filter,
-    Loader2,
-    MessageSquare,
-    RefreshCw,
-    Search,
-    SlidersHorizontal,
-    Star,
-    Tag,
-    TrendingUp,
-    X,
+  BarChart3,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  Eye,
+  Filter,
+  Loader2,
+  MessageSquare,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+  Star,
+  Tag,
+  TrendingUp,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchCommunityStats, fetchExplore } from "../api";
 import { ExploreCard } from "../components/config/ExploreCard";
 import { Button } from "../components/ui/Button";
 import { Select } from "../components/ui/Select";
-import type { CommunityStats, ConfigRecord, ExploreResponse } from "../types/config";
+import type {
+  CommunityStats,
+  ConfigRecord,
+  ExploreResponse,
+} from "../types/config";
 import { CATEGORIES } from "../types/config";
 
 const SORT_OPTIONS = [
@@ -429,7 +433,7 @@ export default function ExplorePage() {
         {/* Results header */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-zinc-500">
-{isFetching && displayConfigs.length === 0 ? (
+            {isFetching && displayConfigs.length === 0 ? (
               "Loading…"
             ) : (
               <>
@@ -441,11 +445,12 @@ export default function ExplorePage() {
               </>
             )}
           </p>
-          {displayConfigs.length > 0 && displayConfigs.length < (data?.total ?? 0) && (
-            <p className="text-xs text-zinc-600 font-mono">
-              {displayConfigs.length} / {data?.total} loaded
-            </p>
-          )}
+          {displayConfigs.length > 0 &&
+            displayConfigs.length < (data?.total ?? 0) && (
+              <p className="text-xs text-zinc-600 font-mono">
+                {displayConfigs.length} / {data?.total} loaded
+              </p>
+            )}
         </div>
 
         {/* Grid */}
@@ -510,7 +515,9 @@ export default function ExplorePage() {
                     ) : undefined
                   }
                 >
-                  {isFetching ? "Loading…" : `Load ${Math.min(LIMIT, (data?.total ?? 0) - displayConfigs.length)} more`}
+                  {isFetching
+                    ? "Loading…"
+                    : `Load ${Math.min(LIMIT, (data?.total ?? 0) - displayConfigs.length)} more`}
                 </Button>
               </div>
             ) : displayConfigs.length > 0 ? (

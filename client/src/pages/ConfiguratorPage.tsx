@@ -1,20 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    AlertCircle,
-    ArrowLeftRight,
-    ArrowUpDown,
-    Car,
-    CheckCircle2,
-    Cpu,
-    Gauge,
-    GitBranch,
-    Map,
-    Monitor,
-    Save,
-    Share2,
-    TrendingUp,
-    Wrench,
+  AlertCircle,
+  ArrowLeftRight,
+  ArrowUpDown,
+  Car,
+  CheckCircle2,
+  Cpu,
+  Gauge,
+  GitBranch,
+  Map,
+  Monitor,
+  Save,
+  Share2,
+  TrendingUp,
+  Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";

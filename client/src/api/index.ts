@@ -1,14 +1,14 @@
 /// <reference types="vite/client" />
 import axios from "axios";
 import type {
-    CommentRecord,
-    CommunityStats,
-    ConfigRecord,
-    ExploreResponse,
-    RatingRecord,
-    RatingSummary,
-    SPConfig,
-    UserRecord,
+  CommentRecord,
+  CommunityStats,
+  ConfigRecord,
+  ExploreResponse,
+  RatingRecord,
+  RatingSummary,
+  SPConfig,
+  UserRecord,
 } from "../types/config";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";

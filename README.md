@@ -21,6 +21,12 @@
     - [Staying up to date with upstream](#staying-up-to-date-with-upstream)
     - [SunnyPilot vs Comma AI — the `source` field](#sunnypilot-vs-comma-ai--the-source-field)
     - [Adding a feature](#adding-a-feature)
+  - [Running Database Migrations](#running-database-migrations)
+    - [When to migrate](#when-to-migrate)
+    - [Dev environment (Docker)](#dev-environment-docker)
+    - [Prod environment (Docker)](#prod-environment-docker)
+    - [Local development (no Docker)](#local-development-no-docker)
+    - [After migrating](#after-migrating)
   - [Configuration Sharing](#configuration-sharing)
   - [Deploying to Vercel](#deploying-to-vercel)
   - [Project Structure](#project-structure)
@@ -37,19 +43,19 @@ Configs can be shared via a unique URL and are locked read-only once published, 
 
 ## Stack
 
-| Layer     | Technology                              |
-| --------- | --------------------------------------- |
-| Frontend  | React 18 + TypeScript + Vite 5          |
-| Styling   | Tailwind CSS (dark zinc theme)          |
-| Icons     | Lucide React                            |
-| State     | Zustand + TanStack Query                |
-| Backend   | Node.js + Express + TypeScript          |
-| ORM       | Prisma 5 (see below)                    |
-| Database  | PostgreSQL 16                           |
-| Auth      | Bearer token (UUID, no password)        |
-| Container | Docker + Docker Compose                 |
-| Testing   | Vitest + @testing-library/react         |
-| Deploy    | Vercel (frontend) + any Node host       |
+| Layer     | Technology                        |
+| --------- | --------------------------------- |
+| Frontend  | React 18 + TypeScript + Vite 5    |
+| Styling   | Tailwind CSS (dark zinc theme)    |
+| Icons     | Lucide React                      |
+| State     | Zustand + TanStack Query          |
+| Backend   | Node.js + Express + TypeScript    |
+| ORM       | Prisma 5 (see below)              |
+| Database  | PostgreSQL 16                     |
+| Auth      | Bearer token (UUID, no password)  |
+| Container | Docker + Docker Compose           |
+| Testing   | Vitest + @testing-library/react   |
+| Deploy    | Vercel (frontend) + any Node host |
 
 ---
 
@@ -92,20 +98,20 @@ All scripts are run from the **project root** unless noted otherwise.
 
 ### Local Development
 
-| Script | What it does |
-|---|---|
-| `npm run dev` | Starts **both** the Express server (port 3001) and the Vite client (port 5173) concurrently with hot reload |
-| `npm run dev:server` | Starts only the Express backend with `tsx watch` |
-| `npm run dev:client` | Starts only the Vite frontend dev server |
-| `npm run build` | Compiles the TypeScript server (`tsc`) then builds the Vite client bundle |
+| Script               | What it does                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `npm run dev`        | Starts **both** the Express server (port 3001) and the Vite client (port 5173) concurrently with hot reload |
+| `npm run dev:server` | Starts only the Express backend with `tsx watch`                                                            |
+| `npm run dev:client` | Starts only the Vite frontend dev server                                                                    |
+| `npm run build`      | Compiles the TypeScript server (`tsc`) then builds the Vite client bundle                                   |
 
 ### Testing
 
-| Script | What it does |
-|---|---|
-| `npm test` | Runs **all** tests — server (Vitest/Node) then client (Vitest/jsdom) |
-| `npm run test:server` | Runs only the server-side tests |
-| `npm run test:client` | Runs only the client-side tests (React Testing Library) |
+| Script                | What it does                                                         |
+| --------------------- | -------------------------------------------------------------------- |
+| `npm test`            | Runs **all** tests — server (Vitest/Node) then client (Vitest/jsdom) |
+| `npm run test:server` | Runs only the server-side tests                                      |
+| `npm run test:client` | Runs only the client-side tests (React Testing Library)              |
 
 Tests live in `__tests__/` directories next to the code they test. All 46 tests must pass — Docker builds will also fail if tests fail.
 
@@ -113,20 +119,20 @@ Tests live in `__tests__/` directories next to the code they test. All 46 tests 
 
 Dev containers use hot reload: source files are bind-mounted so changes take effect without rebuilding. Project name: `sp-dev`.
 
-| Script | What it does |
-|---|---|
-| `npm run docker:dev:build` | Builds the dev Docker images (runs tests during build — fails fast on test failures) |
-| `npm run docker:dev:up` | Starts the full dev stack (DB + server + client) in the **foreground** — logs stream to your terminal |
-| `npm run docker:dev:up:d` | Starts the dev stack in the **background** (detached mode) |
-| `npm run docker:dev:down` | Stops and removes all dev containers (database data is preserved) |
-| `npm run docker:dev:down:v` | Stops containers **and wipes the database volume** — gives you a completely fresh DB on next start |
-| `npm run docker:dev:restart` | Restarts all running dev services without rebuilding |
-| `npm run docker:dev:logs` | Tails the live logs from all dev containers (Ctrl+C to exit) |
-| `npm run docker:dev:upgrade` | Pulls the latest base images, rebuilds all services, and restarts them — useful for keeping base images up-to-date |
-| `npm run docker:dev:shell:server` | Opens an interactive shell (`sh`) **inside the running server container** |
-| `npm run docker:dev:shell:db` | Opens a `psql` session **inside the running database container** |
-| `npm run docker:dev:migrate` | Runs `prisma migrate dev` inside the server container — use this after changing `schema.prisma` |
-| `npm run docker:dev:studio` | Starts Prisma Studio inside the container — opens a database browser at **http://localhost:5555** |
+| Script                            | What it does                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `npm run docker:dev:build`        | Builds the dev Docker images (runs tests during build — fails fast on test failures)                               |
+| `npm run docker:dev:up`           | Starts the full dev stack (DB + server + client) in the **foreground** — logs stream to your terminal              |
+| `npm run docker:dev:up:d`         | Starts the dev stack in the **background** (detached mode)                                                         |
+| `npm run docker:dev:down`         | Stops and removes all dev containers (database data is preserved)                                                  |
+| `npm run docker:dev:down:v`       | Stops containers **and wipes the database volume** — gives you a completely fresh DB on next start                 |
+| `npm run docker:dev:restart`      | Restarts all running dev services without rebuilding                                                               |
+| `npm run docker:dev:logs`         | Tails the live logs from all dev containers (Ctrl+C to exit)                                                       |
+| `npm run docker:dev:upgrade`      | Pulls the latest base images, rebuilds all services, and restarts them — useful for keeping base images up-to-date |
+| `npm run docker:dev:shell:server` | Opens an interactive shell (`sh`) **inside the running server container**                                          |
+| `npm run docker:dev:shell:db`     | Opens a `psql` session **inside the running database container**                                                   |
+| `npm run docker:dev:migrate`      | Runs `prisma migrate dev` inside the server container — use this after changing `schema.prisma`                    |
+| `npm run docker:dev:studio`       | Starts Prisma Studio inside the container — opens a database browser at **http://localhost:5555**                  |
 
 Dev URLs: **http://localhost:5173** (client) · **http://localhost:3001** (API)
 
@@ -134,19 +140,19 @@ Dev URLs: **http://localhost:5173** (client) · **http://localhost:3001** (API)
 
 Prod containers use multi-stage builds (smaller images, no dev dependencies). Prisma migrations run automatically on container start. Project name: `sp-prod`.
 
-| Script | What it does |
-|---|---|
-| `npm run docker:prod:build` | Builds the production Docker images (runs tests during build) |
-| `npm run docker:prod:up` | Starts the full prod stack in the background and runs `prisma migrate deploy` automatically |
-| `npm run docker:prod:down` | Stops and removes all prod containers |
-| `npm run docker:prod:down:v` | Stops prod containers **and wipes the database volume** |
-| `npm run docker:prod:restart` | Restarts prod services |
-| `npm run docker:prod:logs` | Tails live logs from prod containers |
-| `npm run docker:prod:upgrade` | Pulls latest base images, rebuilds prod, and performs a rolling restart |
-| `npm run docker:prod:shell:server` | Shell inside the running prod server container |
-| `npm run docker:prod:shell:db` | `psql` session inside the prod database container |
-| `npm run docker:prod:migrate` | Runs `prisma migrate deploy` inside the prod server (safe for production — never resets data) |
-| `npm run docker:prod:studio` | Prisma Studio against the prod database at **http://localhost:5555** |
+| Script                             | What it does                                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run docker:prod:build`        | Builds the production Docker images (runs tests during build)                                 |
+| `npm run docker:prod:up`           | Starts the full prod stack in the background and runs `prisma migrate deploy` automatically   |
+| `npm run docker:prod:down`         | Stops and removes all prod containers                                                         |
+| `npm run docker:prod:down:v`       | Stops prod containers **and wipes the database volume**                                       |
+| `npm run docker:prod:restart`      | Restarts prod services                                                                        |
+| `npm run docker:prod:logs`         | Tails live logs from prod containers                                                          |
+| `npm run docker:prod:upgrade`      | Pulls latest base images, rebuilds prod, and performs a rolling restart                       |
+| `npm run docker:prod:shell:server` | Shell inside the running prod server container                                                |
+| `npm run docker:prod:shell:db`     | `psql` session inside the prod database container                                             |
+| `npm run docker:prod:migrate`      | Runs `prisma migrate deploy` inside the prod server (safe for production — never resets data) |
+| `npm run docker:prod:studio`       | Prisma Studio against the prod database at **http://localhost:5555**                          |
 
 Prod URL: **http://localhost** (port 80 by default; set `CLIENT_PORT` in your `.env` to change it)
 
@@ -307,10 +313,10 @@ The best sources for new SP and Comma AI parameters:
 
 Every registry entry has a **required** `source` field. TypeScript will refuse to compile if you omit it:
 
-| Value | Meaning | When to use |
-|---|---|---|
-| `'sunnypilot'` | Exclusive to the SP fork | Params with `SP_*` prefix, SP-only behaviour |
-| `'openpilot'` | Stock Comma AI / upstream openpilot | Params that exist in vanilla openpilot |
+| Value          | Meaning                             | When to use                                  |
+| -------------- | ----------------------------------- | -------------------------------------------- |
+| `'sunnypilot'` | Exclusive to the SP fork            | Params with `SP_*` prefix, SP-only behaviour |
+| `'openpilot'`  | Stock Comma AI / upstream openpilot | Params that exist in vanilla openpilot       |
 
 The UI reads `source` to badge each parameter as **SP** or **Comma AI** in the configurator.
 
@@ -340,6 +346,61 @@ Then:
 2. Add the field + default value to `DEFAULT_CONFIG` in `client/src/store/configStore.ts`
 3. For dynamically-rendered sections the `<ParamRow>` is auto-generated from the registry
 4. For manually-laid-out sections (e.g. `VehicleSection`), add a `<ParamRow>` in the component
+
+---
+
+## Running Database Migrations
+
+A migration is **only needed when `server/prisma/schema.prisma` changes** — i.e. when the database structure itself is modified. Pure frontend changes (adding a feature to `featureRegistry.ts`, updating types, changing components) never require a migration.
+
+### When to migrate
+
+| Change type                                       | Migrate?                                    |
+| ------------------------------------------------- | ------------------------------------------- |
+| Add a field/model/index to `schema.prisma`        | **Yes**                                     |
+| Remove or rename a field/model in `schema.prisma` | **Yes**                                     |
+| Add a new param to `featureRegistry.ts` only      | No — stored inside the `config` JSON column |
+| Change server route logic or middleware           | No                                          |
+| Add/update React components or pages              | No                                          |
+| Update environment variables or secrets           | No                                          |
+
+> **Tip:** If the new feature stores its value inside the existing `config` JSON field on the `Configuration` model (which is the case for all SunnyPilot/Comma AI params), no schema change is needed — just update `featureRegistry.ts`, `config.ts`, and `configStore.ts` as described above.
+>
+> A schema change is only required when you need a **new top-level column or table** — for example, adding a new model, a new scalar field directly on a model, or a new relation.
+
+### Dev environment (Docker)
+
+```bash
+# 1. Edit server/prisma/schema.prisma
+# 2. Apply the migration and regenerate the Prisma client:
+npm run docker:dev:migrate
+# When prompted, enter a short descriptive name, e.g. "add_vehicle_trim_field"
+```
+
+The command runs `prisma migrate dev` inside the running server container, creates a new timestamped SQL file under `server/prisma/migrations/`, and regenerates the TypeScript client automatically.
+
+### Prod environment (Docker)
+
+```bash
+# Prod uses prisma migrate deploy (safe — never resets data, no prompt):
+npm run docker:prod:migrate
+```
+
+This is also run automatically every time the prod stack starts (`docker:prod:up`), so in most cases you only need it when applying a migration to an already-running prod stack without a full restart.
+
+### Local development (no Docker)
+
+```bash
+cd server
+npx prisma migrate dev --name describe_your_change
+# The Prisma client is regenerated automatically after the migration
+```
+
+### After migrating
+
+- The updated Prisma client types are available immediately in the server code.
+- Restart the server (`npm run dev:server` or `docker:dev:restart`) if it was already running and didn't pick up hot reload.
+- Commit the new migration file in `server/prisma/migrations/` — it is part of the source code and must be version-controlled.
 
 ---
 

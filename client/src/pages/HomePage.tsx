@@ -1,10 +1,10 @@
 import {
-    ArrowRight,
-    Compass,
-    Cpu,
-    GitBranch,
-    Plus,
-    TrendingUp,
+  ArrowRight,
+  Compass,
+  Cpu,
+  GitBranch,
+  Plus,
+  TrendingUp,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";

@@ -24,6 +24,7 @@
     "helmet": "^7.1.0",
     "nanoid": "^5.0.6",
     "uuid": "^9.0.1",
+    "vite": "8.0.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -32,11 +33,11 @@
     "@types/node": "^20.11.30",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^9.0.8",
-    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/coverage-v8": "^4.1.2",
     "prisma": "^5.10.2",
     "supertest": "^7.0.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2",
-    "vitest": "^1.4.0"
+    "vitest": "^4.1.2"
   }
 }

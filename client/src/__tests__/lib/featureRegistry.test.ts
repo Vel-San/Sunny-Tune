@@ -16,14 +16,14 @@
 
 import { describe, expect, it } from "vitest";
 import {
-    ADVANCED_FEATURES,
-    ALL_FEATURES,
-    COMMA_AI_FEATURES,
-    getDefaultsForSection,
-    getFeature,
-    getFeaturesForSection,
-    LANE_CHANGE_FEATURES,
-    LONGITUDINAL_FEATURES,
+  ADVANCED_FEATURES,
+  ALL_FEATURES,
+  COMMA_AI_FEATURES,
+  getDefaultsForSection,
+  getFeature,
+  getFeaturesForSection,
+  LANE_CHANGE_FEATURES,
+  LONGITUDINAL_FEATURES,
 } from "../../lib/featureRegistry";
 import type { ConfigRecord } from "../../types/config";
 import { createDefaultConfig } from "../../types/config";
@@ -262,7 +262,11 @@ describe("ConfigRecord — clone provenance type contract", () => {
         viewCount: 0,
         cloneCount: 0,
         clonedFromId: "original-id-abc",
-        clonedFrom: { id: "original-id-abc", name: "Original Config", shareToken: "tok123" },
+        clonedFrom: {
+          id: "original-id-abc",
+          name: "Original Config",
+          shareToken: "tok123",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -276,7 +280,11 @@ describe("ConfigRecord — clone provenance type contract", () => {
         viewCount: 0,
         cloneCount: 0,
         clonedFromId: "original-id-xyz",
-        clonedFrom: { id: "original-id-xyz", name: "Private Origin", shareToken: null },
+        clonedFrom: {
+          id: "original-id-xyz",
+          name: "Private Origin",
+          shareToken: null,
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },

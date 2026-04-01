@@ -3,7 +3,11 @@ import { Response, Router } from "express";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { prisma } from "../config/database";
-import { authenticate, AuthRequest, optionalAuthenticate } from "../middleware/auth";
+import {
+  authenticate,
+  AuthRequest,
+  optionalAuthenticate,
+} from "../middleware/auth";
 import { writeLimiter } from "../middleware/rateLimiter";
 
 const nanoid = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 16);

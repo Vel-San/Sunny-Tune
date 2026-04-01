@@ -1,40 +1,40 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    ArrowLeft,
-    ArrowLeftRight,
-    ArrowUpDown,
-    BarChart3,
-    Calendar,
-    Car,
-    ChevronDown,
-    ChevronUp,
-    Copy,
-    Cpu,
-    ExternalLink,
-    Eye,
-    Gauge,
-    GitBranch,
-    GitFork,
-    Loader2,
-    Lock,
-    Map,
-    Monitor,
-    Share2,
-    Star,
-    Tag,
-    TrendingUp,
-    Wrench,
+  ArrowLeft,
+  ArrowLeftRight,
+  ArrowUpDown,
+  BarChart3,
+  Calendar,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Cpu,
+  ExternalLink,
+  Eye,
+  Gauge,
+  GitBranch,
+  GitFork,
+  Loader2,
+  Lock,
+  Map,
+  Monitor,
+  Share2,
+  Star,
+  Tag,
+  TrendingUp,
+  Wrench,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-    cloneConfig,
-    deleteRating,
-    fetchMyRating,
-    fetchRatingSummary,
-    fetchSharedConfig,
-    rateConfig,
+  cloneConfig,
+  deleteRating,
+  fetchMyRating,
+  fetchRatingSummary,
+  fetchSharedConfig,
+  rateConfig,
 } from "../api";
 import { CommentSection } from "../components/config/CommentSection";
 import { Badge } from "../components/ui/Badge";
@@ -42,9 +42,9 @@ import { Button } from "../components/ui/Button";
 import { RatingDisplay, RatingStars } from "../components/ui/RatingStars";
 import { useAuthStore } from "../store/authStore";
 import type {
-    ConfigRecord,
-    RatingRecord,
-    RatingSummary,
+  ConfigRecord,
+  RatingRecord,
+  RatingSummary,
 } from "../types/config";
 import { CATEGORIES } from "../types/config";
 
@@ -322,7 +322,9 @@ export default function SharedConfigPage() {
                   {config.clonedFrom.name}
                 </Link>
               ) : (
-                <span className="text-zinc-400 ml-1">{config.clonedFrom.name}</span>
+                <span className="text-zinc-400 ml-1">
+                  {config.clonedFrom.name}
+                </span>
               )}
             </span>
           )}
@@ -476,7 +478,9 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock icon={ArrowUpDown} title="Longitudinal Control"
+          <SectionBlock
+            icon={ArrowUpDown}
+            title="Longitudinal Control"
             badge={
               <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 select-none">
                 SP
@@ -578,7 +582,9 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock icon={ArrowLeftRight} title="Lane Change"
+          <SectionBlock
+            icon={ArrowLeftRight}
+            title="Lane Change"
             badge={
               <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 select-none">
                 SP
@@ -673,7 +679,9 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock icon={Cpu} title="Comma AI Core"
+          <SectionBlock
+            icon={Cpu}
+            title="Comma AI Core"
             badge={
               <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/20 select-none">
                 All OpenPilot
@@ -802,7 +810,8 @@ export default function SharedConfigPage() {
                 </div>
                 {rateMutation.isError && (
                   <p className="text-xs text-red-400">
-                    {(rateMutation.error as Error)?.message ?? "Failed to submit rating"}
+                    {(rateMutation.error as Error)?.message ??
+                      "Failed to submit rating"}
                   </p>
                 )}
                 {myRating && (
