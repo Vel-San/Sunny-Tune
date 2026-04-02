@@ -32,6 +32,7 @@ import type {
 import { CATEGORIES } from "../types/config";
 
 const SORT_OPTIONS = [
+  { value: "trending", label: "Trending", icon: TrendingUp },
   { value: "rating", label: "Top Rated", icon: Star },
   { value: "recent", label: "Most Recent", icon: Clock },
   { value: "views", label: "Most Viewed", icon: Eye },
@@ -69,10 +70,11 @@ export default function ExplorePage() {
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [category, setCategory] = useState("");
+  const [spVersion, setSpVersion] = useState("");
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [sort, setSort] = useState<
-    "rating" | "recent" | "views" | "clones" | "comments"
-  >("rating");
+    "trending" | "rating" | "recent" | "views" | "clones" | "comments"
+  >("trending");
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const LIMIT = 20;
@@ -110,13 +112,19 @@ export default function ExplorePage() {
     setMake("");
     setModel("");
     setCategory("");
+    setSpVersion("");
     setActiveTags([]);
     setSort("rating");
     resetForFilters();
   }, [resetForFilters]);
 
   const hasFilters =
-    debouncedQ || make || model || category || activeTags.length > 0;
+    debouncedQ ||
+    make ||
+    model ||
+    category ||
+    spVersion ||
+    activeTags.length > 0;
 
   const { data, isLoading, isFetching, isError, refetch } =
     useQuery<ExploreResponse>({
@@ -126,6 +134,7 @@ export default function ExplorePage() {
         make,
         model,
         category,
+        spVersion,
         activeTags,
         sort,
         page,
@@ -137,6 +146,7 @@ export default function ExplorePage() {
           model: model || undefined,
           category: category || undefined,
           tags: activeTags.length ? activeTags : undefined,
+          spVersion: spVersion || undefined,
           sort,
           page,
           limit: LIMIT,
@@ -338,6 +348,20 @@ export default function ExplorePage() {
                     })),
                   ]}
                   className="text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1 block">
+                  SP Version
+                </label>
+                <input
+                  value={spVersion}
+                  onChange={(e) => {
+                    setSpVersion(e.target.value);
+                    resetForFilters();
+                  }}
+                  placeholder="e.g. 0.9.8"
+                  className="input-base text-sm"
                 />
               </div>
               {hasFilters && (

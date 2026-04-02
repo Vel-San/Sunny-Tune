@@ -1,30 +1,49 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response, Router } from "express";
 import { prisma } from "../config/database";
+import { exploreQuerySchema } from "../lib/querySchemas";
+import { stripControlChars } from "../lib/sanitize";
+import { VERIFIED_VEHICLES } from "../lib/vehicles";
 
 export const exploreRouter = Router();
 
 // GET /api/explore — public browse of all shared configs with search + filter + sort + pagination
 exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const {
-      q,
-      make,
-      model,
-      year,
-      tags, // comma-separated
-      category,
-      sort = "rating",
-      page = "1",
-      limit = "20",
-    } = req.query as Record<string, string>;
+  const parsed = exploreQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({
+      error: "Invalid query parameters",
+      details: parsed.error.flatten(),
+    });
+    return;
+  }
 
-    const take = Math.min(50, parseInt(limit) || 20);
-    const skip = (Math.max(1, parseInt(page) || 1) - 1) * take;
+  const {
+    q: rawQ,
+    make: rawMake,
+    model: rawModel,
+    year,
+    tags,
+    category: rawCategory,
+    sort,
+    page,
+    limit,
+    spVersion,
+  } = parsed.data;
+
+  // Strip control characters from free-text search inputs
+  const q = rawQ ? stripControlChars(rawQ) : undefined;
+  const make = rawMake ? stripControlChars(rawMake) : undefined;
+  const model = rawModel ? stripControlChars(rawModel) : undefined;
+  const category = rawCategory ? stripControlChars(rawCategory) : undefined;
+
+  try {
+    const take = limit;
+    const skip = (page - 1) * take;
 
     const searchFilters: Prisma.ConfigurationWhereInput[] = [];
 
-    if (q && typeof q === "string" && q.trim()) {
+    if (q && q.trim()) {
       const term = q.trim();
       searchFilters.push({
         OR: [
@@ -46,7 +65,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
       searchFilters.push({
         vehicleModel: { contains: model, mode: "insensitive" },
       });
-    if (year) searchFilters.push({ vehicleYear: parseInt(year) });
+    if (year) searchFilters.push({ vehicleYear: year });
     if (tags) {
       const tagList = tags
         .split(",")
@@ -60,12 +79,21 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
         category: { equals: category, mode: "insensitive" },
       });
 
+    // SP version filter — matches configs whose metadata.sunnypilotVersion
+    // is exactly equal to the requested version string.
+    if (spVersion) {
+      searchFilters.push({
+        config: { path: ["metadata", "sunnypilotVersion"], equals: spVersion },
+      });
+    }
+
     const where: Prisma.ConfigurationWhereInput = {
       isShared: true,
       ...(searchFilters.length > 0 ? { AND: searchFilters } : {}),
     };
 
-    // Determine DB-level orderBy for non-rating sorts
+    // Determine DB-level orderBy for non-rating/trending sorts
+    const isSortedInJS = sort === "rating" || sort === "trending";
     const dbOrderBy: Prisma.ConfigurationOrderByWithRelationInput =
       sort === "recent"
         ? { sharedAt: "desc" }
@@ -75,7 +103,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
             ? { cloneCount: "desc" }
             : sort === "comments"
               ? { comments: { _count: "desc" } }
-              : { sharedAt: "desc" }; // rating sort done in JS
+              : { sharedAt: "desc" }; // rating/trending sort done in JS
 
     const [total, configs] = await prisma.$transaction([
       prisma.configuration.count({ where }),
@@ -88,6 +116,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
           vehicleMake: true,
           vehicleModel: true,
           vehicleYear: true,
+          config: true,
           tags: true,
           category: true,
           isShared: true,
@@ -99,30 +128,44 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
           clonedFrom: { select: { id: true, name: true, shareToken: true } },
           createdAt: true,
           updatedAt: true,
-          ratings: { select: { value: true } },
+          ratings: { select: { value: true, createdAt: true } },
+          clones: { select: { createdAt: true } },
           _count: { select: { comments: true } },
         },
-        take: sort === "rating" ? undefined : take, // fetch all when rating-sorting in JS
-        skip: sort === "rating" ? 0 : skip,
+        take: isSortedInJS ? undefined : take,
+        skip: isSortedInJS ? 0 : skip,
         orderBy: dbOrderBy,
       }),
     ]);
 
-    // Compute avg rating per config
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // Compute avg rating and trending score per config
     let result = configs.map((c) => {
       const sum = c.ratings.reduce((s, r) => s + r.value, 0);
       const avgRating = c.ratings.length > 0 ? sum / c.ratings.length : null;
+      // Trending: recent ratings * 5 + recent clones * 3 + log(viewCount+1)
+      const ratings7d = c.ratings.filter(
+        (r) => r.createdAt >= sevenDaysAgo,
+      ).length;
+      const clones7d = c.clones.filter(
+        (cl) => cl.createdAt >= sevenDaysAgo,
+      ).length;
+      const trendingScore =
+        ratings7d * 5 + clones7d * 3 + Math.log(c.viewCount + 1);
       return {
         ...c,
         ratings: undefined,
+        clones: undefined,
         avgRating,
         ratingCount: c.ratings.length,
         commentCount: c._count.comments,
+        trendingScore,
         _count: undefined,
       };
     });
 
-    // Apply rating sort in JS (weighted: avg descending, tie-break on count)
+    // Apply JS-side sorts (rating, trending)
     if (sort === "rating") {
       result.sort((a, b) => {
         const ra = a.avgRating ?? 0;
@@ -131,7 +174,13 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
         return b.ratingCount - a.ratingCount;
       });
       result = result.slice(skip, skip + take);
+    } else if (sort === "trending") {
+      result.sort((a, b) => b.trendingScore - a.trendingScore);
+      result = result.slice(skip, skip + take);
     }
+
+    // Strip trendingScore from public response
+    const publicResult = result.map(({ trendingScore: _, ...r }) => r);
 
     // Facets: distinct tags and makes for filter UI
     const [tagFacets, makeFacets] = await Promise.all([
@@ -163,9 +212,9 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
     }));
 
     res.json({
-      configs: result,
+      configs: publicResult,
       total,
-      page: parseInt(page) || 1,
+      page,
       limit: take,
       facets: { tags: topTags, makes },
     });
@@ -180,26 +229,83 @@ exploreRouter.get(
   "/stats",
   async (_req: Request, res: Response): Promise<void> => {
     try {
-      const [configCount, ratingCount, commentCount, makeCount] =
-        await prisma.$transaction([
-          prisma.configuration.count({ where: { isShared: true } }),
-          prisma.rating.count(),
-          prisma.comment.count(),
-          prisma.configuration.groupBy({
-            by: ["vehicleMake"],
-            where: { isShared: true, vehicleMake: { not: null } },
-            orderBy: { _count: { vehicleMake: "desc" } },
-            _count: { vehicleMake: true },
-          }),
-        ]);
+      const [
+        configCount,
+        ratingCount,
+        commentCount,
+        viewsAgg,
+        clonesAgg,
+        makeGroups,
+        categoryGroups,
+        tagDocs,
+      ] = await Promise.all([
+        prisma.configuration.count({ where: { isShared: true } }),
+        prisma.rating.count(),
+        prisma.comment.count(),
+        prisma.configuration.aggregate({
+          where: { isShared: true },
+          _sum: { viewCount: true },
+        }),
+        prisma.configuration.aggregate({
+          where: { isShared: true },
+          _sum: { cloneCount: true },
+        }),
+        prisma.configuration.groupBy({
+          by: ["vehicleMake"],
+          where: { isShared: true, vehicleMake: { not: null } },
+          _count: { vehicleMake: true },
+          orderBy: { _count: { vehicleMake: "desc" } },
+          take: 10,
+        }),
+        prisma.configuration.groupBy({
+          by: ["category"],
+          where: { isShared: true, category: { not: null } },
+          _count: { category: true },
+          orderBy: { _count: { category: "desc" } },
+          take: 10,
+        }),
+        prisma.configuration.findMany({
+          where: { isShared: true },
+          select: { tags: true },
+        }),
+      ]);
+
+      // Aggregate tag counts across all shared configs
+      const tagCounts: Record<string, number> = {};
+      for (const doc of tagDocs) {
+        for (const tag of doc.tags) {
+          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+        }
+      }
+      const topTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15)
+        .map(([tag, count]) => ({ tag, count }));
+
       res.json({
         sharedConfigs: configCount,
         totalRatings: ratingCount,
         totalComments: commentCount,
-        supportedMakes: makeCount.length,
+        supportedMakes: makeGroups.length,
+        totalViews: viewsAgg._sum.viewCount ?? 0,
+        totalClones: clonesAgg._sum.cloneCount ?? 0,
+        topMakes: makeGroups.map((m) => ({
+          make: m.vehicleMake!,
+          count: m._count.vehicleMake,
+        })),
+        topCategories: categoryGroups.map((c) => ({
+          category: c.category!,
+          count: c._count.category,
+        })),
+        topTags,
       });
     } catch {
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   },
 );
+
+// GET /api/explore/vehicles — returns the curated verified vehicle list
+exploreRouter.get("/vehicles", (_req: Request, res: Response): void => {
+  res.json(VERIFIED_VEHICLES);
+});

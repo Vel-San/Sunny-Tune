@@ -3,18 +3,22 @@ import { clsx } from "clsx";
 import {
   Calendar,
   Copy,
+  Download,
   ExternalLink,
   Eye,
+  GitBranch,
   GitFork,
-  Lock,
+  MessageSquare,
   Pencil,
   Share2,
+  Star,
   Tag,
   Trash2,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { cloneConfig, deleteConfig } from "../../api";
+import { exportConfigAsJson } from "../../lib/configExport";
 import type { ConfigRecord } from "../../types/config";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
@@ -63,12 +67,7 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
 
   return (
     <>
-      <div
-        className={clsx(
-          "card rounded-xl p-4 space-y-3 group",
-          config.isReadOnly && "opacity-90",
-        )}
-      >
+      <div className={clsx("card rounded-xl p-4 space-y-3 group")}>
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -98,6 +97,26 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
             {config.description}
           </p>
         )}
+
+        {/* SP version + branch + config version */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {config.config.metadata?.sunnypilotVersion && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-400/80 bg-blue-950/40 border border-blue-800/40 px-1.5 py-0.5 rounded">
+              SP {config.config.metadata.sunnypilotVersion}
+            </span>
+          )}
+          {config.config.metadata?.branch && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+              <GitBranch className="w-2.5 h-2.5" />
+              {config.config.metadata.branch}
+            </span>
+          )}
+          {config.version != null && config.version > 1 && (
+            <span className="text-[10px] text-zinc-600 font-mono">
+              v{config.version}
+            </span>
+          )}
+        </div>
 
         {/* Clone provenance */}
         {config.clonedFrom && (
@@ -138,14 +157,6 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
           </div>
         )}
 
-        {/* Read-only indicator */}
-        {config.isReadOnly && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-500/70">
-            <Lock className="w-3 h-3" />
-            <span>Read-only after sharing</span>
-          </div>
-        )}
-
         {/* Stats */}
         {config.isShared && (
           <div className="flex items-center gap-3 text-xs text-zinc-600">
@@ -155,6 +166,16 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
             <span className="inline-flex items-center gap-1">
               <Copy className="w-3 h-3" /> {config.cloneCount}
             </span>
+            {config.ratingCount != null && config.ratingCount > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <Star className="w-3 h-3" /> {config.ratingCount}
+              </span>
+            )}
+            {config.commentCount != null && config.commentCount > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <MessageSquare className="w-3 h-3" /> {config.commentCount}
+              </span>
+            )}
           </div>
         )}
 
@@ -177,24 +198,30 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
               </Link>
             )}
 
-            {!config.isReadOnly && (
-              <>
-                <Link to={`/configure/${config.id}`}>
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    leftIcon={<Pencil className="w-3 h-3" />}
-                  />
-                </Link>
+            <>
+              <Link to={`/configure/${config.id}`}>
                 <Button
                   variant="ghost"
                   size="xs"
-                  leftIcon={<Share2 className="w-3 h-3" />}
-                  onClick={() => setShareOpen(true)}
-                  title="Share"
+                  leftIcon={<Pencil className="w-3 h-3" />}
                 />
-              </>
-            )}
+              </Link>
+              <Button
+                variant="ghost"
+                size="xs"
+                leftIcon={<Share2 className="w-3 h-3" />}
+                onClick={() => setShareOpen(true)}
+                title={config.isShared ? "Update tags / category" : "Share"}
+              />
+            </>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              leftIcon={<Download className="w-3 h-3" />}
+              onClick={() => exportConfigAsJson(config)}
+              title="Export as JSON"
+            />
 
             <Button
               variant="ghost"
@@ -205,19 +232,17 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
               title="Clone"
             />
 
-            {!config.isReadOnly && (
-              <Button
-                variant="ghost"
-                size="xs"
-                leftIcon={<Trash2 className="w-3 h-3 text-red-500/70" />}
-                loading={deleteMutation.isPending}
-                onClick={() => {
-                  if (confirm(`Delete "${config.name}"?`))
-                    deleteMutation.mutate();
-                }}
-                title="Delete"
-              />
-            )}
+            <Button
+              variant="ghost"
+              size="xs"
+              leftIcon={<Trash2 className="w-3 h-3 text-red-500/70" />}
+              loading={deleteMutation.isPending}
+              onClick={() => {
+                if (confirm(`Delete "${config.name}"?`))
+                  deleteMutation.mutate();
+              }}
+              title="Delete"
+            />
           </div>
         </div>
       </div>
@@ -227,6 +252,9 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
         onClose={() => setShareOpen(false)}
         configId={config.id}
         configName={config.name}
+        existingShareToken={config.shareToken ?? undefined}
+        existingTags={config.tags}
+        existingCategory={config.category}
       />
     </>
   );

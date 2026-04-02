@@ -20,6 +20,11 @@
 
 import { Request, Response, Router } from "express";
 import { prisma } from "../config/database";
+import {
+  adminConfigsQuerySchema,
+  adminListQuerySchema,
+  pageviewsQuerySchema,
+} from "../lib/querySchemas";
 import { adminAuth, adminLimiter } from "../middleware/adminAuth";
 
 export const adminRouter = Router();
@@ -92,8 +97,17 @@ adminRouter.get(
 adminRouter.get(
   "/users",
   async (req: Request, res: Response): Promise<void> => {
-    const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(100, parseInt(req.query.limit as string) || 50);
+    const parsed = adminListQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res
+        .status(400)
+        .json({
+          error: "Invalid query parameters",
+          details: parsed.error.flatten(),
+        });
+      return;
+    }
+    const { page, limit } = parsed.data;
 
     try {
       const [total, users] = await prisma.$transaction([
@@ -208,9 +222,17 @@ adminRouter.delete(
 adminRouter.get(
   "/configs",
   async (req: Request, res: Response): Promise<void> => {
-    const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(100, parseInt(req.query.limit as string) || 50);
-    const sharedOnly = req.query.shared === "true";
+    const parsed = adminConfigsQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res
+        .status(400)
+        .json({
+          error: "Invalid query parameters",
+          details: parsed.error.flatten(),
+        });
+      return;
+    }
+    const { page, limit, shared: sharedOnly } = parsed.data;
 
     try {
       const where = sharedOnly ? { isShared: true } : {};
@@ -323,10 +345,17 @@ adminRouter.put(
 adminRouter.get(
   "/pageviews",
   async (req: Request, res: Response): Promise<void> => {
-    const days = Math.min(
-      365,
-      Math.max(1, parseInt(req.query.days as string) || 30),
-    );
+    const parsed = pageviewsQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res
+        .status(400)
+        .json({
+          error: "Invalid query parameters",
+          details: parsed.error.flatten(),
+        });
+      return;
+    }
+    const { days } = parsed.data;
     const since = new Date(Date.now() - days * 86_400_000);
 
     try {

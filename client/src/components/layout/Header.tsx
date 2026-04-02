@@ -1,27 +1,105 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
   AlertCircle,
+  BarChart2,
+  Bell,
+  Book,
   Check,
   ChevronDown,
   Compass,
   Copy,
+  GitBranch,
   GitFork,
   Info,
   KeyRound,
   LayoutList,
   Plus,
+  RotateCcw,
+  Star,
+  X,
 } from "lucide-react";
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  deleteNotification,
+  fetchNotifications,
+  fetchUnreadCount,
+  markNotificationsRead,
+} from "../../api";
 import { useAuthStore } from "../../store/authStore";
+import type { NotificationRecord } from "../../types/config";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
 
 export const Header: React.FC = () => {
   const { pathname } = useLocation();
-  const { user, token } = useAuthStore();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const { user, token, rerolling, rerollToken } = useAuthStore();
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [rollConfirm, setRollConfirm] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Poll unread count every 60 s
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: fetchUnreadCount,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+  });
+
+  const { data: notifications = [], refetch: refetchNotifs } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: fetchNotifications,
+    enabled: notifOpen,
+  });
+
+  const markReadMutation = useMutation({
+    mutationFn: markNotificationsRead,
+    onSuccess: () => {
+      qc.setQueryData(["notifications", "unread-count"], 0);
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const dismissMutation = useMutation({
+    mutationFn: deleteNotification,
+    onSuccess: (_, id) => {
+      qc.setQueryData<NotificationRecord[]>(["notifications"], (prev = []) =>
+        prev.filter((n) => n.id !== id),
+      );
+    },
+  });
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    if (notifOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [notifOpen]);
+
+  const openNotifications = () => {
+    setNotifOpen((prev) => !prev);
+    if (!notifOpen) refetchNotifs();
+  };
+
+  const notifLabel = (n: NotificationRecord) => {
+    if (n.type === "clone")
+      return `Someone cloned "${n.config?.name ?? "your config"}"`;
+    if (n.type === "rating") {
+      const v = (n.payload as { ratingValue?: number } | null)?.ratingValue;
+      return `Your config "${n.config?.name ?? ""}" received a ${v ?? "new"}-star rating`;
+    }
+    if (n.type === "comment_reply") return `Someone replied to your comment`;
+    return "New notification";
+  };
 
   const copyToken = () => {
     if (!token) return;
@@ -30,12 +108,19 @@ export const Header: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleReroll = async () => {
+    await rerollToken();
+    setRollConfirm(false);
+  };
+
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname.startsWith(path);
 
   const navItems = [
     { to: "/explore", label: "Explore", icon: Compass },
     { to: "/configs", label: "My Configs", icon: LayoutList },
+    { to: "/dashboard", label: "Dashboard", icon: BarChart2 },
+    { to: "/docs", label: "Docs", icon: Book },
     { to: "/about", label: "About", icon: Info },
   ];
 
@@ -75,8 +160,94 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
-          {/* Right: new config + user token */}
+          {/* Right: notifications + new config + user token */}
           <div className="flex items-center gap-2">
+            {/* Notification bell */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={openNotifications}
+                className="relative p-1.5 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 transition-colors"
+                title="Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+                    <span className="text-xs font-semibold text-zinc-300">
+                      Notifications
+                    </span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => markReadMutation.mutate()}
+                        className="text-[11px] text-blue-400 hover:text-blue-300"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-zinc-600">
+                      No notifications yet
+                    </div>
+                  ) : (
+                    <ul className="max-h-72 overflow-y-auto divide-y divide-zinc-800/50">
+                      {notifications.map((n) => (
+                        <li
+                          key={n.id}
+                          className={clsx(
+                            "flex items-start gap-3 px-4 py-3 hover:bg-zinc-900 transition-colors cursor-pointer",
+                            !n.readAt && "bg-blue-500/5",
+                          )}
+                          onClick={() => {
+                            setNotifOpen(false);
+                            if (n.config?.shareToken) {
+                              navigate(`/shared/${n.config.shareToken}`);
+                            }
+                          }}
+                        >
+                          <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded bg-zinc-800 flex items-center justify-center">
+                            {n.type === "clone" && (
+                              <GitBranch className="w-3 h-3 text-blue-400" />
+                            )}
+                            {n.type === "rating" && (
+                              <Star className="w-3 h-3 text-amber-400" />
+                            )}
+                            {n.type === "comment_reply" && (
+                              <Bell className="w-3 h-3 text-zinc-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-zinc-300 leading-snug">
+                              {notifLabel(n)}
+                            </p>
+                            <p className="text-[10px] text-zinc-600 mt-0.5">
+                              {new Date(n.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dismissMutation.mutate(n.id);
+                            }}
+                            className="text-zinc-700 hover:text-zinc-400 flex-shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Link to="/configure">
               <Button
                 variant="primary"
@@ -149,6 +320,48 @@ export const Header: React.FC = () => {
               </p>
             </div>
           )}
+
+          {/* Revoke / re-roll token */}
+          <div className="border-t border-zinc-800 pt-4 space-y-3">
+            {!rollConfirm ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                onClick={() => setRollConfirm(true)}
+                className="w-full text-zinc-500"
+              >
+                Regenerate token…
+              </Button>
+            ) : (
+              <>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  <span className="text-red-400 font-medium">Warning: </span>
+                  This permanently invalidates the current token. Any other
+                  device using it will be signed out immediately.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    loading={rerolling}
+                    leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                    onClick={handleReroll}
+                  >
+                    Confirm
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={rerolling}
+                    onClick={() => setRollConfirm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </Modal>
     </>

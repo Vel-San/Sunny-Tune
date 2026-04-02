@@ -1,5 +1,5 @@
 {
-  "name": "sp-configurator-client",
+  "name": "sunny-tune-client",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -20,7 +20,9 @@
     "nanoid": "^5.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-qr-code": "^2.0.15",
     "react-router-dom": "^6.22.3",
+    "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -29,7 +31,7 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.2",
     "autoprefixer": "^10.4.19",
     "jsdom": "^24.0.0",

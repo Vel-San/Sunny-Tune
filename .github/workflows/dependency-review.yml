@@ -1,0 +1,30 @@
+name: Dependency Review
+
+# Runs on every PR to surface newly introduced vulnerable or licence-incompatible
+# packages before they land in main.
+
+on:
+  pull_request:
+    branches: [main, dev, master]
+
+jobs:
+  dependency-review:
+    name: Review dependency changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the check if any HIGH or CRITICAL CVEs are introduced
+          fail-on-severity: high
+          # Post a summary comment on the PR
+          comment-summary-in-pr: on-failure
+          # Denied licences (adjust to your project's licence policy)
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0

@@ -11,11 +11,14 @@ import {
   ChevronUp,
   Copy,
   Cpu,
+  Download,
   ExternalLink,
   Eye,
   Gauge,
   GitBranch,
+  GitCompare,
   GitFork,
+  Heart,
   Loader2,
   Lock,
   Map,
@@ -29,17 +32,22 @@ import {
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  addFavorite,
   cloneConfig,
   deleteRating,
+  fetchFavoriteStatus,
   fetchMyRating,
   fetchRatingSummary,
   fetchSharedConfig,
   rateConfig,
+  removeFavorite,
 } from "../api";
 import { CommentSection } from "../components/config/CommentSection";
+import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { RatingDisplay, RatingStars } from "../components/ui/RatingStars";
+import { exportConfigAsJson } from "../lib/configExport";
 import { useAuthStore } from "../store/authStore";
 import type {
   ConfigRecord,
@@ -206,6 +214,32 @@ export default function SharedConfigPage() {
     mutationFn: () => cloneConfig(config!.id),
   });
 
+  // ── Favorite toggle ────────────────────────────────────────────────────────
+  const { data: isFavorited = false } = useQuery<boolean>({
+    queryKey: ["favorite-status", config?.id],
+    queryFn: () => fetchFavoriteStatus(config!.id),
+    enabled: !!config?.id,
+  });
+
+  const favMutation = useMutation({
+    mutationFn: () =>
+      isFavorited ? removeFavorite(config!.id) : addFavorite(config!.id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["favorite-status", config!.id] });
+      qc.invalidateQueries({ queryKey: ["configs", "favorites"] });
+    },
+  });
+
+  // ── Diff viewer ────────────────────────────────────────────────────────────
+  const [diffOpen, setDiffOpen] = useState(false);
+  const canDiff = !!config?.clonedFrom?.shareToken;
+
+  const { data: originalConfig } = useQuery<ConfigRecord>({
+    queryKey: ["shared-config", config?.clonedFrom?.shareToken],
+    queryFn: () => fetchSharedConfig(config!.clonedFrom!.shareToken!),
+    enabled: canDiff && diffOpen,
+  });
+
   const copyShareLink = () => {
     navigator.clipboard.writeText(window.location.href);
   };
@@ -340,6 +374,38 @@ export default function SharedConfigPage() {
           >
             Copy link
           </Button>
+          <Button
+            variant={isFavorited ? "primary" : "outline"}
+            size="sm"
+            leftIcon={
+              <Heart
+                className={clsx("w-3.5 h-3.5", isFavorited && "fill-current")}
+              />
+            }
+            loading={favMutation.isPending}
+            onClick={() => favMutation.mutate()}
+          >
+            {isFavorited ? "Saved" : "Save"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<Download className="w-3.5 h-3.5" />}
+            onClick={() => exportConfigAsJson(config)}
+            title="Export config as JSON"
+          >
+            Export
+          </Button>
+          {canDiff && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<GitCompare className="w-3.5 h-3.5" />}
+              onClick={() => setDiffOpen(true)}
+            >
+              View diff from original
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -833,6 +899,18 @@ export default function SharedConfigPage() {
       <div className="card rounded-xl p-5">
         <CommentSection configId={config.id} isOwner={isOwner} />
       </div>
+
+      {/* Diff viewer modal */}
+      {canDiff && diffOpen && originalConfig && (
+        <ConfigDiffModal
+          open={diffOpen}
+          onClose={() => setDiffOpen(false)}
+          original={originalConfig.config}
+          modified={config.config}
+          originalName={originalConfig.name}
+          modifiedName={config.name}
+        />
+      )}
     </div>
   );
 }

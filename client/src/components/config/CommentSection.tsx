@@ -1,8 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
-import { Loader2, MessageSquare, Send, Trash2 } from "lucide-react";
+import {
+  Flag,
+  Loader2,
+  MessageSquare,
+  Reply,
+  Send,
+  Trash2,
+} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { deleteComment, fetchComments, postComment } from "../../api";
+import {
+  deleteComment,
+  fetchComments,
+  postComment,
+  submitReport,
+} from "../../api";
 import type { CommentRecord } from "../../types/config";
 import { Button } from "../ui/Button";
 
@@ -16,6 +28,27 @@ function timeAgo(iso: string): string {
   const days = Math.floor(hrs / 24);
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+/** Build a tree from a flat comment list using parentId. */
+function buildTree(flat: CommentRecord[]): CommentRecord[] {
+  const map = new Map<string, CommentRecord>(
+    flat.map((c) => [c.id, { ...c, replies: [] }]),
+  );
+  const roots: CommentRecord[] = [];
+  for (const c of map.values()) {
+    if (c.parentId) {
+      const parent = map.get(c.parentId);
+      if (parent) {
+        (parent.replies ??= []).push(c);
+      } else {
+        roots.push(c); // orphan (parent deleted) — show at top level
+      }
+    } else {
+      roots.push(c);
+    }
+  }
+  return roots;
 }
 
 interface CommentSectionProps {
@@ -32,6 +65,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const [nickname, setNickname] = useState(
     () => localStorage.getItem("sp_comment_name") ?? "",
   );
+  const [replyTo, setReplyTo] = useState<CommentRecord | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const MAX = 2000;
 
@@ -50,16 +84,19 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     mutationFn: ({
       body: text,
       authorName,
+      parentId,
     }: {
       body: string;
       authorName?: string;
-    }) => postComment(configId, text, authorName),
+      parentId?: string;
+    }) => postComment(configId, text, authorName, parentId),
     onSuccess: (newComment) => {
       qc.setQueryData<CommentRecord[]>(["comments", configId], (prev = []) => [
         ...prev,
         newComment,
       ]);
       setBody("");
+      setReplyTo(null);
     },
   });
 
@@ -86,6 +123,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     addMutation.mutate({
       body: body.trim(),
       authorName: nickname.trim() || undefined,
+      parentId: replyTo?.id,
     });
   };
 
@@ -102,6 +140,26 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
 
       {/* Comment input */}
       <form onSubmit={handleSubmit} className="space-y-3">
+        {replyTo && (
+          <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
+            <Reply className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="truncate">
+              Replying to{" "}
+              <span className="text-zinc-300 font-medium">
+                {replyTo.authorName ?? replyTo.authorHandle}
+              </span>
+              : "{replyTo.body.slice(0, 60)}
+              {replyTo.body.length > 60 ? "…" : ""}"
+            </span>
+            <button
+              type="button"
+              onClick={() => setReplyTo(null)}
+              className="ml-auto text-zinc-600 hover:text-zinc-300"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <div className="space-y-1.5">
           <label className="text-xs text-zinc-500">
             Your name / nickname{" "}
@@ -181,54 +239,134 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       ) : (
         <div className="space-y-3">
-          {comments.map((comment) => (
-            <div
+          {buildTree(comments).map((comment) => (
+            <CommentThread
               key={comment.id}
-              className={clsx(
-                "group relative rounded-lg border px-4 py-3 space-y-1.5",
-                comment.isOwn
-                  ? "border-blue-500/20 bg-blue-500/5"
-                  : "border-zinc-800 bg-[#111117]",
-              )}
-            >
-              {/* Author row */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold text-zinc-300">
-                    {comment.authorName ?? comment.authorHandle}
-                  </span>
-                  {comment.isOwn && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded">
-                      you
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-600">
-                    {timeAgo(comment.createdAt)}
-                  </span>
-                  {comment.isOwn && (
-                    <button
-                      onClick={() => deleteMutation.mutate(comment.id)}
-                      disabled={deleteMutation.isPending}
-                      className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-all"
-                      title="Delete comment"
-                    >
-                      {deleteMutation.isPending &&
-                      deleteMutation.variables === comment.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-              {/* Body */}
-              <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                {comment.body}
-              </p>
-            </div>
+              comment={comment}
+              onReply={setReplyTo}
+              onDelete={(id) => deleteMutation.mutate(id)}
+              deletingId={
+                deleteMutation.isPending
+                  ? (deleteMutation.variables as string)
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Thread renderer ──────────────────────────────────────────────────────────
+
+interface CommentThreadProps {
+  comment: CommentRecord;
+  onReply: (c: CommentRecord) => void;
+  onDelete: (id: string) => void;
+  deletingId?: string;
+  depth?: number;
+}
+
+const CommentThread: React.FC<CommentThreadProps> = ({
+  comment,
+  onReply,
+  onDelete,
+  deletingId,
+  depth = 0,
+}) => {
+  const [reported, setReported] = useState(false);
+  const reportMutation = useMutation({
+    mutationFn: () => submitReport("comment", comment.id, "Flagged by user"),
+    onSuccess: () => setReported(true),
+  });
+
+  return (
+    <div className={depth > 0 ? "ml-6 border-l border-zinc-800 pl-4" : ""}>
+      <div
+        className={clsx(
+          "group relative rounded-lg border px-4 py-3 space-y-1.5",
+          comment.isOwn
+            ? "border-blue-500/20 bg-blue-500/5"
+            : "border-zinc-800 bg-[#111117]",
+        )}
+      >
+        {/* Author row */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-semibold text-zinc-300">
+              {comment.authorName ?? comment.authorHandle}
+            </span>
+            {comment.isOwn && (
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded">
+                you
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-600">
+              {timeAgo(comment.createdAt)}
+            </span>
+            {/* Reply button */}
+            {depth < 2 && (
+              <button
+                onClick={() => onReply(comment)}
+                className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-zinc-300 transition-all"
+                title="Reply"
+              >
+                <Reply className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {/* Flag button */}
+            {!comment.isOwn && (
+              <button
+                onClick={() => reportMutation.mutate()}
+                disabled={reported || reportMutation.isPending}
+                className={clsx(
+                  "opacity-0 group-hover:opacity-100 transition-all",
+                  reported
+                    ? "text-amber-500 opacity-100"
+                    : "text-zinc-600 hover:text-amber-400",
+                )}
+                title={reported ? "Flagged" : "Flag comment"}
+              >
+                <Flag className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {/* Delete button */}
+            {comment.isOwn && (
+              <button
+                onClick={() => onDelete(comment.id)}
+                disabled={deletingId === comment.id}
+                className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-all"
+                title="Delete comment"
+              >
+                {deletingId === comment.id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-3.5 h-3.5" />
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Body */}
+        <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+          {comment.body}
+        </p>
+      </div>
+      {/* Nested replies */}
+      {(comment.replies?.length ?? 0) > 0 && (
+        <div className="mt-2 space-y-2">
+          {comment.replies!.map((reply) => (
+            <CommentThread
+              key={reply.id}
+              comment={reply}
+              onReply={onReply}
+              onDelete={onDelete}
+              deletingId={deletingId}
+              depth={depth + 1}
+            />
           ))}
         </div>
       )}

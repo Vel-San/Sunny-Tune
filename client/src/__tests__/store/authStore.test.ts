@@ -21,10 +21,22 @@ import { useAuthStore } from "../../store/authStore";
 const mockRegisterUser = vi.fn();
 const mockFetchMe = vi.fn();
 
-vi.mock("../../api", () => ({
-  registerUser: (...args: unknown[]) => mockRegisterUser(...args),
-  fetchMe: (...args: unknown[]) => mockFetchMe(...args),
-}));
+vi.mock("../../api", () => {
+  // Provide a real class so `instanceof ApiError` checks in authStore work.
+  class ApiError extends Error {
+    readonly status: number;
+    constructor(message: string, status: number) {
+      super(message);
+      this.name = "ApiError";
+      this.status = status;
+    }
+  }
+  return {
+    ApiError,
+    registerUser: (...args: unknown[]) => mockRegisterUser(...args),
+    fetchMe: (...args: unknown[]) => mockFetchMe(...args),
+  };
+});
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

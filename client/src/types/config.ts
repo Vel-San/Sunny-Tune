@@ -526,6 +526,7 @@ export interface ConfigRecord {
   sharedAt?: string;
   viewCount: number;
   cloneCount: number;
+  version?: number;
   /** ID of the config this was cloned from, if any */
   clonedFromId?: string | null;
   /** Summary of the source config (populated when clonedFromId is set) */
@@ -555,6 +556,9 @@ export interface CommentRecord {
   body: string;
   authorHandle: string;
   authorName?: string | null;
+  parentId: string | null;
+  /** Replies are built client-side from the flat list returned by the API. */
+  replies?: CommentRecord[];
   isOwn: boolean;
   createdAt: string;
   updatedAt: string;
@@ -590,6 +594,73 @@ export interface CommunityStats {
   totalRatings: number;
   totalComments: number;
   supportedMakes: number;
+  totalViews: number;
+  totalClones: number;
+  topMakes: { make: string; count: number }[];
+  topCategories: { category: string; count: number }[];
+  topTags: { tag: string; count: number }[];
+}
+
+/** A saved bookmark: the config record plus when it was favorited. */
+export interface FavoriteRecord extends ConfigRecord {
+  favoritedAt: string;
+}
+
+/** An in-app notification (clone, rating, comment_reply). */
+export interface NotificationRecord {
+  id: string;
+  type: "clone" | "rating" | "comment_reply";
+  configId: string | null;
+  config: { id: string; name: string; shareToken: string | null } | null;
+  payload: Record<string, unknown> | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+/** Paginated response for GET /api/configs. */
+export interface ConfigsPage {
+  configs: ConfigRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/** A single version snapshot of a config (before an edit). */
+export interface ConfigSnapshot {
+  id: string;
+  configId: string;
+  version: number;
+  name: string;
+  /** Full SPConfig JSON at time of snapshot — only present in the detail endpoint. */
+  data?: SPConfig;
+  createdAt: string;
+}
+
+/** Slim snapshot entry for the history list (no data). */
+export interface ConfigSnapshotMeta {
+  id: string;
+  version: number;
+  name: string;
+  createdAt: string;
+}
+
+/** A user-created collection / playlist of configs. */
+export interface CollectionRecord {
+  id: string;
+  name: string;
+  description?: string | null;
+  isPublic: boolean;
+  itemCount?: number;
+  createdAt: string;
+  updatedAt: string;
+  items?: { configId: string; addedAt: string; config: ConfigRecord }[];
+}
+
+/** A vehicle entry from the verified vehicles list. */
+export interface VehicleEntry {
+  make: string;
+  displayName: string;
+  models: string[];
 }
 
 // ─── Predefined tags ─────────────────────────────────────────────────────────

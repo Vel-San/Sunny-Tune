@@ -3,7 +3,11 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import AboutPage from "./pages/AboutPage";
 import AdminPage from "./pages/AdminPage";
+import ChangelogPage from "./pages/ChangelogPage";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
 import ConfiguratorPage from "./pages/ConfiguratorPage";
+import DashboardPage from "./pages/DashboardPage";
+import DocsPage from "./pages/DocsPage";
 import ExplorePage from "./pages/ExplorePage";
 import HomePage from "./pages/HomePage";
 import MyConfigsPage from "./pages/MyConfigsPage";
@@ -48,6 +52,13 @@ export default function App() {
                 element={<SharedConfigPage />}
               />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/changelog" element={<ChangelogPage />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route
+                path="/collections/:id"
+                element={<CollectionDetailPage />}
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>

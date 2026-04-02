@@ -4,11 +4,14 @@ import {
   ChevronRight,
   Copy,
   Eye,
+  GitBranch,
+  Heart,
   MessageSquare,
   Tag,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { addFavorite, removeFavorite } from "../../api";
 import type { ConfigRecord } from "../../types/config";
 import { Badge } from "../ui/Badge";
 import { RatingDisplay } from "../ui/RatingStars";
@@ -49,17 +52,46 @@ const MAKE_LABELS: Record<string, string> = {
 interface ExploreCardProps {
   config: ConfigRecord;
   className?: string;
+  /** Whether the current user has already favorited this config. */
+  isFavorited?: boolean;
+  /** Called after a favorite toggle succeeds so parent can refetch. */
+  onFavoriteToggle?: () => void;
 }
 
 export const ExploreCard: React.FC<ExploreCardProps> = ({
   config,
   className,
+  isFavorited = false,
+  onFavoriteToggle,
 }) => {
   const make = config.vehicleMake
     ? (MAKE_LABELS[config.vehicleMake] ?? config.vehicleMake.toUpperCase())
     : null;
   const shownTags = config.tags.slice(0, 3);
   const extraTags = config.tags.length - shownTags.length;
+
+  const [favorited, setFavorited] = useState(isFavorited);
+  const [toggling, setToggling] = useState(false);
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault(); // don't navigate to the shared page
+    if (toggling) return;
+    setToggling(true);
+    try {
+      if (favorited) {
+        await removeFavorite(config.id);
+        setFavorited(false);
+      } else {
+        await addFavorite(config.id);
+        setFavorited(true);
+      }
+      onFavoriteToggle?.();
+    } catch {
+      // silently revert on error
+    } finally {
+      setToggling(false);
+    }
+  };
 
   return (
     <Link
@@ -93,6 +125,20 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
             {config.category.replace(/-/g, " ")}
           </Badge>
         )}
+        {/* Favorite button */}
+        <button
+          onClick={toggleFavorite}
+          disabled={toggling}
+          className={clsx(
+            "flex-shrink-0 p-1 rounded transition-colors",
+            favorited
+              ? "text-red-400 hover:text-red-300"
+              : "text-zinc-600 hover:text-zinc-400",
+          )}
+          title={favorited ? "Remove from favorites" : "Save to favorites"}
+        >
+          <Heart className={clsx("w-3.5 h-3.5", favorited && "fill-current")} />
+        </button>
       </div>
 
       {/* Description */}
@@ -100,6 +146,24 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
         <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
           {config.description}
         </p>
+      )}
+
+      {/* SP version + branch */}
+      {(config.config.metadata?.sunnypilotVersion ||
+        config.config.metadata?.branch) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {config.config.metadata?.sunnypilotVersion && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-400/80 bg-blue-950/40 border border-blue-800/40 px-1.5 py-0.5 rounded">
+              SP {config.config.metadata.sunnypilotVersion}
+            </span>
+          )}
+          {config.config.metadata?.branch && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+              <GitBranch className="w-2.5 h-2.5" />
+              {config.config.metadata.branch}
+            </span>
+          )}
+        </div>
       )}
 
       {/* Tags */}

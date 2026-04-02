@@ -1,0 +1,52 @@
+# Lighthouse CI configuration
+# Docs: https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md
+
+ci:
+  collect:
+    # Serve the pre-built static bundle — no backend needed for these audits
+    staticDistDir: ./client/dist
+    numberOfRuns: 3
+    settings:
+      # Simulate a mid-tier mobile device on a 4G connection
+      preset: desktop
+
+  assert:
+    # Use "warn" on most checks (non-blocking on PRs) and "error" only on
+    # critical accessibility issues. Tighten these over time as scores improve.
+    assertions:
+      # Performance
+      categories:performance:
+        - warn
+        - minScore: 0.65
+      first-contentful-paint:
+        - warn
+        - maxNumericValue: 3000
+      largest-contentful-paint:
+        - warn
+        - maxNumericValue: 4000
+      total-blocking-time:
+        - warn
+        - maxNumericValue: 600
+
+      # Accessibility — fail on clear violations
+      categories:accessibility:
+        - error
+        - minScore: 0.80
+      color-contrast:
+        - warn
+      image-alt:
+        - error
+
+      # Best Practices
+      categories:best-practices:
+        - warn
+        - minScore: 0.75
+
+      # SEO
+      categories:seo:
+        - warn
+        - minScore: 0.80
+
+  upload:
+    # Store reports as GitHub public artifacts (no LHCI server needed)
+    target: temporary-public-storage

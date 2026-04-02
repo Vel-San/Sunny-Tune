@@ -1,8 +1,8 @@
-import { Router, Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "../config/database";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { registerLimiter } from "../middleware/rateLimiter";
+import { destructiveLimiter, registerLimiter } from "../middleware/rateLimiter";
 
 export const usersRouter = Router();
 
@@ -21,6 +21,26 @@ usersRouter.post(
       });
     } catch {
       res.status(500).json({ error: "Failed to register user" });
+    }
+  },
+);
+
+// POST /api/users/revoke-token — invalidate the current token and issue a new one
+// Useful when a token has been leaked or a user wants to log out all other devices.
+usersRouter.post(
+  "/revoke-token",
+  authenticate,
+  destructiveLimiter,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const newToken = `sp_${uuidv4().replace(/-/g, "")}`;
+      const user = await prisma.user.update({
+        where: { id: req.userId },
+        data: { token: newToken },
+      });
+      res.json({ token: user.token });
+    } catch {
+      res.status(500).json({ error: "Failed to revoke token" });
     }
   },
 );

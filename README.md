@@ -1,3 +1,16 @@
+<!-- BADGES — replace YOUR_USERNAME/sunny-tune with your GitHub handle/repo name -->
+
+[![CI](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/codeql.yml/badge.svg)](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/codeql.yml)
+[![Lighthouse](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/YOUR_USERNAME/sunny-tune/actions/workflows/lighthouse.yml)
+[![Node.js](https://img.shields.io/badge/node-20%2B-brightgreen?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+---
+
 - [SunnyTune ☀️](#sunnytune-️)
   - [Stack](#stack)
   - [What is Prisma?](#what-is-prisma)
@@ -27,6 +40,22 @@
     - [Prod environment (Docker)](#prod-environment-docker)
     - [Local development (no Docker)](#local-development-no-docker)
     - [After migrating](#after-migrating)
+  - [Security](#security)
+    - [Admin secret — bcrypt hashing](#admin-secret--bcrypt-hashing)
+    - [Admin IP allowlist](#admin-ip-allowlist)
+    - [Token revocation](#token-revocation)
+    - [Content-Security-Policy](#content-security-policy)
+    - [Input validation](#input-validation)
+  - [Config Import / Export](#config-import--export)
+  - [Config Diff Viewer](#config-diff-viewer)
+  - [Config Version History](#config-version-history)
+  - [Config Collections / Playlists](#config-collections--playlists)
+  - [QR Code Sharing](#qr-code-sharing)
+  - [Trending This Week](#trending-this-week)
+  - [Verified Vehicle List](#verified-vehicle-list)
+  - [Dashboard](#dashboard)
+  - [SP Version Compatibility Filter](#sp-version-compatibility-filter)
+  - [Favorites / Bookmarks](#favorites--bookmarks)
   - [Configuration Sharing](#configuration-sharing)
   - [Deploying to Vercel](#deploying-to-vercel)
   - [Project Structure](#project-structure)
@@ -39,23 +68,123 @@ A community web application for creating, storing, and sharing [SunnyPilot](http
 
 Configs can be shared via a unique URL and are locked read-only once published, ensuring shared configs remain immutable.
 
+> **Contributing?** See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — setup, code style, how to add SP parameters, PR process, and more.
+> **Security?** See [SECURITY.md](SECURITY.md) for the responsible disclosure process and architecture overview.
+
+---
+
+## ⚠️ Before Making This Repo Public
+
+Run through this checklist **before** flipping the repo from private → public.
+
+<details>
+<summary>Click to expand the pre-public security checklist</summary>
+
+### 1. Scan git history for leaked secrets
+
+Even if your `.env` is in `.gitignore`, secrets can leak via accidental commits. Run locally:
+
+```bash
+# Install gitleaks (macOS: brew install gitleaks)
+gitleaks detect --source . --log-opts="--all" --verbose
+
+# Or scan with trufflehog
+npx trufflehog git file://. --only-verified
+```
+
+If anything is found, **rotate the secret immediately** before making the repo public (changing the env var is not enough — the history must be cleaned with `git filter-repo` or BFG).
+
+### 2. Verify nothing sensitive is committed
+
+```bash
+# Check .env files are NOT tracked
+git ls-files | grep -E "\.env$|\.env\."
+
+# Check for common secret patterns
+git log --all -p | grep -iE "(secret|password|token|api_key|private_key)\s*=\s*.{8,}"
+```
+
+Expected output: **nothing**. Your `.gitignore` already excludes `.env*` files, but double-check.
+
+### 3. Set up GitHub Actions secrets
+
+Your CI workflows need these repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret                          | Required by                               | How to generate                                                                                      |
+| ------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| _(none required for CI to run)_ | `ci.yml`, `codeql.yml`, `secret-scan.yml` | —                                                                                                    |
+| `LHCI_GITHUB_APP_TOKEN`         | `lighthouse.yml`                          | Optional — install the [LHCI GitHub App](https://github.com/apps/lighthouse-ci) for PR status checks |
+
+> The CI workflow uses only `GITHUB_TOKEN` (auto-provided) — no secrets needed for tests/build to run.
+
+### 4. Review all environment variable defaults
+
+Check `.env.example` — ensure every value is clearly a placeholder (no real passwords, tokens, or IPs):
+
+```bash
+cat .env.example   # should contain only "change_me" / "replace_me" values
+```
+
+Current `.env.example` looks safe ✅ — but re-verify if you've edited it since.
+
+### 5. Add a LICENSE file
+
+Open source repos need a licence. Choose one at [choosealicense.com](https://choosealicense.com/) and add a `LICENSE` file to the repo root. MIT is a common choice for community tools.
+
+```bash
+# Example: MIT licence
+curl -s "https://api.github.com/licenses/mit" | python3 -c "import sys,json; print(json.load(sys.stdin)['body'])" > LICENSE
+# Edit the year and author name in the file
+```
+
+### 6. Update the README badges
+
+Replace `YOUR_USERNAME/sunny-tune` in the badge URLs at the top of this file with your actual GitHub username and repo name.
+
+### 7. Enable GitHub security features
+
+In your repo settings, enable:
+
+- **Dependabot alerts** — automatically notifies you of vulnerable dependencies
+- **Dependabot security updates** — auto-PRs for vulnerable deps
+- **Secret scanning** — GitHub scans all commits for known secret patterns
+- **Code scanning** — the CodeQL workflow already sets this up once it runs
+
+### 8. Protect the `main` branch
+
+Settings → Branches → Add branch ruleset for `main`:
+
+- ✅ Require a pull request before merging
+- ✅ Require status checks to pass (CI, CodeQL, Secret Scan)
+- ✅ Require branches to be up to date before merging
+- ✅ Restrict force pushes
+
+### 9. Run the "Create Labels" workflow
+
+After pushing, go to Actions → **Create Labels** → Run workflow. This creates all the labels used by the PR labeler and stale workflows.
+
+</details>
+
 ---
 
 ## Stack
 
-| Layer     | Technology                        |
-| --------- | --------------------------------- |
-| Frontend  | React 18 + TypeScript + Vite 5    |
-| Styling   | Tailwind CSS (dark zinc theme)    |
-| Icons     | Lucide React                      |
-| State     | Zustand + TanStack Query          |
-| Backend   | Node.js + Express + TypeScript    |
-| ORM       | Prisma 5 (see below)              |
-| Database  | PostgreSQL 16                     |
-| Auth      | Bearer token (UUID, no password)  |
-| Container | Docker + Docker Compose           |
-| Testing   | Vitest + @testing-library/react   |
-| Deploy    | Vercel (frontend) + any Node host |
+| Layer       | Technology                        |
+| ----------- | --------------------------------- |
+| Layer       | Technology                        |
+| ----------- | --------------------------------- |
+| Frontend    | React 18 + TypeScript + Vite 5    |
+| Styling     | Tailwind CSS (dark zinc theme)    |
+| Icons       | Lucide React                      |
+| State       | Zustand + TanStack Query          |
+| QR Codes    | react-qr-code (pure SVG)          |
+| Backend     | Node.js + Express + TypeScript    |
+| ORM         | Prisma 5 (see below)              |
+| Database    | PostgreSQL 16                     |
+| Auth        | Bearer token (UUID, no password)  |
+| Container   | Docker + Docker Compose           |
+| Testing     | Vitest + @testing-library/react   |
+| Deploy      | Vercel (frontend) + any Node host |
 
 ---
 
@@ -113,7 +242,7 @@ All scripts are run from the **project root** unless noted otherwise.
 | `npm run test:server` | Runs only the server-side tests                                      |
 | `npm run test:client` | Runs only the client-side tests (React Testing Library)              |
 
-Tests live in `__tests__/` directories next to the code they test. All 46 tests must pass — Docker builds will also fail if tests fail.
+Tests live in `__tests__/` directories next to the code they test. All tests must pass — Docker builds will also fail if tests fail.
 
 ### Docker — Development (`docker-compose.dev.yml`)
 
@@ -168,7 +297,7 @@ Prod URL: **http://localhost** (port 80 by default; set `CLIENT_PORT` in your `.
 ### 1. Create the root `.env` file
 
 ```bash
-cd /path/to/sp-configurator
+cd /path/to/sunny-tune
 cat > .env << EOF
 POSTGRES_PASSWORD=$(openssl rand -hex 16)
 TOKEN_SECRET=$(openssl rand -hex 32)
@@ -257,7 +386,8 @@ For Docker, place these in a `.env` file at the project root (Docker Compose rea
 ```env
 POSTGRES_PASSWORD=replace_me
 TOKEN_SECRET=replace_me
-ADMIN_SECRET=replace_me
+# Use ADMIN_SECRET_HASH (bcrypt) for production — see Security section below
+ADMIN_SECRET_HASH=replace_me_with_bcrypt_hash
 CORS_ORIGIN=http://localhost:5173
 VITE_API_URL=http://localhost:3001
 CLIENT_PORT=80          # port to expose the frontend on
@@ -278,7 +408,7 @@ SunnyTune uses **anonymous UUID tokens** — no sign-up or password required.
 
 ## Admin Panel
 
-Access the admin panel at `/admin`. You'll be prompted for the `ADMIN_SECRET` value set in your environment.
+Access the admin panel at `/admin`. You'll be prompted for the `ADMIN_SECRET` (or the plain-text value behind `ADMIN_SECRET_HASH`) value set in your environment.
 
 The secret is stored only in `sessionStorage` (cleared automatically when the browser tab closes — never in `localStorage`).
 
@@ -404,13 +534,203 @@ npx prisma migrate dev --name describe_your_change
 
 ---
 
+## Security
+
+### Admin secret — bcrypt hashing
+
+**Recommended approach** — store a bcrypt hash instead of the plain-text secret so a leaked env file does not expose the password.
+
+```bash
+# Generate the hash once (cost factor 12)
+cd server
+npm run hash-secret -- "your-chosen-admin-password"
+# Outputs something like: $2b$12$xxxxxxxxxxxxxxxxxxx
+```
+
+Then in your `.env`:
+
+```env
+# Recommended: bcrypt hash (plaintext never stored)
+ADMIN_SECRET_HASH=$2b$12$xxxxxxxxxxx...
+
+# Legacy fallback: plaintext (still timing-safe, but less secure)
+# ADMIN_SECRET=your-chosen-admin-password
+```
+
+The middleware checks `ADMIN_SECRET_HASH` first. If it is set the `ADMIN_SECRET` variable is ignored. Both behave identically for the admin UI — just type the plain-text password in the browser prompt.
+
+### Admin IP allowlist
+
+Restrict admin panel access to specific IP addresses (e.g. your home/office IP):
+
+```env
+# Comma-separated, no spaces
+ADMIN_ALLOWED_IPS=203.0.113.10,198.51.100.42
+```
+
+When unset, any IP can attempt authentication (still protected by rate-limit + secret).
+
+### Token revocation
+
+A user can invalidate their current bearer token and issue a fresh one via the header key-icon → **Regenerate token**. This immediately signs out all other devices using the old token. Use it if a token is leaked.
+
+### Content-Security-Policy
+
+- **API server** (Helmet): `default-src 'none'; frame-ancestors 'none'` — the API serves only JSON, so no sources are allowed at all.
+- **Frontend** (nginx): full CSP covering `default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, and `base-uri 'self'`. Inline styles are allowed (`unsafe-inline`) because Tailwind generates them at build time.
+
+### Input validation
+
+- All JSON request bodies are validated with **Zod** before reaching handler logic.
+- All query parameters (`page`, `limit`, `sort`, `q`, `year`, `days`, etc.) are coerced and range-checked; invalid params return `400` with a field-error breakdown.
+- Free-text fields (`name`, `description`, `tags`, `comments`) have C0/C1 control characters stripped server-side before storage.
+- The `config` JSON field rejects payloads with unknown top-level section keys.
+
+---
+
+## Config Import / Export
+
+Every config can be round-tripped as a `.sunnytune.json` file — useful for sharing outside the app, version-controlling your tuning, or migrating between SunnyTune instances.
+
+**Export** — click the download icon on any ConfigCard or use the **Export** button in the configurator toolbar. A JSON file is saved locally.
+
+**Import** — click **Import JSON** in the configurator toolbar (or on the My Configs page). The file is validated against the expected schema before loading; a clear error is shown if anything doesn't match.
+
+The export format:
+
+```json
+{
+  "exportVersion": 1,
+  "exportedAt": "2026-04-01T00:00:00.000Z",
+  "name": "My Honda Config",
+  "description": "...",
+  "vehicleMake": "honda",
+  "vehicleModel": "Civic",
+  "vehicleYear": 2023,
+  "tags": ["highway", "smooth"],
+  "category": "daily-driver",
+  "config": { ... }
+}
+```
+
+---
+
+## Config Diff Viewer
+
+When viewing a shared config that was cloned from another public config, a **View diff from original** button appears. Clicking it opens a modal listing every parameter that differs between the clone and its source — grouped by section, showing old → new values with human-readable labels from the feature registry.
+
+A **Config Compare** mode is also available on the My Configs page: click the compare icon to enter compare mode, select two configs, then click **View Diff** to open the same diff modal between any two of your own configs.
+
+---
+
+## Config Version History
+
+Every time you save an existing config, SunnyTune automatically snapshots the previous state before overwriting it. This gives you a full version history.
+
+- The snapshot is stored in the `config_snapshots` table with an auto-incrementing `version` number.
+- Up to **20 snapshots** per config are retained; older ones are pruned automatically.
+- Access history via the **History** (clock) button in the configurator's top bar.
+- From the history modal you can **Diff** any snapshot against the current state (same diff viewer), or **Restore** it (loads into the editor — you still need to Save to persist).
+
+Relevant API endpoints:
+
+```
+GET  /api/configs/:id/history            → list of { id, version, name, createdAt }
+GET  /api/configs/:id/history/:snapshotId → full snapshot including config JSON
+```
+
+---
+
+## Config Collections / Playlists
+
+Collections let you organise related configs into named playlists (e.g. "Highway builds", "E2E experiments").
+
+- Create, rename, and delete collections from the **Collections** tab on the My Configs page.
+- Each collection can be toggled **Public** (accessible via URL without auth) or private.
+- Add or remove configs from a collection's detail page (`/collections/:id`).
+- A config can appear in multiple collections.
+
+Relevant API endpoints:
+
+```
+GET    /api/collections              → list your collections
+POST   /api/collections              → create { name, description?, isPublic }
+GET    /api/collections/:id          → detail with items
+PUT    /api/collections/:id          → update
+DELETE /api/collections/:id          → delete
+POST   /api/collections/:id/items    → add config { configId }
+DELETE /api/collections/:id/items/:configId
+```
+
+---
+
+## QR Code Sharing
+
+When a config is shared successfully, the Share modal displays a **QR code** generated from the public URL. Scan it with any device (including your Comma device's browser) to instantly open the config. The QR code is generated client-side using `react-qr-code` — no external service call.
+
+---
+
+## Trending This Week
+
+The Explore page has a **Trending** sort option (selected by default). It ranks configs by a weighted score calculated over the past 7 days:
+
+```
+trendingScore = (ratings in last 7d × 5) + (clones in last 7d × 3) + log(viewCount + 1)
+```
+
+This surfaces recently-active configs over all-time leaders.
+
+---
+
+## Verified Vehicle List
+
+The server maintains a curated list of vehicles supported by SunnyPilot/OpenPilot in `server/src/lib/vehicles.ts`. It covers 18+ makes and 200+ models.
+
+- The list is exposed via `GET /api/explore/vehicles` and used as autocomplete data for the vehicle make/model selector.
+- The `other` make entry is intentionally empty — it acts as a catch-all for unlisted vehicles.
+- To add a new vehicle: add an entry to `VERIFIED_VEHICLES` in `vehicles.ts` and it will immediately appear in the client picker (no migration needed — the list is not stored in the database).
+
+---
+
+## Dashboard
+
+The **Dashboard** page (`/dashboard`) gives you an at-a-glance view of your config stats and community activity:
+
+- **Your Stats** — total configs, shared count, total views received, total clones received
+- **Top Configs by Views** — bar chart of your 5 most-viewed configs
+- **Lateral Method Distribution** — bar chart showing how many of your configs use Torque / PID / INDI / LQR
+- **SP Branch Distribution** — breakdown of stable-sp vs dev-sp vs nightly across your configs
+- **Community Stats** — total shared configs, ratings, comments, and unique makes platform-wide
+- **Recently Updated** — your last 5 modified configs with version numbers
+
+Charts are rendered with pure CSS (no charting library dependency).
+
+---
+
+## SP Version Compatibility Filter
+
+The Explore page has a **Min SP Version** filter. Enter a version string (e.g. `0.9.8`) to show only configs whose `metadata.sunnypilotVersion` is an exact match or higher (semver order). Leave the field blank to show all versions.
+
+---
+
+## Favorites / Bookmarks
+
+Any shared config can be saved to your personal favorites list:
+
+- Click the **heart** icon on any explore card or shared config page to toggle a favorite.
+- Your saved favorites appear under the **Favorites** tab on the My Configs page.
+- Favorites do not clone or modify the original config — they are just a personal bookmark.
+- Favoriting requires a registered (anonymous) session token.
+
+---
+
 ## Configuration Sharing
 
 1. Open any saved config and click **Share**.
 2. A unique share link is generated: `/shared/<token>`.
-3. The config becomes **permanently read-only** — no further edits are possible.
-4. Anyone with the link can view the config and leave ratings/comments.
-5. Click **Clone** to create your own editable copy of any shared config.
+3. Anyone with the link can view the config and leave ratings/comments.
+4. Click **Clone** to create your own editable copy of any shared config.
+5. After sharing you can continue editing and saving — each save increments the version counter. The public share URL always reflects the latest version.
 
 ---
 
@@ -427,7 +747,7 @@ npx prisma migrate dev --name describe_your_change
 ## Project Structure
 
 ```
-sp-configurator/
+sunny-tune/
 ├── client/                         # React + Vite frontend
 │   ├── src/
 │   │   ├── api/                    # Axios API client + admin API
@@ -437,7 +757,12 @@ sp-configurator/
 │   │   │   └── ui/                 # Button, Modal, Badge, etc.
 │   │   ├── lib/
 │   │   │   └── featureRegistry.ts  # ← Add new SP/Comma AI params here
-│   │   ├── pages/                  # Route-level pages
+│   │   ├── pages/
+│   │   │   ├── DashboardPage.tsx   # Stats & charts dashboard
+│   │   │   ├── ChangelogPage.tsx   # Version changelog timeline
+│   │   │   ├── DocsPage.tsx        # In-app documentation
+│   │   │   ├── CollectionDetailPage.tsx  # Collection item management
+│   │   │   └── ...                 # Other route pages
 │   │   ├── store/                  # Zustand stores (auth, config)
 │   │   ├── types/                  # Shared TypeScript types (SPConfig, etc.)
 │   │   └── __tests__/              # Vitest + React Testing Library tests
@@ -447,8 +772,13 @@ sp-configurator/
 │   ├── prisma/
 │   │   └── schema.prisma           # ← Database schema (edit then run migrate)
 │   ├── src/
+│   │   ├── lib/
+│   │   │   ├── vehicles.ts         # Verified SunnyPilot vehicle list
+│   │   │   └── querySchemas.ts     # Shared Zod schemas for query params
 │   │   ├── middleware/             # auth, adminAuth, pageView, rateLimiter
-│   │   ├── routes/                 # REST API route handlers
+│   │   ├── routes/
+│   │   │   ├── collections.ts      # Collections CRUD
+│   │   │   └── ...                 # configs, explore, community, etc.
 │   │   └── __tests__/              # Server unit + integration tests
 │   ├── Dockerfile                  # Multi-stage production build
 │   └── Dockerfile.dev              # Dev image

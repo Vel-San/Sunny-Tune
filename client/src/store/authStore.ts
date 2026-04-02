@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fetchMe, registerUser } from "../api";
+import { ApiError, fetchMe, registerUser, revokeToken } from "../api";
 import type { UserRecord } from "../types/config";
 
 interface AuthState {
@@ -7,9 +7,11 @@ interface AuthState {
   user: UserRecord | null;
   initialized: boolean;
   loading: boolean;
+  rerolling: boolean;
   error: string | null;
   init: () => Promise<void>;
   logout: () => void;
+  rerollToken: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -17,6 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   initialized: false,
   loading: false,
+  rerolling: false,
   error: null,
 
   init: async () => {
@@ -32,9 +35,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ token, user, initialized: true, loading: false });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Auth failed";
-      // If the stored token is rejected, clear it and retry once
+      // Only clear the token + re-register when the server explicitly rejects
+      // it with a 401. A status of 0 means networking / server-restart — keep
+      // the token so the user's data is still accessible once the server is up.
+      const is401 = err instanceof ApiError && err.status === 401;
       const hadToken = !!localStorage.getItem("sp_user_token");
-      if (hadToken) {
+      if (hadToken && is401) {
         localStorage.removeItem("sp_user_token");
         try {
           const result = await registerUser();
@@ -53,5 +59,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem("sp_user_token");
     set({ token: null, user: null, initialized: false });
+  },
+
+  rerollToken: async () => {
+    set({ rerolling: true, error: null });
+    try {
+      const { token: newToken } = await revokeToken();
+      localStorage.setItem("sp_user_token", newToken);
+      set({ token: newToken, rerolling: false });
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to regenerate token";
+      set({ error: msg, rerolling: false });
+    }
   },
 }));

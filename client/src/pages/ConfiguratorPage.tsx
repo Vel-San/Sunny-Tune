@@ -6,19 +6,30 @@ import {
   ArrowUpDown,
   Car,
   CheckCircle2,
+  Clock,
   Cpu,
+  Download,
   Gauge,
   GitBranch,
   Map,
   Monitor,
+  RotateCcw,
   Save,
   Share2,
   TrendingUp,
+  Upload,
   Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createConfig, fetchConfig, updateConfig } from "../api";
+import {
+  createConfig,
+  fetchConfig,
+  fetchConfigHistory,
+  fetchConfigSnapshot,
+  updateConfig,
+} from "../api";
+import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
 import { ShareModal } from "../components/config/ShareModal";
 import { AdvancedSection } from "../components/config/sections/AdvancedSection";
 import { CommaAISection } from "../components/config/sections/CommaAISection";
@@ -32,7 +43,14 @@ import { SpeedControlSection } from "../components/config/sections/SpeedControlS
 import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { Modal } from "../components/ui/Modal";
+import {
+  exportConfigAsJson,
+  ImportValidationError,
+  parseImportFile,
+} from "../lib/configExport";
 import { useConfigStore } from "../store/configStore";
+import type { ConfigSnapshotMeta } from "../types/config";
 
 const SECTIONS = [
   { id: "vehicle", label: "Vehicle", icon: Car },
@@ -69,6 +87,21 @@ export default function ConfiguratorPage() {
   } = useConfigStore();
   const [shareOpen, setShareOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedSnapshot, setSelectedSnapshot] =
+    useState<ConfigSnapshotMeta | null>(null);
+  const [snapshotDiffOpen, setSnapshotDiffOpen] = useState(false);
+
+  // Warn on browser refresh / tab close
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   // Load existing config for editing
   const { data: existingConfig } = useQuery({
@@ -90,7 +123,25 @@ export default function ConfiguratorPage() {
     } else if (!id) {
       initNew();
     }
+    // Honour a hash-based deep-link (e.g. /configure/abc#lateral)
+    const hash = window.location.hash.slice(1);
+    if (hash && SECTIONS.some((s) => s.id === hash)) {
+      setTimeout(() => scrollToSection(hash), 300);
+    }
   }, [id, existingConfig]);
+
+  // History (version snapshots)
+  const { data: historyList = [] } = useQuery({
+    queryKey: ["config-history", editingId],
+    queryFn: () => fetchConfigHistory(editingId!),
+    enabled: !!editingId && historyOpen,
+  });
+
+  const { data: snapshotData } = useQuery({
+    queryKey: ["config-snapshot", editingId, selectedSnapshot?.id],
+    queryFn: () => fetchConfigSnapshot(editingId!, selectedSnapshot!.id),
+    enabled: !!editingId && !!selectedSnapshot,
+  });
 
   const saveMutation = useMutation({
     mutationFn: () => {
@@ -119,14 +170,53 @@ export default function ConfiguratorPage() {
     },
   });
 
+  const handleExport = () => {
+    if (!existingConfig) return;
+    exportConfigAsJson(existingConfig);
+  };
+
+  const handleImportClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,.sunnytune.json";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setImportError(null);
+      try {
+        const imported = await parseImportFile(file);
+        // Load the imported config into the editor — it starts as a new unsaved config
+        loadConfig(
+          "", // no id — treat as a new config
+          imported.name,
+          imported.description ?? "",
+          imported.config as import("../types/config").SPConfig,
+          imported.tags ?? [],
+          imported.category ?? "",
+        );
+        // Clear the editing id so Save creates a new DB row
+        navigate("/configure", { replace: true });
+      } catch (err) {
+        setImportError(
+          err instanceof ImportValidationError
+            ? err.message
+            : "Failed to import file.",
+        );
+      }
+    };
+    input.click();
+  };
+
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
+    // Keep the URL hash in sync so the link can be shared / book-marked
+    history.replaceState(null, "", `#${sectionId}`);
     document
       .getElementById(sectionId)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const isReadOnly = existingConfig?.isReadOnly ?? false;
+  const isReadOnly = false; // isReadOnly no longer locks editing; admin-locked configs use admin routes
 
   return (
     <div className="min-h-[calc(100vh-57px)] flex">
@@ -184,6 +274,37 @@ export default function ConfiguratorPage() {
                 <span className="text-xs text-zinc-600">Unsaved changes</span>
               )}
               <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<Upload className="w-3.5 h-3.5" />}
+                onClick={handleImportClick}
+                title="Import config from JSON file"
+              >
+                <span className="hidden md:inline">Import</span>
+              </Button>
+              {editingId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={<Clock className="w-3.5 h-3.5" />}
+                  onClick={() => setHistoryOpen(true)}
+                  title="Version history"
+                >
+                  <span className="hidden md:inline">History</span>
+                </Button>
+              )}
+              {editingId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={<Download className="w-3.5 h-3.5" />}
+                  onClick={handleExport}
+                  title="Export config as JSON"
+                >
+                  <span className="hidden md:inline">Export</span>
+                </Button>
+              )}
+              <Button
                 variant="secondary"
                 size="sm"
                 leftIcon={<Save className="w-3.5 h-3.5" />}
@@ -220,7 +341,13 @@ export default function ConfiguratorPage() {
         )}
 
         {/* Config sections */}
-        <div className="px-4 pt-3 pb-12 space-y-3 max-w-3xl">
+        <div className="px-4 pt-3 pb-12 space-y-3 max-w-3xl mx-auto w-full">
+          {importError && (
+            <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-400">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {importError}
+            </div>
+          )}
           {saveMutation.isError && (
             <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -228,16 +355,36 @@ export default function ConfiguratorPage() {
             </div>
           )}
 
-          <VehicleSection />
-          <DrivingPersonalitySection />
-          <LateralControlSection />
-          <LongitudinalSection />
-          <SpeedControlSection />
-          <LaneChangeSection />
-          <NavigationSection />
-          <InterfaceSection />
-          <CommaAISection />
-          <AdvancedSection />
+          <div id="vehicle" className="scroll-mt-20">
+            <VehicleSection />
+          </div>
+          <div id="driving-personality" className="scroll-mt-20">
+            <DrivingPersonalitySection />
+          </div>
+          <div id="lateral" className="scroll-mt-20">
+            <LateralControlSection />
+          </div>
+          <div id="longitudinal" className="scroll-mt-20">
+            <LongitudinalSection />
+          </div>
+          <div id="speed-control" className="scroll-mt-20">
+            <SpeedControlSection />
+          </div>
+          <div id="lane-change" className="scroll-mt-20">
+            <LaneChangeSection />
+          </div>
+          <div id="navigation" className="scroll-mt-20">
+            <NavigationSection />
+          </div>
+          <div id="interface" className="scroll-mt-20">
+            <InterfaceSection />
+          </div>
+          <div id="comma-ai" className="scroll-mt-20">
+            <CommaAISection />
+          </div>
+          <div id="advanced" className="scroll-mt-20">
+            <AdvancedSection />
+          </div>
         </div>
       </div>
 
@@ -247,6 +394,101 @@ export default function ConfiguratorPage() {
           onClose={() => setShareOpen(false)}
           configId={editingId}
           configName={editingName}
+        />
+      )}
+
+      {/* Version history modal */}
+      <Modal
+        open={historyOpen}
+        onClose={() => {
+          setHistoryOpen(false);
+          setSelectedSnapshot(null);
+        }}
+        title="Version History"
+        width="md"
+      >
+        <div className="space-y-2">
+          {historyList.length === 0 && (
+            <p className="text-sm text-zinc-500 py-4 text-center">
+              No snapshots yet. Snapshots are saved automatically each time you
+              save the config.
+            </p>
+          )}
+          {historyList.map((snap) => (
+            <div
+              key={snap.id}
+              className={`flex items-center justify-between gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                selectedSnapshot?.id === snap.id
+                  ? "border-blue-500/50 bg-blue-950/20"
+                  : "border-zinc-800 hover:border-zinc-600"
+              }`}
+              onClick={() => setSelectedSnapshot(snap)}
+            >
+              <div>
+                <p className="text-sm text-zinc-200 font-medium">
+                  v{snap.version} — {snap.name}
+                </p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {new Date(snap.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedSnapshot?.id === snap.id && snapshotData?.data && (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    leftIcon={<ArrowLeftRight className="w-3 h-3" />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSnapshotDiffOpen(true);
+                    }}
+                  >
+                    Diff
+                  </Button>
+                )}
+                {selectedSnapshot?.id === snap.id && snapshotData?.data && (
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    leftIcon={<RotateCcw className="w-3 h-3" />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (
+                        confirm(
+                          `Restore to v${snap.version}? Unsaved changes will be overwritten.`,
+                        )
+                      ) {
+                        loadConfig(
+                          editingId!,
+                          snap.name,
+                          existingConfig?.description ?? "",
+                          snapshotData.data!,
+                          existingConfig?.tags ?? [],
+                          existingConfig?.category ?? "",
+                        );
+                        setHistoryOpen(false);
+                        setSelectedSnapshot(null);
+                      }
+                    }}
+                  >
+                    Restore
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* Snapshot diff modal */}
+      {selectedSnapshot && snapshotData?.data && (
+        <ConfigDiffModal
+          open={snapshotDiffOpen}
+          onClose={() => setSnapshotDiffOpen(false)}
+          original={snapshotData.data}
+          modified={editingConfig}
+          originalName={`v${selectedSnapshot.version} (${new Date(selectedSnapshot.createdAt).toLocaleDateString()})`}
+          modifiedName="Current"
         />
       )}
     </div>

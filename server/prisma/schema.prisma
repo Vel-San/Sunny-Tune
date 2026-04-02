@@ -18,6 +18,10 @@ model User {
   configurations Configuration[]
   ratings        Rating[]
   comments       Comment[]
+  favorites      Favorite[]
+  notifications  Notification[]
+  reports        Report[]
+  collections    Collection[]
 
   @@map("users")
 }
@@ -40,6 +44,7 @@ model Configuration {
   sharedAt     DateTime? @map("shared_at")
   viewCount    Int            @default(0) @map("view_count")
   cloneCount   Int            @default(0) @map("clone_count")
+  version      Int            @default(1) @map("version")
   clonedFromId String?        @map("cloned_from_id") @db.Uuid
   clonedFrom   Configuration? @relation("CloneTree", fields: [clonedFromId], references: [id], onDelete: SetNull)
   clones       Configuration[] @relation("CloneTree")
@@ -47,11 +52,16 @@ model Configuration {
   updatedAt    DateTime       @updatedAt @map("updated_at")
   ratings      Rating[]
   comments     Comment[]
+  favorites    Favorite[]
+  notifications Notification[]
+  snapshots    ConfigSnapshot[]
+  collectionItems CollectionItem[]
 
   @@index([userId])
   @@index([shareToken])
   @@index([vehicleMake])
   @@index([category])
+  @@index([isShared, sharedAt(sort: Desc)])
   @@map("configurations")
 }
 
@@ -74,14 +84,18 @@ model Comment {
   id         String        @id @default(uuid()) @db.Uuid
   userId     String        @map("user_id") @db.Uuid
   configId   String        @map("config_id") @db.Uuid
+  parentId   String?       @map("parent_id") @db.Uuid
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   config     Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  parent     Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies    Comment[]     @relation("CommentReplies")
   body       String        @db.VarChar(2000)
   authorName String?       @map("author_name") @db.VarChar(50)
   createdAt  DateTime      @default(now()) @map("created_at")
   updatedAt  DateTime      @updatedAt @map("updated_at")
 
   @@index([configId])
+  @@index([parentId])
   @@map("comments")
 }
 
@@ -98,4 +112,99 @@ model PageView {
   @@index([path])
   @@index([createdAt])
   @@map("page_views")
+}
+
+/// A user’s saved bookmark for a shared config.
+model Favorite {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  configId  String        @map("config_id") @db.Uuid
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config    Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@unique([userId, configId])
+  @@index([userId])
+  @@index([configId])
+  @@map("favorites")
+}
+/// In-app notification: clone or rating event on one of the user's configs.
+model Notification {
+  id        String         @id @default(uuid()) @db.Uuid
+  userId    String         @map("user_id") @db.Uuid
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// "clone" | "rating" | "comment_reply"
+  type      String         @db.VarChar(20)
+  configId  String?        @map("config_id") @db.Uuid
+  config    Configuration? @relation(fields: [configId], references: [id], onDelete: Cascade)
+  /// JSON payload e.g. { ratingValue: 4 }
+  payload   Json?
+  readAt    DateTime?      @map("read_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([configId])
+  @@map("notifications")
+}
+
+/// Content moderation report submitted by a user.
+model Report {
+  id         String   @id @default(uuid()) @db.Uuid
+  reporterId String   @map("reporter_id") @db.Uuid
+  reporter   User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  /// "config" | "comment"
+  targetType String   @map("target_type") @db.VarChar(20)
+  targetId   String   @map("target_id") @db.Uuid
+  reason     String   @db.VarChar(500)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+/// Immutable snapshot of a config taken before each edit (version history).
+model ConfigSnapshot {
+  id        String        @id @default(uuid()) @db.Uuid
+  configId  String        @map("config_id") @db.Uuid
+  config    Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  /// 1-based version number at the time of save — matches Configuration.version before increment
+  version   Int
+  name      String        @db.VarChar(100)
+  /// Full SPConfig JSON at time of snapshot
+  data      Json
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([configId])
+  @@map("config_snapshots")
+}
+
+/// A named playlist/collection of configs owned by a user.
+model Collection {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @map("user_id") @db.Uuid
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String           @db.VarChar(100)
+  description String?          @db.VarChar(500)
+  isPublic    Boolean          @default(false) @map("is_public")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  items       CollectionItem[]
+
+  @@index([userId])
+  @@map("collections")
+}
+
+/// Junction table — a config belonging to a collection.
+model CollectionItem {
+  collectionId String        @map("collection_id") @db.Uuid
+  configId     String        @map("config_id") @db.Uuid
+  collection   Collection    @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  config       Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  addedAt      DateTime      @default(now()) @map("added_at")
+
+  @@id([collectionId, configId])
+  @@index([collectionId])
+  @@index([configId])
+  @@map("collection_items")
 }

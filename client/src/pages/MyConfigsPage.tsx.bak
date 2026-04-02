@@ -1,0 +1,504 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeftRight,
+  ChevronLeft,
+  ChevronRight,
+  FolderOpen,
+  FolderPlus,
+  Heart,
+  Layers,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  createCollection,
+  deleteCollection,
+  fetchCollections,
+  fetchConfigs,
+  fetchFavorites,
+} from "../api";
+import { ConfigCard } from "../components/config/ConfigCard";
+import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
+import { ExploreCard } from "../components/config/ExploreCard";
+import { Button } from "../components/ui/Button";
+import { Modal } from "../components/ui/Modal";
+import type { CollectionRecord, ConfigRecord } from "../types/config";
+
+const PAGE_SIZE = 12;
+
+function SkeletonCard() {
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 animate-pulse space-y-3">
+      <div className="h-3 bg-zinc-800 rounded w-1/3" />
+      <div className="h-5 bg-zinc-800 rounded w-2/3" />
+      <div className="h-3 bg-zinc-800 rounded w-full" />
+      <div className="h-3 bg-zinc-800 rounded w-5/6" />
+      <div className="flex gap-2 pt-2">
+        <div className="h-5 bg-zinc-800 rounded w-16" />
+        <div className="h-5 bg-zinc-800 rounded w-20" />
+      </div>
+    </div>
+  );
+}
+
+type Tab = "mine" | "favorites" | "collections";
+
+export default function MyConfigsPage() {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [tab, setTab] = useState<Tab>("mine");
+  const [page, setPage] = useState(1);
+
+  // Compare mode
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareA, setCompareA] = useState<ConfigRecord | null>(null);
+  const [compareB, setCompareB] = useState<ConfigRecord | null>(null);
+  const [diffOpen, setDiffOpen] = useState(false);
+
+  // Collection create modal
+  const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  // Server-side paginated configs
+  const { data: configsPage, isLoading, isError } = useQuery({
+    queryKey: ["configs", page],
+    queryFn: () => fetchConfigs(page, PAGE_SIZE),
+  });
+
+  const configs = configsPage?.configs ?? [];
+  const total = configsPage?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Favorites
+  const {
+    data: favorites,
+    isLoading: favsLoading,
+    isError: favsError,
+    refetch: refetchFavs,
+  } = useQuery({
+    queryKey: ["configs", "favorites"],
+    queryFn: fetchFavorites,
+    enabled: tab === "favorites",
+  });
+
+  // Collections
+  const { data: collections = [], isLoading: collLoading } = useQuery({
+    queryKey: ["collections"],
+    queryFn: fetchCollections,
+    enabled: tab === "collections",
+  });
+
+  const createCollMutation = useMutation({
+    mutationFn: () => createCollection({ name: newName }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["collections"] });
+      setNewCollectionOpen(false);
+      setNewName("");
+    },
+  });
+
+  const deleteCollMutation = useMutation({
+    mutationFn: (id: string) => deleteCollection(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["collections"] }),
+  });
+
+  const switchTab = (t: Tab) => {
+    setTab(t);
+    setPage(1);
+    setCompareMode(false);
+    setCompareA(null);
+    setCompareB(null);
+  };
+
+  const toggleCompareSelect = (cfg: ConfigRecord) => {
+    if (!compareMode) return;
+    if (compareA?.id === cfg.id) { setCompareA(null); return; }
+    if (compareB?.id === cfg.id) { setCompareB(null); return; }
+    if (!compareA) { setCompareA(cfg); return; }
+    if (!compareB) { setCompareB(cfg); return; }
+  };
+
+  const isSelected = (cfg: ConfigRecord) =>
+    cfg.id === compareA?.id || cfg.id === compareB?.id;
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-zinc-100">My Configurations</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
+            {tab === "mine"
+              ? configsPage
+                ? `${total} config${total !== 1 ? "s" : ""}`
+                : "Loading…"
+              : tab === "favorites"
+              ? favorites
+                ? `${favorites.length} saved`
+                : "Loading…"
+              : `${collections.length} collection${collections.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {tab === "mine" && (
+            <Button
+              variant={compareMode ? "secondary" : "ghost"}
+              size="sm"
+              leftIcon={<ArrowLeftRight className="w-3.5 h-3.5" />}
+              onClick={() => {
+                setCompareMode(!compareMode);
+                setCompareA(null);
+                setCompareB(null);
+              }}
+            >
+              {compareMode ? "Cancel" : "Compare"}
+            </Button>
+          )}
+          {tab === "collections" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<FolderPlus className="w-3.5 h-3.5" />}
+              onClick={() => setNewCollectionOpen(true)}
+            >
+              New Collection
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            leftIcon={<Plus className="w-4 h-4" />}
+            onClick={() => navigate("/configure")}
+          >
+            New Config
+          </Button>
+        </div>
+      </div>
+
+      {/* Compare banner */}
+      {compareMode && (
+        <div className="mb-4 p-3 rounded-lg border border-blue-500/30 bg-blue-950/20 flex items-center justify-between gap-3">
+          <p className="text-xs text-blue-300">
+            {!compareA && !compareB && "Click two configs to compare them."}
+            {compareA && !compareB && `Selected: "${compareA.name}" — pick another.`}
+            {compareA && compareB && `Comparing "${compareA.name}" vs "${compareB.name}"`}
+          </p>
+          {compareA && compareB && (
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<ArrowLeftRight className="w-3.5 h-3.5" />}
+              onClick={() => setDiffOpen(true)}
+            >
+              View Diff
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b border-zinc-800">
+        {(["mine", "favorites", "collections"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            className={`px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${
+              tab === t
+                ? "text-zinc-100 border-b-2 border-blue-500"
+                : "text-zinc-500 hover:text-zinc-300"
+            }`}
+            onClick={() => switchTab(t)}
+          >
+            {t === "favorites" && <Heart className="w-3.5 h-3.5" />}
+            {t === "collections" && <Layers className="w-3.5 h-3.5" />}
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* My Configs */}
+      {tab === "mine" && (
+        <>
+          {isError && (
+            <div className="text-center py-12 text-red-400 text-sm">
+              Failed to load configurations. Please try again.
+            </div>
+          )}
+          {isLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+          {!isLoading && !isError && configs.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                <FolderOpen className="w-6 h-6 text-zinc-600" />
+              </div>
+              <h2 className="text-base font-semibold text-zinc-300 mb-1">
+                No configurations yet
+              </h2>
+              <p className="text-sm text-zinc-600 mb-6 max-w-xs">
+                Create your first SunnyPilot configuration to get started.
+              </p>
+              <Button
+                variant="primary"
+                leftIcon={<Plus className="w-4 h-4" />}
+                onClick={() => navigate("/configure")}
+              >
+                Create Configuration
+              </Button>
+            </div>
+          )}
+          {!isLoading && !isError && configs.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {configs.map((config) => (
+                <div
+                  key={config.id}
+                  onClick={() => toggleCompareSelect(config)}
+                  className={
+                    compareMode
+                      ? `cursor-pointer rounded-xl transition-all ${
+                          isSelected(config)
+                            ? "ring-2 ring-blue-500 scale-[1.02]"
+                            : "opacity-70 hover:opacity-100"
+                        }`
+                      : ""
+                  }
+                >
+                  <ConfigCard config={config} />
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Favorites */}
+      {tab === "favorites" && (
+        <>
+          {favsError && (
+            <div className="text-center py-12 text-red-400 text-sm">
+              Failed to load favorites.
+            </div>
+          )}
+          {favsLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+          {!favsLoading && !favsError && (favorites?.length ?? 0) === 0 && (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                <Heart className="w-6 h-6 text-zinc-600" />
+              </div>
+              <h2 className="text-base font-semibold text-zinc-300 mb-1">
+                No favorites yet
+              </h2>
+              <p className="text-sm text-zinc-600">
+                Save configs you like from the Explore page.
+              </p>
+            </div>
+          )}
+          {!favsLoading && !favsError && (favorites?.length ?? 0) > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {favorites!.map((fav) => (
+                <ExploreCard
+                  key={fav.id}
+                  config={fav}
+                  isFavorited
+                  onFavoriteToggle={() => refetchFavs()}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Collections */}
+      {tab === "collections" && (
+        <>
+          {collLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+          {!collLoading && collections.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                <Layers className="w-6 h-6 text-zinc-600" />
+              </div>
+              <h2 className="text-base font-semibold text-zinc-300 mb-1">
+                No collections yet
+              </h2>
+              <p className="text-sm text-zinc-600 mb-6">
+                Group related configs into named playlists.
+              </p>
+              <Button
+                variant="primary"
+                leftIcon={<FolderPlus className="w-4 h-4" />}
+                onClick={() => setNewCollectionOpen(true)}
+              >
+                Create Collection
+              </Button>
+            </div>
+          )}
+          {!collLoading && collections.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {collections.map((col: CollectionRecord) => (
+                <div
+                  key={col.id}
+                  className="card rounded-xl p-4 space-y-3 cursor-pointer hover:border-zinc-600 transition-colors"
+                  onClick={() => navigate(`/collections/${col.id}`)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-zinc-100 truncate">
+                        {col.name}
+                      </p>
+                      {col.description && (
+                        <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">
+                          {col.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        leftIcon={<Pencil className="w-3 h-3" />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/collections/${col.id}`);
+                        }}
+                        title="Open"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        leftIcon={<Trash2 className="w-3 h-3 text-red-500/70" />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete collection "${col.name}"?`)) {
+                            deleteCollMutation.mutate(col.id);
+                          }
+                        }}
+                        title="Delete"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-zinc-600">
+                    <Layers className="w-3 h-3" />
+                    <span>
+                      {col.itemCount ?? 0} config
+                      {(col.itemCount ?? 0) !== 1 ? "s" : ""}
+                    </span>
+                    {col.isPublic && (
+                      <span className="ml-auto text-green-500/70 font-mono text-[10px]">
+                        Public
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Pagination */}
+      {tab === "mine" && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<ChevronLeft className="w-4 h-4" />}
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Prev
+          </Button>
+          <span className="text-xs text-zinc-500 font-mono">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<ChevronRight className="w-4 h-4" />}
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      {/* Config Diff Modal */}
+      {compareA && compareB && (
+        <ConfigDiffModal
+          open={diffOpen}
+          onClose={() => setDiffOpen(false)}
+          original={compareA.config}
+          modified={compareB.config}
+          originalName={compareA.name}
+          modifiedName={compareB.name}
+        />
+      )}
+
+      {/* New Collection modal */}
+      <Modal
+        open={newCollectionOpen}
+        onClose={() => {
+          setNewCollectionOpen(false);
+          setNewName("");
+        }}
+        title="New Collection"
+        width="sm"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+              Name
+            </label>
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="e.g. Toyota Daily Drivers"
+              className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              maxLength={100}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newName.trim()) createCollMutation.mutate();
+              }}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-1 border-t border-zinc-800">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setNewCollectionOpen(false)}
+            >
+              <X className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={!newName.trim()}
+              loading={createCollMutation.isPending}
+              onClick={() => createCollMutation.mutate()}
+            >
+              Create
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}

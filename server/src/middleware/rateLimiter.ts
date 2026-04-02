@@ -16,10 +16,24 @@ export const registerLimiter = rateLimit({
   message: { error: "Too many registration attempts" },
 });
 
+/** General write operations (create, update). 20 per minute per IP. */
 export const writeLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 30,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Write rate limit exceeded" },
+});
+
+/**
+ * Stricter limiter for destructive / high-impact operations:
+ * delete, share, clone, revoke-token, report.
+ * 10 per minute per IP.
+ */
+export const destructiveLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many sensitive operations — please wait" },
 });

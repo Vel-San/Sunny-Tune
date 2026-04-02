@@ -2,6 +2,8 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import helmet from "helmet";
+import { prisma } from "./config/database";
+import { logger } from "./lib/logger";
 import { errorHandler } from "./middleware/errorHandler";
 import { trackPageView } from "./middleware/pageView";
 import { globalLimiter } from "./middleware/rateLimiter";
@@ -15,6 +17,14 @@ const PORT = parseInt(process.env.PORT ?? "3001", 10);
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    // The API only serves JSON — use the most restrictive CSP possible.
+    // frame-ancestors 'none' prevents this origin being embedded in a frame.
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+      },
+    },
   }),
 );
 
@@ -41,9 +51,16 @@ app.use("/api", apiRouter);
 app.use("/api/shared", sharedConfigRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
-app.get("/health", (_req, res) =>
-  res.json({ status: "ok", ts: new Date().toISOString() }),
-);
+app.get("/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: "ok", db: "ok", ts: new Date().toISOString() });
+  } catch {
+    res
+      .status(503)
+      .json({ status: "degraded", db: "error", ts: new Date().toISOString() });
+  }
+});
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
@@ -52,7 +69,8 @@ app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(
-    `[server] listening on port ${PORT} (${process.env.NODE_ENV ?? "development"})`,
-  );
+  logger.info("Server started", {
+    port: PORT,
+    env: process.env.NODE_ENV ?? "development",
+  });
 });

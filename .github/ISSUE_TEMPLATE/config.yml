@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: SunnyPilot Community
+    url: https://community.sunnypilot.ai/
+    about: Questions about SunnyPilot settings or driving behaviour — not SunnyTune bugs.
+  - name: Comma AI Community
+    url: https://discord.comma.ai/
+    about: Questions about openpilot / Comma AI hardware.

@@ -1,5 +1,3 @@
-version: "3.9"
-
 # ─── Development docker-compose ───────────────────────────────────────────────
 # Starts the full stack with hot-reload for both client and server.
 # All secrets here are intentionally weak dev-only values.

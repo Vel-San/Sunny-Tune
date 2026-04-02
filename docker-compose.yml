@@ -1,5 +1,3 @@
-version: "3.9"
-
 # ─── Production docker-compose ───────────────────────────────────────────────
 # Copy server/.env.example to server/.env and fill in all variables before
 # running `docker compose up --build`.

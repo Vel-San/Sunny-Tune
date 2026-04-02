@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Check, Copy, Lock, Share2, Tag } from "lucide-react";
+import { Check, Copy, Share2, Tag } from "lucide-react";
 import React, { useState } from "react";
+import QRCode from "react-qr-code";
 import { shareConfig } from "../../api";
 import { useConfigStore } from "../../store/configStore";
 import { CATEGORIES } from "../../types/config";
@@ -15,6 +16,9 @@ interface ShareModalProps {
   onClose: () => void;
   configId: string;
   configName: string;
+  existingShareToken?: string;
+  existingTags?: string[];
+  existingCategory?: string;
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({
@@ -22,17 +26,41 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   onClose,
   configId,
   configName,
+  existingShareToken,
+  existingTags,
+  existingCategory,
 }) => {
   const qc = useQueryClient();
   const { editingTags, editingCategory, setTags, setCategory } =
     useConfigStore();
-  const [shareToken, setShareToken] = useState<string | null>(null);
+
+  // For already-shared configs we show the existing link immediately and
+  // pre-populate tags/category from the saved values.
+  const isAlreadyShared = !!existingShareToken;
+  const [shareToken, setShareToken] = useState<string | null>(
+    existingShareToken ?? null,
+  );
   const [copied, setCopied] = useState(false);
+  const [updateDone, setUpdateDone] = useState(false);
+
+  // Seed the store fields when opening an already-shared config
+  React.useEffect(() => {
+    if (open && isAlreadyShared) {
+      setTags(existingTags ?? []);
+      setCategory(existingCategory ?? "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const shareMutation = useMutation({
-    mutationFn: () => shareConfig(configId),
+    mutationFn: () =>
+      shareConfig(configId, {
+        tags: editingTags,
+        category: editingCategory || undefined,
+      }),
     onSuccess: ({ shareToken: token }) => {
       setShareToken(token);
+      setUpdateDone(true);
       qc.invalidateQueries({ queryKey: ["configs"] });
       qc.invalidateQueries({ queryKey: ["community-stats"] });
       qc.invalidateQueries({ queryKey: ["explore"] });
@@ -51,8 +79,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const handleClose = () => {
-    setShareToken(null);
+    if (!isAlreadyShared) setShareToken(null);
     setCopied(false);
+    setUpdateDone(false);
     onClose();
   };
 
@@ -60,23 +89,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     <Modal
       open={open}
       onClose={handleClose}
-      title="Share Configuration"
+      title={isAlreadyShared ? "Update Tags & Category" : "Share Configuration"}
       width="md"
     >
-      {!shareToken ? (
+      {/* ── Edit form: shown for drafts (before sharing) or already-shared configs ── */}
+      {(!shareToken || isAlreadyShared) && !updateDone ? (
         <div className="space-y-5">
-          {/* Warning */}
-          <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-300 space-y-1">
-              <p className="font-medium">This action is irreversible</p>
-              <p className="text-amber-400/70">
-                Once shared,{" "}
-                <strong className="text-amber-300">{configName}</strong> becomes
-                permanently read-only. You cannot edit it after sharing.
-              </p>
+          {/* Existing share link (already-shared only) */}
+          {isAlreadyShared && shareUrl && (
+            <div className="space-y-1.5">
+              <p className="text-xs text-zinc-500">Share link</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  readOnly
+                  value={shareUrl}
+                  className="font-mono text-xs"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={
+                    copied ? (
+                      <Check className="w-3.5 h-3.5 text-green-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )
+                  }
+                  onClick={copyLink}
+                >
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tags */}
           <div className="space-y-2">
@@ -113,24 +159,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               onClick={() => shareMutation.mutate()}
               leftIcon={<Share2 className="w-3.5 h-3.5" />}
             >
-              Publish & Share
+              {isAlreadyShared ? "Update" : "Publish & Share"}
             </Button>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Success */}
-          <div className="flex items-center gap-2.5 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <Lock className="w-4 h-4 text-green-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-green-300 font-medium">
-                Config shared successfully
-              </p>
-              <p className="text-xs text-green-500/70 mt-0.5">
-                This config is now locked as read-only.
-              </p>
-            </div>
-          </div>
+          {updateDone && (
+            <p className="text-xs text-green-400">Tags and category updated.</p>
+          )}
 
           {/* Share link */}
           <div className="space-y-1.5">
@@ -158,6 +195,16 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               </Button>
             </div>
           </div>
+
+          {/* QR code */}
+          {shareUrl && (
+            <div className="flex flex-col items-center gap-2 pt-1">
+              <p className="text-xs text-zinc-500 self-start">QR code</p>
+              <div className="bg-white p-3 rounded-lg inline-block">
+                <QRCode value={shareUrl} size={160} />
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end pt-2 border-t border-zinc-800">
             <Button variant="primary" size="sm" onClick={handleClose}>
