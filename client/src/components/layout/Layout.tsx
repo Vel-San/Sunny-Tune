@@ -1,3 +1,4 @@
+import { Github } from "lucide-react";
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { APP_VERSION } from "../../lib/version";
@@ -69,6 +70,16 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <span className="text-zinc-400 font-medium">AI tools</span>.
           </span>
           <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/Vel-San/Sunny-Tune"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-zinc-400 transition-colors"
+              aria-label="View source on GitHub"
+            >
+              <Github className="w-3.5 h-3.5" />
+              Open Source
+            </a>
             <Link
               to="/changelog"
               className="font-mono text-zinc-700 hover:text-zinc-400 transition-colors"
