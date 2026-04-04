@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npx prisma generate && npm run build"
+
+[deploy]
+preDeployCommand = "npx prisma migrate deploy"
+startCommand = "node dist/index.js"

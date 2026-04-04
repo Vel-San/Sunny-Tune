@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Particle fall animation ─────────────────────────────────────────────── */
+@keyframes particle-fall {
+  0% {
+    transform: translateY(-2vh) translateX(0px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(105vh) translateX(var(--drift, 0px));
+    opacity: 0;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-600;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-blue-600/40 text-zinc-100;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-950;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-zinc-900 border border-zinc-800 rounded-lg;
+  }
+
+  .card-elevated {
+    @apply bg-[#111117] border border-zinc-800 rounded-lg;
+  }
+
+  .section-header {
+    @apply flex items-center gap-2.5 text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-4;
+  }
+
+  .param-label {
+    @apply text-sm font-medium text-zinc-200;
+  }
+
+  .param-desc {
+    @apply text-xs text-zinc-500 mt-0.5 leading-relaxed;
+  }
+
+  .mono {
+    @apply font-mono text-xs;
+  }
+
+  .input-base {
+    @apply w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm text-zinc-100
+           placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+           transition-colors duration-150;
+  }
+
+  .divider {
+    @apply border-t border-zinc-800 my-6;
+  }
+}

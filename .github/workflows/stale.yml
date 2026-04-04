@@ -1,0 +1,50 @@
+name: Stale Issues & PRs
+
+on:
+  schedule:
+    # Run every day at 02:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    name: Mark stale · close forgotten items
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # ── Issues ──────────────────────────────────────────────────────
+          days-before-issue-stale: 60
+          days-before-issue-close: 14
+          stale-issue-label: "stale"
+          stale-issue-message: >
+            This issue has been open for 60 days without any activity.
+            It will be closed automatically in 14 days unless there is
+            new activity or the `stale` label is removed.
+          close-issue-message: >
+            Closing due to inactivity. Feel free to re-open if this is
+            still relevant — just leave a comment with any new information.
+
+          # ── Pull Requests ────────────────────────────────────────────────
+          days-before-pr-stale: 30
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          stale-pr-message: >
+            This pull request has had no activity for 30 days.
+            It will be closed in 7 days unless updated or the `stale` label
+            is removed. If this is blocked on a review, please ping a
+            maintainer.
+          close-pr-message: >
+            Closing due to inactivity. The branch is not deleted — feel free
+            to re-open when you're ready to continue.
+
+          # ── Skip these labels ────────────────────────────────────────────
+          exempt-issue-labels: "pinned,security,in-progress,blocked"
+          exempt-pr-labels: "pinned,security,in-progress,blocked,do-not-merge"
+
+          # How many items to process per run (keep under API rate limit)
+          operations-per-run: 100

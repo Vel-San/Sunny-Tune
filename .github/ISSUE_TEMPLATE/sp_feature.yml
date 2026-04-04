@@ -1,0 +1,83 @@
+name: Add / Update SP or Comma AI Parameter
+description: Request a new SunnyPilot or openpilot parameter to be added to the configurator
+title: "[SP Param]: "
+labels: ["feature", "sunnypilot"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request that a new SunnyPilot or Comma AI parameter be added to the SunnyTune configurator.
+        Useful links: [SP RELEASES.md](https://github.com/sunnypilot/sunnypilot/blob/master/RELEASES.md) · [SP repo search](https://github.com/sunnypilot/sunnypilot)
+
+  - type: input
+    id: param_key
+    attributes:
+      label: Parameter key / name
+      description: The exact param name as used in the SP/openpilot source (e.g. `SP_LONG_SMOOTH_BRAKING`).
+      placeholder: "SP_EXAMPLE_PARAM"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Is this a SunnyPilot-exclusive param or a stock openpilot one?
+      options:
+        - sunnypilot (SP-exclusive, SP_* prefix)
+        - openpilot (stock Comma AI / upstream)
+    validations:
+      required: true
+
+  - type: input
+    id: since
+    attributes:
+      label: Introduced in SP version
+      placeholder: "e.g. 0.9.8"
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does this parameter do?
+      description: Describe the parameter's effect on driving behaviour.
+    validations:
+      required: true
+
+  - type: input
+    id: type
+    attributes:
+      label: Parameter type
+      description: toggle / number / slider / select
+      placeholder: "toggle"
+    validations:
+      required: true
+
+  - type: textarea
+    id: values
+    attributes:
+      label: Possible values / range
+      description: For selects, list the options. For numbers/sliders, give min/max/step/default.
+      placeholder: |
+        Toggle: true / false (default: false)
+        — or —
+        Slider: min 0, max 100, step 5, default 50
+    validations:
+      required: false
+
+  - type: input
+    id: section
+    attributes:
+      label: Config section
+      description: Which section best fits? (longitudinal / laneChange / commaAI / advanced / interface / navigation / speedControl / vehicle)
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Link to the SP PR, changelog entry, or commit that introduced this param.
+    validations:
+      required: false

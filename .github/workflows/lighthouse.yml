@@ -1,0 +1,46 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lighthouse:
+    name: Performance & Accessibility audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build client
+        run: npm run build --workspace=client
+        env:
+          VITE_API_URL: https://placeholder.example.com
+
+      - name: Run Lighthouse CI
+        run: npx @lhci/cli@0.14.x autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report-${{ github.sha }}
+          path: .lighthouseci/
+          retention-days: 30

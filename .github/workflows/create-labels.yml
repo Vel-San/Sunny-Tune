@@ -1,0 +1,71 @@
+name: Create Labels
+
+# Run this workflow once after pushing to GitHub to create all the labels
+# used by the other workflows (PR labeler, stale, etc.).
+# Trigger manually from: Actions → Create Labels → Run workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-labels:
+    name: Upsert repository labels
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Create / update labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = [
+              // ── Area ──────────────────────────────────────────────────────
+              { name: "frontend",      color: "0075ca", description: "Changes to the React/Vite client" },
+              { name: "backend",       color: "d93f0b", description: "Changes to the Express/Prisma server" },
+              { name: "database",      color: "e4e669", description: "Prisma schema or migrations" },
+              { name: "docker",        color: "0e8a16", description: "Docker / Docker Compose changes" },
+              { name: "dependencies",  color: "c2efff", description: "Dependency updates (package.json)" },
+              { name: "ci",            color: "8250df", description: "GitHub Actions / CI pipeline" },
+              // ── Type ──────────────────────────────────────────────────────
+              { name: "bug",           color: "d73a4a", description: "Something is not working" },
+              { name: "feature",       color: "a2eeef", description: "New feature or enhancement" },
+              { name: "documentation", color: "0075ca", description: "Documentation improvements" },
+              { name: "performance",   color: "fbca04", description: "Performance improvement" },
+              { name: "security",      color: "e11d48", description: "Security fix or hardening" },
+              { name: "tests",         color: "bfd4f2", description: "Test coverage or infrastructure" },
+              // ── Status ────────────────────────────────────────────────────
+              { name: "stale",         color: "e4e669", description: "No recent activity" },
+              { name: "in-progress",   color: "0e8a16", description: "Actively being worked on" },
+              { name: "blocked",       color: "d93f0b", description: "Blocked on something external" },
+              { name: "pinned",        color: "e4e669", description: "Pinned — never mark stale" },
+              { name: "do-not-merge",  color: "b60205", description: "Not ready to merge" },
+              { name: "needs-review",  color: "fbca04", description: "Awaiting code review" },
+              // ── SP specific ────────────────────────────────────────────────
+              { name: "sunnypilot",    color: "f97316", description: "SP-specific parameter or feature" },
+              { name: "openpilot",     color: "6366f1", description: "Stock openpilot / Comma AI feature" },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ...label,
+                });
+                console.log(`Created: ${label.name}`);
+              } catch (err) {
+                if (err.status === 422) {
+                  // Label already exists — update it
+                  await github.rest.issues.updateLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ...label,
+                  });
+                  console.log(`Updated: ${label.name}`);
+                } else {
+                  throw err;
+                }
+              }
+            }

@@ -1,0 +1,83 @@
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# keep the example template
+!.env.example
+
+# ─── Build Outputs ────────────────────────────────────────────────────────────
+client/dist/
+server/dist/
+
+# ─── Prisma ───────────────────────────────────────────────────────────────────
+# Generated client (rebuilt on install/deploy)
+server/node_modules/.prisma/
+server/prisma/generated/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Test & Coverage ─────────────────────────────────────────────────────────
+coverage/
+client/coverage/
+server/coverage/
+*.lcov
+.nyc_output/
+
+# ─── Vite ────────────────────────────────────────────────────────────────────
+client/.vite/
+
+# ─── TypeScript ──────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── OS & Editor ─────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Docker ──────────────────────────────────────────────────────────────────
+# Local override files (never commit these)
+docker-compose.override.yml
+
+# ─── Vercel ──────────────────────────────────────────────────────────────────
+# The whole .vercel/ folder is local-only — contains personal project/org IDs.
+# Vercel deploys via native GitHub integration (no CLI needed in CI).
+.vercel/
+.vercel
+.env*.local
+
+# ─── Deployment reference ─────────────────────────────────────────────────────
+# DEPLOYMENT.md is a personal ops reference containing live service IDs,
+# secrets, and credentials — never commit it.
+# See DEPLOYMENT.example.md for the sanitized template.
+DEPLOYMENT.md
+
+# Root vercel.json is redundant — Vercel uses client/vercel.json (rootDirectory=client).
+# Keep gitignored to avoid confusion; the real config lives in client/vercel.json.
+/vercel.json
+
+# ─── Client production env ────────────────────────────────────────────────────
+# Managed via Vercel dashboard env vars — no need to commit.
+client/.env.production

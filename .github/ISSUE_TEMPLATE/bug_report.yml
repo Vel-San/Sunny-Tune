@@ -1,0 +1,90 @@
+name: Bug Report
+description: Something in SunnyTune isn't working as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please fill out the sections below as completely as possible — it helps us reproduce and fix the issue much faster.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: "e.g. When I click Share, the modal closes immediately without showing the share link."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps to trigger the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What actually happened? Include any error messages from the browser console or server logs.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does the bug occur?
+      options:
+        - Configurator (editing a config)
+        - My Configs page
+        - Explore / Discover page
+        - Shared config view
+        - Collections
+        - Dashboard
+        - Admin panel
+        - Import / Export
+        - Authentication / token
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & OS
+      placeholder: "e.g. Chrome 123 on macOS 14"
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Paste screenshots or a screen recording here (drag & drop supported).
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this hasn't been reported yet.
+          required: true
+        - label: I can reproduce this consistently (not a one-off).
+          required: false

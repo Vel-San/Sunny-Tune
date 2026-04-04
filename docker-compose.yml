@@ -1,0 +1,77 @@
+# ─── Production docker-compose ───────────────────────────────────────────────
+# Copy .env.example to .env at the project root and fill in ALL values before
+# running any `docker:prod:*` command.
+#
+# Required env vars (no defaults — will error if missing):
+#   POSTGRES_PASSWORD   — PostgreSQL superuser password
+#   TOKEN_SECRET        — Random 32+ character string (openssl rand -hex 32)
+#   CORS_ORIGIN         — Public URL of the client (e.g. https://your-domain.com)
+#
+# Optional/conditional:
+#   ADMIN_SECRET_HASH   — bcrypt hash of admin password (recommended)
+#   ADMIN_SECRET        — plaintext admin password (only if HASH not set)
+#   ADMIN_ALLOWED_IPS   — comma-separated IPs that may access /admin
+#   VITE_API_URL        — override client's API base URL (default: /api)
+#   CLIENT_PORT         — host port for the frontend (default: 80)
+#   POSTGRES_USER       — postgres superuser name (default: postgres)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sptune
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sp_net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@db:5432/sptune
+      TOKEN_SECRET: ${TOKEN_SECRET:?TOKEN_SECRET must be set in .env}
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN must be set in .env}
+      ADMIN_SECRET: ${ADMIN_SECRET:-}
+      ADMIN_SECRET_HASH: ${ADMIN_SECRET_HASH:-}
+      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
+    networks:
+      - sp_net
+    expose:
+      - "3001"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    networks:
+      - sp_net
+
+networks:
+  sp_net:
+    driver: bridge
+
+volumes:
+  postgres_data:

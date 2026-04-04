@@ -1,0 +1,52 @@
+# .github/labeler.yml
+# Used by the pr-labeler workflow (actions/labeler@v5).
+# Labels are applied automatically when files matching the globs change.
+# All labels must exist in the repo — run the "Create Labels" workflow first.
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "client/**"
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "server/src/**"
+          - "server/tsconfig.json"
+          - "server/package.json"
+
+database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "server/prisma/**"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docker-compose*.yml"
+          - "**/Dockerfile"
+          - "**/Dockerfile.*"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.md"
+          - "docs/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/package.json"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/__tests__/**"
+          - "**/*.test.ts"
+          - "**/*.test.tsx"
+          - "**/vitest.config.*"

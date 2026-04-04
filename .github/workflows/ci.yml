@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev, master]
+  pull_request:
+    branches: [main, dev, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── TypeScript + Tests + Build ─────────────────────────────────────────────
+  test:
+    name: Typecheck · Tests · Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: server
+
+      # ── TypeScript ────────────────────────────────────────────────────────
+      - name: TypeScript check · server
+        run: npx tsc --noEmit
+        working-directory: server
+
+      - name: TypeScript check · client
+        run: npx tsc --noEmit
+        working-directory: client
+
+      # ── Tests ─────────────────────────────────────────────────────────────
+      - name: Run tests · server
+        run: npm run test:server
+
+      - name: Run tests · client
+        run: npm run test:client
+
+      # ── Build ─────────────────────────────────────────────────────────────
+      - name: Build · server
+        run: npm run build --workspace=server
+
+      - name: Build · client
+        run: npm run build --workspace=client
+        env:
+          # Placeholder — real value is only needed at runtime, not build time
+          VITE_API_URL: https://placeholder.example.com
+
+      # ── Upload build artifacts (7-day retention) ──────────────────────────
+      - name: Upload client build
+        uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: client-dist-${{ github.sha }}
+          path: client/dist/
+          retention-days: 7
