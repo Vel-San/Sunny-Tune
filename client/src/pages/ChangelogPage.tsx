@@ -9,6 +9,57 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.0.1",
+    date: "2026-04-05",
+    tags: ["feature", "fix", "ux", "mobile"],
+    changes: [
+      {
+        type: "added",
+        text: "Config version number now always shown with a visible badge on all cards (My Configs, Explore, Favorites, Shared page) — was previously near-invisible or missing entirely",
+      },
+      {
+        type: "added",
+        text: "History (version snapshots) button now accessible from config cards in My Configs and from the shared config page (owner only) — previously only available inside the editor",
+      },
+      {
+        type: "changed",
+        text: "Hyundai/Kia/Genesis longitudinal tune options renamed: 0=Off (default), 1=Dynamic (sportier acceleration & braking), 2=Predictive (smooth, comfort-focused anticipatory control). Import clamped to valid range 0–2.",
+      },
+      {
+        type: "fixed",
+        text: "Animated particle background now shows on the Explore page — was hidden by an opaque background layer unique to that page",
+      },
+      {
+        type: "added",
+        text: 'Updated cards now show a purple "Updated" badge (top-left) matching the neon ring colour, complementing the existing spinning neon border',
+      },
+      {
+        type: "added",
+        text: 'New cards now have a subtle repeating shine/glare sweep in addition to the green "New" badge',
+      },
+      {
+        type: "added",
+        text: "Full mobile responsiveness: all pages, modals, cards, sliders, dropdowns, section navigation, and forms now work correctly on phones and small screens",
+      },
+      {
+        type: "changed",
+        text: "Modals now slide up from bottom on mobile (sheet style) with a scrollable body — previously could overflow off-screen",
+      },
+      {
+        type: "changed",
+        text: "Config editor gains a horizontal section pill scroller on mobile — replaces the desktop sidebar that was hidden on small screens",
+      },
+      {
+        type: "changed",
+        text: "Slider thumb size increased from 14px to 20px and number input ± buttons enlarged for better touch usability",
+      },
+      {
+        type: "changed",
+        text: "Home page hero heading now scales down on narrow screens; feature grid switches to single column on mobile",
+      },
+    ],
+  },
+  {
     version: "2.0.0",
     date: "2026-04-04",
     tags: ["feature", "fix", "ux", "cleanup"],

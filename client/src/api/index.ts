@@ -172,6 +172,7 @@ export async function fetchExplore(params: {
   year?: number;
   tags?: string[];
   category?: string;
+  branch?: string;
   sort?: "trending" | "rating" | "recent" | "views" | "clones" | "comments";
   page?: number;
   limit?: number;
@@ -184,6 +185,7 @@ export async function fetchExplore(params: {
   if (params.year) query.year = params.year.toString();
   if (params.tags?.length) query.tags = params.tags.join(",");
   if (params.category) query.category = params.category;
+  if (params.branch) query.branch = params.branch;
   if (params.sort) query.sort = params.sort;
   if (params.page) query.page = params.page.toString();
   if (params.limit) query.limit = params.limit.toString();

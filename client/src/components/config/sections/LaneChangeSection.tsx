@@ -6,14 +6,15 @@ import { Slider } from "../../ui/Slider";
 import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow, SourceLegend } from "../ConfigSection";
 
+// SP AutoLaneChangeTimer integer enum values
 const TIMER_OPTS = [
-  { value: "0", label: "Nudge required (no auto)" },
-  { value: "0.5", label: "0.5 s after signal" },
-  { value: "1", label: "1.0 s after signal" },
-  { value: "1.5", label: "1.5 s after signal" },
-  { value: "2", label: "2.0 s after signal" },
-  { value: "2.5", label: "2.5 s after signal" },
-  { value: "3", label: "3.0 s after signal" },
+  { value: "-1", label: "Off (auto disabled)" },
+  { value: "0", label: "Nudge required" },
+  { value: "1", label: "Nudgeless (immediate)" },
+  { value: "2", label: "0.5 s after signal" },
+  { value: "3", label: "1.0 s after signal" },
+  { value: "4", label: "2.0 s after signal" },
+  { value: "5", label: "3.0 s after signal" },
 ];
 
 export const LaneChangeSection: React.FC = () => {
@@ -49,7 +50,7 @@ export const LaneChangeSection: React.FC = () => {
         <Select
           value={String(lc.autoTimer)}
           onChange={(v) =>
-            set("autoTimer", parseFloat(v) as typeof lc.autoTimer)
+            set("autoTimer", parseInt(v, 10) as typeof lc.autoTimer)
           }
           options={TIMER_OPTS}
           disabled={!lc.enabled}

@@ -49,10 +49,11 @@ export const Modal: React.FC<ModalProps> = ({
       />
 
       {/* Panel */}
-      <div className="relative flex min-h-full items-center justify-center p-4">
+      <div className="relative flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
         <div
           className={clsx(
-            "relative w-full bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl animate-slide-down",
+            "relative w-full bg-zinc-900 border-t sm:border border-zinc-700 sm:rounded-xl shadow-2xl animate-slide-down",
+            "rounded-t-2xl",
             widthStyles[width],
           )}
         >
@@ -70,7 +71,9 @@ export const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Body */}
-          <div className="p-5">{children}</div>
+          <div className="p-5 overflow-y-auto max-h-[calc(100svh-8rem)]">
+            {children}
+          </div>
         </div>
       </div>
     </div>

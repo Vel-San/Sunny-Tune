@@ -262,13 +262,13 @@ export const LONGITUDINAL_FEATURES: FeatureDefinition[] = [
     section: "longitudinal",
     label: "Hyundai Longitudinal Tuning",
     description:
-      "Longitudinal tuning preset for Hyundai/Kia/Genesis vehicles. 0=Stock openpilot, 1=SP tune (smoother), 2=SP+ aggressive tune.",
+      "Longitudinal tuning preset for Hyundai/Kia/Genesis vehicles. 0=Off (default tuning with standard acceleration and braking), 1=Dynamic (more responsive acceleration and braking for a sportier feel), 2=Predictive (smoother, anticipatory speed changes that prioritize comfort).",
     type: "select",
     default: 0,
     options: [
-      { label: "0 — Stock openpilot", value: 0 },
-      { label: "1 — SP tune", value: 1 },
-      { label: "2 — SP+ aggressive", value: 2 },
+      { label: "0 — Off (Default)", value: 0 },
+      { label: "1 — Dynamic", value: 1 },
+      { label: "2 — Predictive", value: 2 },
     ],
     spKey: "HyundaiLongitudinalTuning",
     since: "2025",

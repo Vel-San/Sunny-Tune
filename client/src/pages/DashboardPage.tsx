@@ -297,7 +297,8 @@ const PERSONALITY_COLORS: Record<string, string> = {
 const BRANCH_COLORS: Record<string, string> = {
   "stable-sp": "bg-green-500",
   "dev-sp": "bg-amber-500",
-  nightly: "bg-red-500",
+  "staging-sp": "bg-blue-500",
+  nightly: "bg-red-500", // kept for backward compat with old configs
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -529,7 +530,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-zinc-100">Dashboard</h1>
           <p className="text-sm text-zinc-500 mt-0.5">

@@ -49,6 +49,8 @@ export const exploreQuerySchema = z.object({
    * E.g. "0.9.8" shows only configs tuned for 0.9.8 or later.
    */
   spVersion: z.string().max(20).optional(),
+  /** SP branch filter — matches config.metadata.branch */
+  branch: z.enum(["stable-sp", "nightly", "dev-sp", "staging-sp"]).optional(),
 });
 
 export type ExploreQuery = z.infer<typeof exploreQuerySchema>;

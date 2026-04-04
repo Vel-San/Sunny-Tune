@@ -1,7 +1,7 @@
 import { Car } from "lucide-react";
 import React from "react";
 import { useConfigStore } from "../../../store/configStore";
-import type { SPBranch } from "../../../types/config";
+import type { CommaHardware, SPBranch } from "../../../types/config";
 import { Input } from "../../ui/Input";
 import { NumberInput } from "../../ui/NumberInput";
 import { Select } from "../../ui/Select";
@@ -30,12 +30,52 @@ const MAKES = [
   { value: "other", label: "Other" },
 ];
 
-const BRANCHES: { value: SPBranch; label: string }[] = [
-  { value: "stable-sp", label: "stable-sp (Stable)" },
-  { value: "dev-sp", label: "dev-sp (Development)" },
-  { value: "staging-sp", label: "staging-sp (Staging)" },
-  { value: "nightly", label: "nightly (Nightly)" },
+const HARDWARE_OPTIONS = [
+  { value: "", label: "Unknown / Not specified" },
+  { value: "comma4", label: "Comma 4 (C4)" },
+  { value: "comma3x", label: "Comma 3X (C3X)" },
+  { value: "comma3", label: "Comma 3 (C3)" },
 ];
+
+/**
+ * Branch options per hardware platform.
+ * Branches that don't exist for a given device are hidden to prevent
+ * users from entering an invalid branch for their hardware.
+ *
+ * C4:  staging.sunnypilot.ai · dev.sunnypilot.ai
+ * C3X: release.sunnypilot.ai (release-tizi) · staging.sunnypilot.ai · dev.sunnypilot.ai
+ * C3:  install.sunnypilot.ai/staging-tici only
+ */
+const BRANCHES_BY_HW: Record<string, { value: SPBranch; label: string }[]> = {
+  comma4: [
+    { value: "staging-sp", label: "staging.sunnypilot.ai (Staging)" },
+    { value: "dev-sp", label: "dev.sunnypilot.ai (Dev)" },
+  ],
+  comma3x: [
+    {
+      value: "stable-sp",
+      label: "release.sunnypilot.ai / release-tizi (Stable)",
+    },
+    { value: "staging-sp", label: "staging.sunnypilot.ai (Staging)" },
+    { value: "dev-sp", label: "dev.sunnypilot.ai (Dev)" },
+  ],
+  comma3: [
+    {
+      value: "staging-sp",
+      label: "install.sunnypilot.ai/staging-tici (Staging TICI)",
+    },
+  ],
+  // Unknown hardware — show all known branches except nightly (removed; kept
+  // in SPBranch type only for backward compat with old stored configs)
+  "": [
+    {
+      value: "stable-sp",
+      label: "release.sunnypilot.ai (Stable / release-tizi)",
+    },
+    { value: "staging-sp", label: "staging.sunnypilot.ai (Staging)" },
+    { value: "dev-sp", label: "dev.sunnypilot.ai (Dev)" },
+  ],
+};
 
 export const VehicleSection: React.FC = () => {
   const { editingConfig, updateField } = useConfigStore();
@@ -45,6 +85,19 @@ export const VehicleSection: React.FC = () => {
     updateField("vehicle", k, val);
   const setM = <K extends keyof typeof m>(k: K, val: (typeof m)[K]) =>
     updateField("metadata", k, val);
+
+  const hw = m.hardware ?? "";
+  const branchOptions = BRANCHES_BY_HW[hw] ?? BRANCHES_BY_HW[""];
+
+  const handleHardwareChange = (val: string) => {
+    const newHw = val as CommaHardware | undefined;
+    setM("hardware", newHw || undefined);
+    // If current branch is not valid for the new hardware, reset to first option
+    const newBranches = BRANCHES_BY_HW[val] ?? BRANCHES_BY_HW[""];
+    if (!newBranches.some((b) => b.value === m.branch)) {
+      setM("branch", newBranches[0].value);
+    }
+  };
 
   return (
     <ConfigSection
@@ -84,6 +137,19 @@ export const VehicleSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
+        label="Comma AI HW"
+        description="Comma AI hardware device. Determines which branches are available."
+        source="sunnypilot"
+        since="2022"
+      >
+        <Select
+          value={hw}
+          onChange={handleHardwareChange}
+          options={HARDWARE_OPTIONS}
+        />
+      </ParamRow>
+
+      <ParamRow
         label="SP Version"
         description="sunnypilot version installed on the device (e.g. 2026.001.000)"
         source="sunnypilot"
@@ -99,14 +165,14 @@ export const VehicleSection: React.FC = () => {
 
       <ParamRow
         label="Branch"
-        description="Update channel / git branch used on the device"
+        description="Update channel used on the device. Options depend on your hardware."
         source="sunnypilot"
         since="2021"
       >
         <Select
           value={m.branch}
           onChange={(val) => setM("branch", val as SPBranch)}
-          options={BRANCHES}
+          options={branchOptions}
         />
       </ParamRow>
 

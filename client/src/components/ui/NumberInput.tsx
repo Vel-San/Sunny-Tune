@@ -48,7 +48,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         type="button"
         onClick={decrement}
         disabled={value <= min || disabled}
-        className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-zinc-400
+        className="flex-shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-400
                    hover:text-zinc-100 hover:bg-zinc-800 transition-colors duration-100
                    disabled:opacity-40 disabled:cursor-not-allowed border-r border-zinc-700"
       >
@@ -79,7 +79,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         type="button"
         onClick={increment}
         disabled={value >= max || disabled}
-        className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-zinc-400
+        className="flex-shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-400
                    hover:text-zinc-100 hover:bg-zinc-800 transition-colors duration-100
                    disabled:opacity-40 disabled:cursor-not-allowed border-l border-zinc-700"
       >

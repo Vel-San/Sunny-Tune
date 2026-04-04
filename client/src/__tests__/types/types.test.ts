@@ -28,6 +28,8 @@ describe("ConfigsPage interface", () => {
   const page: ConfigsPage = {
     configs: [],
     total: 0,
+    sharedCount: 0,
+    draftCount: 0,
     page: 1,
     limit: 24,
   };

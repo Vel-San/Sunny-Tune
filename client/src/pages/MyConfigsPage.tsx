@@ -3,6 +3,7 @@ import {
   ArrowLeftRight,
   ChevronLeft,
   ChevronRight,
+  EyeOff,
   FolderOpen,
   FolderPlus,
   Heart,
@@ -26,6 +27,7 @@ import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
 import { ExploreCard } from "../components/config/ExploreCard";
 import { Button } from "../components/ui/Button";
 import { Modal } from "../components/ui/Modal";
+import { clearAllSeen } from "../lib/seenConfigs";
 import type { CollectionRecord, ConfigRecord } from "../types/config";
 
 const PAGE_SIZE = 12;
@@ -75,6 +77,8 @@ export default function MyConfigsPage() {
 
   const configs = configsPage?.configs ?? [];
   const total = configsPage?.total ?? 0;
+  const sharedCount = configsPage?.sharedCount ?? 0;
+  const draftCount = configsPage?.draftCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Favorites
@@ -144,13 +148,13 @@ export default function MyConfigsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-bold text-zinc-100">My Configurations</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {tab === "mine"
               ? configsPage
-                ? `${total} config${total !== 1 ? "s" : ""}`
+                ? `${sharedCount} shared · ${draftCount} draft`
                 : "Loading…"
               : tab === "favorites"
                 ? favorites
@@ -160,6 +164,24 @@ export default function MyConfigsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {tab !== "collections" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<EyeOff className="w-3.5 h-3.5" />}
+              onClick={clearAllSeen}
+              title="Mark all as seen"
+            >
+              Clear All
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            leftIcon={<Plus className="w-4 h-4" />}
+            onClick={() => navigate("/configure")}
+          >
+            New Config
+          </Button>
           {tab === "mine" && (
             <Button
               variant={compareMode ? "secondary" : "ghost"}
@@ -184,13 +206,6 @@ export default function MyConfigsPage() {
               New Collection
             </Button>
           )}
-          <Button
-            variant="primary"
-            leftIcon={<Plus className="w-4 h-4" />}
-            onClick={() => navigate("/configure")}
-          >
-            New Config
-          </Button>
         </div>
       </div>
 
@@ -261,16 +276,9 @@ export default function MyConfigsPage() {
               <h2 className="text-base font-semibold text-zinc-300 mb-1">
                 No configurations yet
               </h2>
-              <p className="text-sm text-zinc-600 mb-6 max-w-xs">
+              <p className="text-sm text-zinc-600 max-w-xs">
                 Create your first SunnyPilot configuration to get started.
               </p>
-              <Button
-                variant="primary"
-                leftIcon={<Plus className="w-4 h-4" />}
-                onClick={() => navigate("/configure")}
-              >
-                Create Configuration
-              </Button>
             </div>
           )}
           {!isLoading && !isError && configs.length > 0 && (

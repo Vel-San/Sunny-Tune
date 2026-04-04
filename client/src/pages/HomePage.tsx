@@ -45,7 +45,7 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-zinc-100 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-zinc-100 tracking-tight">
               Forge your perfect
               <br />
               <span className="text-blue-400">SunnyPilot config</span>
@@ -80,7 +80,7 @@ export default function HomePage() {
           </div>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-2 gap-3 text-left mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mt-4">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card rounded-xl p-4 space-y-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">

@@ -13,7 +13,6 @@ import {
   GitBranch,
   Map,
   Monitor,
-  RotateCcw,
   Save,
   Share2,
   TrendingUp,
@@ -22,14 +21,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  createConfig,
-  fetchConfig,
-  fetchConfigHistory,
-  fetchConfigSnapshot,
-  updateConfig,
-} from "../api";
-import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
+import { createConfig, fetchConfig, updateConfig } from "../api";
+import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { ShareModal } from "../components/config/ShareModal";
 import { AdvancedSection } from "../components/config/sections/AdvancedSection";
 import { CommaAISection } from "../components/config/sections/CommaAISection";
@@ -43,7 +36,6 @@ import { SpeedControlSection } from "../components/config/sections/SpeedControlS
 import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { Modal } from "../components/ui/Modal";
 import {
   exportAsSunnyLink,
   exportConfigAsJson,
@@ -51,7 +43,6 @@ import {
   parseImportFile,
 } from "../lib/configExport";
 import { useConfigStore } from "../store/configStore";
-import type { ConfigSnapshotMeta } from "../types/config";
 
 const SECTIONS = [
   { id: "vehicle", label: "Vehicle", icon: Car },
@@ -90,9 +81,6 @@ export default function ConfiguratorPage() {
   const [saved, setSaved] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [selectedSnapshot, setSelectedSnapshot] =
-    useState<ConfigSnapshotMeta | null>(null);
-  const [snapshotDiffOpen, setSnapshotDiffOpen] = useState(false);
 
   // Warn on browser refresh / tab close
   useEffect(() => {
@@ -130,19 +118,6 @@ export default function ConfiguratorPage() {
       setTimeout(() => scrollToSection(hash), 300);
     }
   }, [id, existingConfig]);
-
-  // History (version snapshots)
-  const { data: historyList = [] } = useQuery({
-    queryKey: ["config-history", editingId],
-    queryFn: () => fetchConfigHistory(editingId!),
-    enabled: !!editingId && historyOpen,
-  });
-
-  const { data: snapshotData } = useQuery({
-    queryKey: ["config-snapshot", editingId, selectedSnapshot?.id],
-    queryFn: () => fetchConfigSnapshot(editingId!, selectedSnapshot!.id),
-    enabled: !!editingId && !!selectedSnapshot,
-  });
 
   const saveMutation = useMutation({
     mutationFn: () => {
@@ -220,8 +195,8 @@ export default function ConfiguratorPage() {
   const isReadOnly = false; // isReadOnly no longer locks editing; admin-locked configs use admin routes
 
   return (
-    <div className="min-h-[calc(100vh-57px)] flex">
-      {/* Sidebar nav */}
+    <div className="min-h-[calc(100vh-57px)] flex flex-col lg:flex-row">
+      {/* Sidebar nav — desktop only */}
       <aside className="hidden lg:flex flex-col w-48 flex-shrink-0 border-r border-zinc-800 bg-zinc-950 sticky top-[57px] h-[calc(100vh-57px)] overflow-y-auto py-4">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 px-4 mb-2">
           Sections
@@ -354,6 +329,27 @@ export default function ConfiguratorPage() {
           </div>
         )}
 
+        {/* Mobile section scroll nav — replaces hidden sidebar */}
+        <div className="lg:hidden overflow-x-auto scrollbar-hide border-b border-zinc-800 bg-zinc-950/90 backdrop-blur sticky top-[calc(57px+53px)] z-10">
+          <div className="flex gap-0.5 px-4 py-2">
+            {SECTIONS.map(({ id: sid, label, icon: Icon }) => (
+              <button
+                key={sid}
+                onClick={() => scrollToSection(sid)}
+                className={clsx(
+                  "flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors",
+                  activeSection === sid
+                    ? "bg-zinc-800 text-zinc-100"
+                    : "text-zinc-500 hover:text-zinc-300",
+                )}
+              >
+                <Icon className="w-3 h-3 flex-shrink-0" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Config sections */}
         <div className="px-4 pt-3 pb-12 space-y-3 max-w-3xl mx-auto w-full">
           {importError && (
@@ -369,34 +365,37 @@ export default function ConfiguratorPage() {
             </div>
           )}
 
-          <div id="vehicle" className="scroll-mt-20">
+          <div id="vehicle" className="scroll-mt-44 lg:scroll-mt-20">
             <VehicleSection />
           </div>
-          <div id="driving-personality" className="scroll-mt-20">
+          <div
+            id="driving-personality"
+            className="scroll-mt-44 lg:scroll-mt-20"
+          >
             <DrivingPersonalitySection />
           </div>
-          <div id="lateral" className="scroll-mt-20">
+          <div id="lateral" className="scroll-mt-44 lg:scroll-mt-20">
             <LateralControlSection />
           </div>
-          <div id="longitudinal" className="scroll-mt-20">
+          <div id="longitudinal" className="scroll-mt-44 lg:scroll-mt-20">
             <LongitudinalSection />
           </div>
-          <div id="speed-control" className="scroll-mt-20">
+          <div id="speed-control" className="scroll-mt-44 lg:scroll-mt-20">
             <SpeedControlSection />
           </div>
-          <div id="lane-change" className="scroll-mt-20">
+          <div id="lane-change" className="scroll-mt-44 lg:scroll-mt-20">
             <LaneChangeSection />
           </div>
-          <div id="navigation" className="scroll-mt-20">
+          <div id="navigation" className="scroll-mt-44 lg:scroll-mt-20">
             <NavigationSection />
           </div>
-          <div id="interface" className="scroll-mt-20">
+          <div id="interface" className="scroll-mt-44 lg:scroll-mt-20">
             <InterfaceSection />
           </div>
-          <div id="comma-ai" className="scroll-mt-20">
+          <div id="comma-ai" className="scroll-mt-44 lg:scroll-mt-20">
             <CommaAISection />
           </div>
-          <div id="advanced" className="scroll-mt-20">
+          <div id="advanced" className="scroll-mt-44 lg:scroll-mt-20">
             <AdvancedSection />
           </div>
         </div>
@@ -412,97 +411,23 @@ export default function ConfiguratorPage() {
       )}
 
       {/* Version history modal */}
-      <Modal
-        open={historyOpen}
-        onClose={() => {
-          setHistoryOpen(false);
-          setSelectedSnapshot(null);
-        }}
-        title="Version History"
-        width="md"
-      >
-        <div className="space-y-2">
-          {historyList.length === 0 && (
-            <p className="text-sm text-zinc-500 py-4 text-center">
-              No snapshots yet. Snapshots are saved automatically each time you
-              save the config.
-            </p>
-          )}
-          {historyList.map((snap) => (
-            <div
-              key={snap.id}
-              className={`flex items-center justify-between gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedSnapshot?.id === snap.id
-                  ? "border-blue-500/50 bg-blue-950/20"
-                  : "border-zinc-800 hover:border-zinc-600"
-              }`}
-              onClick={() => setSelectedSnapshot(snap)}
-            >
-              <div>
-                <p className="text-sm text-zinc-200 font-medium">
-                  v{snap.version} — {snap.name}
-                </p>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  {new Date(snap.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedSnapshot?.id === snap.id && snapshotData?.data && (
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    leftIcon={<ArrowLeftRight className="w-3 h-3" />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSnapshotDiffOpen(true);
-                    }}
-                  >
-                    Diff
-                  </Button>
-                )}
-                {selectedSnapshot?.id === snap.id && snapshotData?.data && (
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    leftIcon={<RotateCcw className="w-3 h-3" />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (
-                        confirm(
-                          `Restore to v${snap.version}? Unsaved changes will be overwritten.`,
-                        )
-                      ) {
-                        loadConfig(
-                          editingId!,
-                          snap.name,
-                          existingConfig?.description ?? "",
-                          snapshotData.data!,
-                          existingConfig?.tags ?? [],
-                          existingConfig?.category ?? "",
-                        );
-                        setHistoryOpen(false);
-                        setSelectedSnapshot(null);
-                      }
-                    }}
-                  >
-                    Restore
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Modal>
-
-      {/* Snapshot diff modal */}
-      {selectedSnapshot && snapshotData?.data && (
-        <ConfigDiffModal
-          open={snapshotDiffOpen}
-          onClose={() => setSnapshotDiffOpen(false)}
-          original={snapshotData.data}
-          modified={editingConfig}
-          originalName={`v${selectedSnapshot.version} (${new Date(selectedSnapshot.createdAt).toLocaleDateString()})`}
-          modifiedName="Current"
+      {editingId && (
+        <ConfigHistoryModal
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          configId={editingId}
+          currentConfig={editingConfig}
+          currentName={editingName}
+          onRestore={(snapshotConfig, snapshotName) => {
+            loadConfig(
+              editingId,
+              snapshotName,
+              existingConfig?.description ?? "",
+              snapshotConfig,
+              existingConfig?.tags ?? [],
+              existingConfig?.category ?? "",
+            );
+          }}
         />
       )}
     </div>

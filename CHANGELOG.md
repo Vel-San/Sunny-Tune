@@ -4,6 +4,30 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.0.1] — 2026-04-05
+
+### Added
+
+- Config version number now always shown with a visible badge on all cards (My Configs, Explore, Favorites, Shared page) — was previously near-invisible or missing entirely
+- History (version snapshots) button now accessible from config cards in My Configs and from the shared config page (owner only) — previously only available inside the editor
+- Full mobile responsiveness: all pages, modals, cards, sliders, dropdowns, section navigation, and forms now work correctly on phones and small screens
+
+### Changed
+
+- Hyundai/Kia/Genesis longitudinal tune options renamed: 0=Off (default), 1=Dynamic (sportier acceleration & braking), 2=Predictive (smooth, comfort-focused anticipatory control). Import clamped to valid range 0–2.
+- Modals now slide up from the bottom on mobile (sheet style) with scrollable body — previously could overflow off-screen
+- Config editor gains a horizontal section pill scroller on mobile — replaces the desktop sidebar hidden on small screens
+- Slider thumb size increased to 20px and number input ± buttons enlarged for better touch usability
+- Home page hero heading scales down on narrow screens; feature grid switches to single column on mobile
+
+### Fixed
+
+- Animated particle background now shows on the Explore page — was hidden by an opaque background layer unique to that page
+- Updated cards now show a purple "Updated" badge (top-left) matching the neon ring colour, alongside the existing spinning neon border
+- New cards now have a subtle repeating shine/glare sweep effect in addition to the green "New" badge
+
+---
+
 ## [2.0.0] — 2026-04-04
 
 ### Fixed

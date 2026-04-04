@@ -2,6 +2,8 @@
 
 export type SPBranch = "stable-sp" | "dev-sp" | "staging-sp" | "nightly";
 
+export type CommaHardware = "comma4" | "comma3x" | "comma3";
+
 export type CarMake =
   | "toyota"
   | "lexus"
@@ -37,6 +39,11 @@ export interface SPConfig {
     branch: SPBranch;
     /** Active driving model — ModelManager_ActiveBundle (model name/path) */
     activeModel: string;
+    /**
+     * Comma AI hardware device. Optional — absent on configs created before
+     * this field was added; treat missing value as "unknown".
+     */
+    hardware?: CommaHardware;
   };
 
   // ── 1. Vehicle ─────────────────────────────────────────────────────────────
@@ -123,8 +130,11 @@ export interface SPConfig {
   laneChange: {
     /** Enable openpilot-assisted lane changes */
     enabled: boolean;
-    /** Auto-delay before lane change begins (0=nudge required) — AutoLaneChangeTimer */
-    autoTimer: 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3;
+    /**
+     * AutoLaneChangeTimer — SP integer enum:
+     * -1=Off, 0=Nudge, 1=Nudgeless, 2=0.5s, 3=1s, 4=2s, 5=3s
+     */
+    autoTimer: -1 | 0 | 1 | 2 | 3 | 4 | 5;
     /** Minimum speed for assisted lane change (kph) — BlinkerMinLateralControlSpeed */
     minimumSpeed: number;
     /** Use car's BSM radar to block unsafe lane changes — BlindSpot */
@@ -258,7 +268,7 @@ export function createDefaultConfig(): SPConfig {
     },
     laneChange: {
       enabled: true,
-      autoTimer: 1,
+      autoTimer: 0,
       minimumSpeed: 20,
       bsmMonitoring: false,
       blinkerPauseLateral: false,
@@ -384,6 +394,7 @@ export interface CommunityStats {
   sharedConfigs: number;
   totalRatings: number;
   totalComments: number;
+  totalDrafts: number;
   supportedMakes: number;
   totalViews: number;
   totalClones: number;
@@ -412,6 +423,8 @@ export interface NotificationRecord {
 export interface ConfigsPage {
   configs: ConfigRecord[];
   total: number;
+  sharedCount: number;
+  draftCount: number;
   page: number;
   limit: number;
 }
@@ -473,6 +486,14 @@ export const PREDEFINED_TAGS = [
   "truck",
   "sedan",
   "crossover",
+  // ── Comma AI hardware ────────────────────────────────────────────
+  "comma4",
+  "comma3x",
+  "comma3",
+  // ── Branch ───────────────────────────────────────────────────────
+  "release",
+  "staging",
+  "dev",
   // ── Lateral features ─────────────────────────────────────────────
   "torque-ctrl",
   "live-torque",
@@ -494,8 +515,7 @@ export const PREDEFINED_TAGS = [
   // ── Navigation / connectivity ────────────────────────────────────
   "osm",
   "sunnylink",
-  // ── Branch / status ───────────────────────────────────────────────
-  "staging",
+  // ── Status ────────────────────────────────────────────────────────
   "experimental",
   "developer",
   "tested",

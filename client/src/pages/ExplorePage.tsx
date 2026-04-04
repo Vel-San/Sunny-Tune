@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-  BarChart3,
-  Car,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -11,6 +9,7 @@ import {
   Filter,
   Loader2,
   MessageSquare,
+  Plus,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -20,10 +19,13 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { fetchCommunityStats, fetchExplore, fetchFavorites } from "../api";
 import { ExploreCard } from "../components/config/ExploreCard";
 import { Button } from "../components/ui/Button";
 import { Select } from "../components/ui/Select";
+import { tagColor } from "../lib/colorUtils";
+import { clearAllSeen } from "../lib/seenConfigs";
 import { useAuthStore } from "../store/authStore";
 import type {
   CommunityStats,
@@ -66,14 +68,24 @@ const ALL_MAKES = [
   { value: "other", label: "Other" },
 ];
 
+const BRANCH_OPTIONS = [
+  { value: "", label: "All Branches" },
+  { value: "stable-sp", label: "release.sunnypilot.ai (Stable)" },
+  { value: "staging-sp", label: "staging.sunnypilot.ai (Staging)" },
+  { value: "dev-sp", label: "dev.sunnypilot.ai (Dev)" },
+];
+
 export default function ExplorePage() {
   const token = useAuthStore((s) => s.token);
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
+  const [debouncedModel, setDebouncedModel] = useState("");
   const [category, setCategory] = useState("");
+  const [branch, setBranch] = useState("");
   const [spVersion, setSpVersion] = useState("");
+  const [debouncedSpVersion, setDebouncedSpVersion] = useState("");
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [sort, setSort] = useState<
     "trending" | "rating" | "recent" | "views" | "clones" | "comments"
@@ -100,7 +112,7 @@ export default function ExplorePage() {
     setPage((p) => p + 1);
   }, []);
 
-  // Debounce search — also resets accumulated configs
+  // Debounce all free-text inputs — resets accumulated configs on change
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedQ(q);
@@ -109,13 +121,32 @@ export default function ExplorePage() {
     return () => clearTimeout(t);
   }, [q, resetForFilters]);
 
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedModel(model);
+      resetForFilters();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [model, resetForFilters]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSpVersion(spVersion);
+      resetForFilters();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [spVersion, resetForFilters]);
+
   const resetFilters = useCallback(() => {
     setQ("");
     setDebouncedQ("");
     setMake("");
     setModel("");
+    setDebouncedModel("");
     setCategory("");
+    setBranch("");
     setSpVersion("");
+    setDebouncedSpVersion("");
     setActiveTags([]);
     setSort("rating");
     resetForFilters();
@@ -124,9 +155,10 @@ export default function ExplorePage() {
   const hasFilters =
     debouncedQ ||
     make ||
-    model ||
+    debouncedModel ||
     category ||
-    spVersion ||
+    branch ||
+    debouncedSpVersion ||
     activeTags.length > 0;
 
   const { data, isLoading, isFetching, isError, refetch } =
@@ -135,9 +167,10 @@ export default function ExplorePage() {
         "explore",
         debouncedQ,
         make,
-        model,
+        debouncedModel,
         category,
-        spVersion,
+        branch,
+        debouncedSpVersion,
         activeTags,
         sort,
         page,
@@ -146,10 +179,11 @@ export default function ExplorePage() {
         fetchExplore({
           q: debouncedQ || undefined,
           make: make || undefined,
-          model: model || undefined,
+          model: debouncedModel || undefined,
           category: category || undefined,
           tags: activeTags.length ? activeTags : undefined,
-          spVersion: spVersion || undefined,
+          spVersion: debouncedSpVersion || undefined,
+          branch: branch || undefined,
           sort,
           page,
           limit: LIMIT,
@@ -204,7 +238,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen">
       {/* Page heading */}
       <div className="border-b border-zinc-800 bg-zinc-950/80 sticky top-[57px] z-20 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 space-y-3">
@@ -214,10 +248,9 @@ export default function ExplorePage() {
               <h1 className="text-lg font-semibold text-zinc-100">
                 Community Configs
               </h1>
-              {stats && (
+              {stats && stats.totalDrafts > 0 && (
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  {stats.sharedConfigs} configs &middot; {stats.totalRatings}{" "}
-                  ratings &middot; {stats.supportedMakes} makes
+                  {stats.totalDrafts} drafts
                 </p>
               )}
             </div>
@@ -337,10 +370,7 @@ export default function ExplorePage() {
                 </label>
                 <input
                   value={model}
-                  onChange={(e) => {
-                    setModel(e.target.value);
-                    resetForFilters();
-                  }}
+                  onChange={(e) => setModel(e.target.value)}
                   placeholder="e.g. Ioniq 5, Camry…"
                   className="input-base text-sm"
                 />
@@ -367,14 +397,25 @@ export default function ExplorePage() {
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1 block">
+                  Branch
+                </label>
+                <Select
+                  value={branch}
+                  onChange={(v) => {
+                    setBranch(v);
+                    resetForFilters();
+                  }}
+                  options={BRANCH_OPTIONS}
+                  className="text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1 block">
                   SP Version
                 </label>
                 <input
                   value={spVersion}
-                  onChange={(e) => {
-                    setSpVersion(e.target.value);
-                    resetForFilters();
-                  }}
+                  onChange={(e) => setSpVersion(e.target.value)}
                   placeholder="e.g. 0.9.8"
                   className="input-base text-sm"
                 />
@@ -392,26 +433,32 @@ export default function ExplorePage() {
             </div>
           )}
 
-          {/* Popular tags (from facets) */}
+          {/* Popular tags (from facets — always global across all shared configs) */}
           {data?.facets.tags && data.facets.tags.length > 0 && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <Filter className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-              {data.facets.tags.slice(0, 20).map(({ tag, count }) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={clsx(
-                    "flex-shrink-0 inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded border transition-colors",
-                    activeTags.includes(tag)
-                      ? "bg-blue-600/20 border-blue-500/40 text-blue-400"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300",
-                  )}
-                >
-                  <Tag className="w-2.5 h-2.5" />
-                  {tag}
-                  <span className="text-zinc-600">{count}</span>
-                </button>
-              ))}
+              {data.facets.tags.slice(0, 20).map(({ tag, count }) => {
+                const isActive = activeTags.includes(tag);
+                const color = tagColor(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={clsx(
+                      "flex-shrink-0 inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded border transition-all",
+                      isActive
+                        ? [color, "opacity-100 ring-1 ring-current/40"]
+                        : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300",
+                    )}
+                  >
+                    <Tag className="w-2.5 h-2.5" />
+                    {tag}
+                    <span className={isActive ? "opacity-60" : "text-zinc-600"}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -419,40 +466,6 @@ export default function ExplorePage() {
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Stats row */}
-        {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            {[
-              {
-                icon: BarChart3,
-                label: "Shared Configs",
-                value: stats.sharedConfigs,
-              },
-              { icon: Star, label: "Total Ratings", value: stats.totalRatings },
-              {
-                icon: MessageSquare,
-                label: "Comments",
-                value: stats.totalComments,
-              },
-              { icon: Car, label: "Car Makes", value: stats.supportedMakes },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="card p-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-blue-400" />
-                </div>
-                <div>
-                  <p className="font-mono text-base font-semibold text-zinc-100">
-                    {value.toLocaleString()}
-                  </p>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                    {label}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Active filter chips */}
         {activeTags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
@@ -484,12 +497,29 @@ export default function ExplorePage() {
               </>
             )}
           </p>
-          {displayConfigs.length > 0 &&
-            displayConfigs.length < (data?.total ?? 0) && (
-              <p className="text-xs text-zinc-600 font-mono">
-                {displayConfigs.length} / {data?.total} loaded
-              </p>
-            )}
+          <div className="flex items-center gap-4">
+            {displayConfigs.length > 0 &&
+              displayConfigs.length < (data?.total ?? 0) && (
+                <p className="text-xs text-zinc-600 font-mono">
+                  {displayConfigs.length} / {data?.total} loaded
+                </p>
+              )}
+            <button
+              onClick={clearAllSeen}
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Mark all as seen
+            </button>
+            <Link to="/configure">
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                New Config
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Grid */}

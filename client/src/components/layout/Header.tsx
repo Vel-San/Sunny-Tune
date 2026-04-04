@@ -1,33 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-  AlertCircle,
-  BarChart2,
-  Bell,
-  Book,
-  Check,
-  ChevronDown,
-  Compass,
-  Copy,
-  GitBranch,
-  GitFork,
-  Info,
-  KeyRound,
-  LayoutList,
-  Menu,
-  Plus,
-  RotateCcw,
-  Star,
-  Tag,
-  X,
+    AlertCircle,
+    BarChart2,
+    Bell,
+    Book,
+    Check,
+    ChevronDown,
+    Compass,
+    Copy,
+    GitBranch,
+    GitFork,
+    Info,
+    KeyRound,
+    LayoutList,
+    Menu,
+    RotateCcw,
+    Star,
+    Tag,
+    X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  deleteNotification,
-  fetchNotifications,
-  fetchUnreadCount,
-  markNotificationsRead,
+    deleteNotification,
+    fetchNotifications,
+    fetchUnreadCount,
+    markNotificationsRead,
 } from "../../api";
 import { useAuthStore } from "../../store/authStore";
 import type { NotificationRecord } from "../../types/config";
@@ -145,22 +144,24 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="sticky top-0 z-30 bg-zinc-950 border-b border-zinc-800">
-        <div className="w-full max-w-7xl mx-auto px-4 h-[57px] flex items-center justify-between gap-3">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0 group">
-            <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
-              <GitFork className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-sm text-zinc-100 group-hover:text-blue-400 transition-colors whitespace-nowrap">
-              SunnyTune
-            </span>
-            <span className="hidden sm:block text-[10px] font-mono text-zinc-600 border border-zinc-800 px-1.5 py-0.5 rounded">
-              SP · comma
-            </span>
-          </Link>
+        <div className="w-full max-w-7xl mx-auto px-4 h-[57px] relative flex items-center">
+          {/* Logo — left-anchored */}
+          <div className="flex items-center">
+            <Link
+              to="/"
+              className="flex items-center gap-2 flex-shrink-0 group"
+            >
+              <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
+                <GitFork className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold text-sm text-zinc-100 group-hover:text-blue-400 transition-colors whitespace-nowrap">
+                SunnyTune
+              </span>
+            </Link>
+          </div>
 
-          {/* Desktop nav — hidden on mobile */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+          {/* Desktop nav — absolutely centered so it's always equidistant from both sides */}
+          <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
             {navItems.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
@@ -178,8 +179,8 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
-          {/* Right: notifications + new config + user token + hamburger */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Right: notifications + user token + hamburger */}
+          <div className="ml-auto flex items-center gap-2">
             {/* Notification bell */}
             <div className="relative" ref={notifRef}>
               <button
@@ -265,17 +266,6 @@ export const Header: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* New Config — icon-only on mobile, full label on sm+ */}
-            <Link to="/configure">
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<Plus className="w-3.5 h-3.5" />}
-              >
-                <span className="hidden sm:block">New Config</span>
-              </Button>
-            </Link>
 
             {/* User token pill — desktop only */}
             <button

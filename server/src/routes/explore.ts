@@ -29,6 +29,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
     page,
     limit,
     spVersion,
+    branch,
   } = parsed.data;
 
   // Strip control characters from free-text search inputs
@@ -87,6 +88,13 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
       });
     }
 
+    // Branch filter — matches config.metadata.branch
+    if (branch) {
+      searchFilters.push({
+        config: { path: ["metadata", "branch"], equals: branch },
+      });
+    }
+
     const where = {
       isShared: true,
       ...(searchFilters.length > 0 ? { AND: searchFilters } : {}),
@@ -124,6 +132,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
           sharedAt: true,
           viewCount: true,
           cloneCount: true,
+          version: true,
           clonedFromId: true,
           clonedFrom: { select: { id: true, name: true, shareToken: true } },
           createdAt: true,
@@ -236,6 +245,7 @@ exploreRouter.get(
         configCount,
         ratingCount,
         commentCount,
+        draftCount,
         viewsAgg,
         clonesAgg,
         makeGroups,
@@ -245,6 +255,7 @@ exploreRouter.get(
         prisma.configuration.count({ where: { isShared: true } }),
         prisma.rating.count(),
         prisma.comment.count(),
+        prisma.configuration.count({ where: { isShared: false } }),
         prisma.configuration.aggregate({
           where: { isShared: true },
           _sum: { viewCount: true },
@@ -289,6 +300,7 @@ exploreRouter.get(
         sharedConfigs: configCount,
         totalRatings: ratingCount,
         totalComments: commentCount,
+        totalDrafts: draftCount,
         supportedMakes: makeGroups.length,
         totalViews: viewsAgg._sum.viewCount ?? 0,
         totalClones: clonesAgg._sum.cloneCount ?? 0,

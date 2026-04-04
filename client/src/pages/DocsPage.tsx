@@ -309,8 +309,8 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>Version number</H3>
           <P>
             Each config starts at v1. Every save increments the version counter.
-            The current version is shown on the config card (v2, v3…) whenever
-            it's been updated at least once.
+            The version is always shown on every config card (v1, v2, v3…)
+            across My Configs, Explore, Favorites, and the shared config page.
           </P>
         </>
       ),
@@ -426,10 +426,10 @@ const CONTENT: Record<string, DocBlock[]> = {
           </P>
           <H3>Accessing history</H3>
           <P>
-            In the config editor, click the{" "}
-            <strong className="text-zinc-200">History</strong> button (clock
-            icon) in the top bar. A modal lists all saved snapshots in
-            reverse-version order.
+            Click the <strong className="text-zinc-200">History</strong> button
+            (clock icon) on any config card in My Configs, on the shared config
+            page (owner only), or in the config editor top bar. A modal lists
+            all saved snapshots in reverse-version order.
           </P>
           <H3>Comparing snapshots</H3>
           <P>

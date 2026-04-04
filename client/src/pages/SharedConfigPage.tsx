@@ -9,6 +9,7 @@ import {
   Car,
   ChevronDown,
   ChevronUp,
+  Clock,
   Copy,
   Cpu,
   Download,
@@ -44,6 +45,7 @@ import {
 } from "../api";
 import { CommentSection } from "../components/config/CommentSection";
 import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
+import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { RatingDisplay, RatingStars } from "../components/ui/RatingStars";
@@ -76,10 +78,15 @@ const ROW: React.FC<{
   value: React.ReactNode;
   mono?: boolean;
 }> = ({ label, value, mono }) => (
-  <div className="flex items-start justify-between gap-4 py-2 border-b border-zinc-800/60 last:border-0">
-    <span className="text-xs text-zinc-500 flex-shrink-0 w-44">{label}</span>
+  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-0.5 sm:gap-4 py-2 border-b border-zinc-800/60 last:border-0">
+    <span className="text-xs text-zinc-500 sm:flex-shrink-0 sm:w-44">
+      {label}
+    </span>
     <span
-      className={clsx("text-sm text-zinc-200 text-right", mono && "font-mono")}
+      className={clsx(
+        "text-sm text-zinc-200 sm:text-right",
+        mono && "font-mono",
+      )}
     >
       {value}
     </span>
@@ -222,6 +229,7 @@ export default function SharedConfigPage() {
 
   // ── Diff viewer ────────────────────────────────────────────────────────────
   const [diffOpen, setDiffOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const canDiff = !!config?.clonedFrom?.shareToken;
 
   const { data: originalConfig } = useQuery<ConfigRecord>({
@@ -428,6 +436,16 @@ export default function SharedConfigPage() {
               </Button>
             </Link>
           )}
+          {isOwner && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Clock className="w-3.5 h-3.5" />}
+              onClick={() => setHistoryOpen(true)}
+            >
+              History
+            </Button>
+          )}
         </div>
       </div>
 
@@ -445,6 +463,18 @@ export default function SharedConfigPage() {
             />
             <ROW label="Model" value={c.vehicle.model || "—"} />
             <ROW label="Year" value={c.vehicle.year} mono />
+            {c.metadata.hardware && (
+              <ROW
+                label="Comma AI HW"
+                value={
+                  c.metadata.hardware === "comma4"
+                    ? "Comma 4 (C4)"
+                    : c.metadata.hardware === "comma3x"
+                      ? "Comma 3X (C3X)"
+                      : "Comma 3 (C3)"
+                }
+              />
+            )}
             <ROW label="SP Version" value={c.metadata.sunnypilotVersion} mono />
             <ROW label="Branch" value={c.metadata.branch} mono />
             {c.metadata.activeModel && (
@@ -535,7 +565,13 @@ export default function SharedConfigPage() {
             />
             <ROW
               label="Hyundai Long Tune"
-              value={c.longitudinal.hyundaiLongTune ? "On" : "Off"}
+              value={
+                c.longitudinal.hyundaiLongTune === 0
+                  ? "0 — Off"
+                  : c.longitudinal.hyundaiLongTune === 1
+                    ? "1 — Dynamic"
+                    : "2 — Predictive"
+              }
             />
             <ROW
               label="Plan+"
@@ -600,9 +636,19 @@ export default function SharedConfigPage() {
             <ROW
               label="Timer"
               value={
-                c.laneChange.autoTimer === 0
-                  ? "Nudge required"
-                  : `${c.laneChange.autoTimer}s`
+                c.laneChange.autoTimer === -1
+                  ? "Off"
+                  : c.laneChange.autoTimer === 0
+                    ? "Nudge required"
+                    : c.laneChange.autoTimer === 1
+                      ? "Nudgeless"
+                      : c.laneChange.autoTimer === 2
+                        ? "0.5s"
+                        : c.laneChange.autoTimer === 3
+                          ? "1.0s"
+                          : c.laneChange.autoTimer === 4
+                            ? "2.0s"
+                            : "3.0s"
               }
               mono
             />
@@ -834,6 +880,17 @@ export default function SharedConfigPage() {
           modified={config.config}
           originalName={originalConfig.name}
           modifiedName={config.name}
+        />
+      )}
+
+      {/* Version history modal (owner only) */}
+      {isOwner && (
+        <ConfigHistoryModal
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          configId={config.id}
+          currentConfig={config.config}
+          currentName={config.name}
         />
       )}
     </div>

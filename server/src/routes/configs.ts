@@ -119,8 +119,11 @@ configsRouter.get(
     const { page, limit } = parsed.data;
     const skip = (page - 1) * limit;
     try {
-      const [total, configs] = await prisma.$transaction([
+      const [total, sharedCount, configs] = await prisma.$transaction([
         prisma.configuration.count({ where: { userId: req.userId } }),
+        prisma.configuration.count({
+          where: { userId: req.userId, isShared: true },
+        }),
         prisma.configuration.findMany({
           where: { userId: req.userId },
           select: {
@@ -156,7 +159,14 @@ configsRouter.get(
         ratingCount: _count.ratings,
         commentCount: _count.comments,
       }));
-      res.json({ configs: mapped, total, page, limit });
+      res.json({
+        configs: mapped,
+        total,
+        sharedCount,
+        draftCount: total - sharedCount,
+        page,
+        limit,
+      });
     } catch {
       res.status(500).json({ error: "Failed to fetch configurations" });
     }
@@ -525,6 +535,7 @@ sharedConfigRouter.get(
           sharedAt: true,
           viewCount: true,
           cloneCount: true,
+          version: true,
           clonedFromId: true,
           clonedFrom: { select: { id: true, name: true, shareToken: true } },
           createdAt: true,

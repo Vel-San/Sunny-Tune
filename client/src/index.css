@@ -2,6 +2,126 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Card "updated" neon spinning border ─────────────────────────────────── */
+@property --neon-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes neon-spin {
+  to {
+    --neon-angle: 360deg;
+  }
+}
+
+@keyframes neon-new-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px 1px rgba(74, 222, 128, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 13px 3px rgba(74, 222, 128, 0.85);
+  }
+}
+
+@keyframes neon-updated-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px 1px rgba(129, 140, 248, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 13px 3px rgba(129, 140, 248, 0.8);
+  }
+}
+
+@keyframes card-shine {
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 160%;
+  }
+}
+
+/* Wrapper that shows the ring must be "relative isolate" */
+.neon-updated-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px; /* rounded-xl (12px) + inset offset */
+  background: conic-gradient(
+    from var(--neon-angle) at 50% 50%,
+    transparent 0deg,
+    #3b82f6 40deg,
+    #818cf8 80deg,
+    #c084fc 110deg,
+    transparent 150deg
+  );
+  animation: neon-spin 6s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.neon-new-badge {
+  position: absolute;
+  top: -7px;
+  left: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  border: 1px solid rgba(134, 239, 172, 0.4);
+  border-radius: 9999px;
+  padding: 1px 7px 2px;
+  z-index: 10;
+  pointer-events: none;
+  animation: neon-new-pulse 2.5s ease-in-out infinite;
+}
+
+.neon-updated-badge {
+  position: absolute;
+  top: -7px;
+  left: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  border-radius: 9999px;
+  padding: 1px 7px 2px;
+  z-index: 10;
+  pointer-events: none;
+  animation: neon-updated-pulse 2.5s ease-in-out infinite;
+}
+
+/* Subtle shine sweep on "New" cards — contained by overflow-hidden on the card */
+.neon-new-shine {
+  position: relative;
+}
+.neon-new-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  border-radius: 14px;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 80%
+  );
+  transform: skewX(-15deg);
+  animation: card-shine 3.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* ── Particle fall animation ─────────────────────────────────────────────── */
 @keyframes particle-fall {
   0% {

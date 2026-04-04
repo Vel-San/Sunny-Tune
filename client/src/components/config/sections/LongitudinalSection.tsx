@@ -8,9 +8,9 @@ import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow, SourceLegend } from "../ConfigSection";
 
 const HYUNDAI_TUNE_OPTS = [
-  { value: "0", label: "0 — Stock openpilot" },
-  { value: "1", label: "1 — SP tune (smoother)" },
-  { value: "2", label: "2 — SP+ aggressive" },
+  { value: "0", label: "0 — Off (Default openpilot tuning)" },
+  { value: "1", label: "1 — Dynamic (Sportier acceleration & braking)" },
+  { value: "2", label: "2 — Predictive (Smooth, comfort-focused)" },
 ];
 
 export const LongitudinalSection: React.FC = () => {
@@ -68,7 +68,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Hyundai/Kia/Genesis Tune"
         source="sunnypilot"
         since="2025"
-        description="HyundaiLongitudinalTuning — longitudinal tuning preset for Hyundai-group vehicles."
+        description="HyundaiLongitudinalTuning — longitudinal tuning preset for Hyundai/Kia/Genesis vehicles. 0=Off (standard openpilot), 1=Dynamic (more responsive acceleration and braking for a sportier feel), 2=Predictive (smoother, anticipatory speed changes that prioritize comfort)."
       >
         <Select
           value={String(l.hyundaiLongTune)}

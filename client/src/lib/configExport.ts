@@ -307,6 +307,23 @@ export function parseSunnyLinkExportObject(
   cfg.metadata.sunnypilotVersion = version || cfg.metadata.sunnypilotVersion;
   cfg.metadata.branch = slBranch(s["UpdaterTargetBranch"] ?? s["GitBranch"]);
 
+  // Try to infer hardware from the branch URL — the exact install URL reveals
+  // the target platform. C4/C3X share staging/dev URLs so they're ambiguous.
+  const rawBranchStr = String(
+    s["UpdaterTargetBranch"] ?? s["GitBranch"] ?? "",
+  ).toLowerCase();
+  if (rawBranchStr.includes("tici")) {
+    // install.sunnypilot.ai/staging-tici → Comma 3
+    cfg.metadata.hardware = "comma3";
+  } else if (
+    rawBranchStr.includes("tizi") ||
+    rawBranchStr.includes("release.sunnypilot.ai")
+  ) {
+    // release.sunnypilot.ai / release-tizi → Comma 3X
+    cfg.metadata.hardware = "comma3x";
+  }
+  // staging.sunnypilot.ai / dev.sunnypilot.ai used by both C4 and C3X — leave unset
+
   // Parse active driving model bundle — ModelManager_ActiveBundle may be a
   // JSON string or a pre-parsed object depending on the SunnyLink version.
   const activeModel = slActiveModel(s["ModelManager_ActiveBundle"]);
@@ -356,9 +373,9 @@ export function parseSunnyLinkExportObject(
     s["AlphaLongitudinalEnabled"],
     false,
   );
-  cfg.longitudinal.hyundaiLongTune = slInt(
-    s["HyundaiLongitudinalTuning"],
+  cfg.longitudinal.hyundaiLongTune = Math.max(
     0,
+    Math.min(2, slInt(s["HyundaiLongitudinalTuning"], 0)),
   ) as 0 | 1 | 2;
   // PlanplusControl: "1.0" = enabled, "0" or absent = disabled
   const ppRaw = s["PlanplusControl"];
@@ -372,9 +389,10 @@ export function parseSunnyLinkExportObject(
   cfg.longitudinal.customAccLong = slInt(s["CustomAccLongPressIncrement"], 5);
 
   // ── laneChange ───────────────────────────────────────────────────────────
-  cfg.laneChange.autoTimer = slNum(
-    s["AutoLaneChangeTimer"],
-    0,
+  // AutoLaneChangeTimer is an SP integer enum: -1=Off, 0=Nudge, 1=Nudgeless, 2=0.5s, 3=1s, 4=2s, 5=3s
+  const rawTimer = slInt(s["AutoLaneChangeTimer"], 0);
+  cfg.laneChange.autoTimer = (
+    rawTimer >= -1 && rawTimer <= 5 ? rawTimer : 0
   ) as SPConfig["laneChange"]["autoTimer"];
   cfg.laneChange.bsmMonitoring =
     slBool(s["BlindSpot"], false) || slBool(s["AutoLaneChangeBsmDelay"], false);
