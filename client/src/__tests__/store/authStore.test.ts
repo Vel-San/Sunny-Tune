@@ -138,7 +138,7 @@ describe("authStore — logout()", () => {
 
   it("clears token, user, and localStorage", async () => {
     // Arrange: set an authenticated state
-    const token = "sp_logouttest1234567890";
+    const token = "sp_logouttest1234567890"; // gitleaks:allow
     localStorage.setItem("sp_user_token", token);
     useAuthStore.setState({
       token,
