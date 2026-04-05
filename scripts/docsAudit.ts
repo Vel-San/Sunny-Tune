@@ -959,9 +959,6 @@ for (const [sec, params] of Object.entries(missingBySection).sort()) {
   for (const p of params) {
     const note = p.note ? `  ${DIM}(${p.note})${RESET}` : "";
     console.log(`    ${YEL}•${RESET} ${p.label}${note}`);
-    console.log(
-      `      ${DIM}docs: https://docs.sunnypilot.ai/${p.docsPath}${RESET}`,
-    );
   }
   console.log();
 }

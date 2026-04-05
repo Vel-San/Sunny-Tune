@@ -1,5 +1,12 @@
 import { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import AboutPage from "./pages/AboutPage";
 import AdminPage from "./pages/AdminPage";
@@ -23,47 +30,50 @@ import { useAuthStore } from "./store/authStore";
  * The `/admin` route renders outside of the main `<Layout>` (it has its own
  * header) and does not require the user's bearer token.
  */
-export default function App() {
+/** Initialises auth then renders downstream routes via <Outlet />. */
+function AuthInit() {
   const initAuth = useAuthStore((s) => s.init);
-
   useEffect(() => {
     initAuth();
   }, [initAuth]);
+  return <Outlet />;
+}
 
+/** Wraps the main app routes in the shared Layout. */
+function LayoutWrapper() {
   return (
-    <Routes>
-      {/* Admin panel — renders its own layout */}
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<AuthInit />}>
+      {/* Admin panel — its own layout */}
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/admin/*" element={<AdminPage />} />
 
       {/* Main app — wrapped in shared Layout */}
-      <Route
-        path="/*"
-        element={
-          <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/configure" element={<ConfiguratorPage />} />
-              <Route path="/configure/:id" element={<ConfiguratorPage />} />
-              <Route path="/configs" element={<MyConfigsPage />} />
-              <Route
-                path="/shared/:shareToken"
-                element={<SharedConfigPage />}
-              />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/changelog" element={<ChangelogPage />} />
-              <Route path="/docs" element={<DocsPage />} />
-              <Route
-                path="/collections/:id"
-                element={<CollectionDetailPage />}
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Layout>
-        }
-      />
-    </Routes>
-  );
+      <Route element={<LayoutWrapper />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/configure" element={<ConfiguratorPage />} />
+        <Route path="/configure/:id" element={<ConfiguratorPage />} />
+        <Route path="/configs" element={<MyConfigsPage />} />
+        <Route path="/shared/:shareToken" element={<SharedConfigPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/changelog" element={<ChangelogPage />} />
+        <Route path="/docs" element={<DocsPage />} />
+        <Route path="/collections/:id" element={<CollectionDetailPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Route>,
+  ),
+);
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }

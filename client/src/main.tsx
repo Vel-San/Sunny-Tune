@@ -3,7 +3,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 // Import logger to activate global window.onerror / unhandledrejection catchers
@@ -22,11 +21,9 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-        <Analytics />
-        <SpeedInsights />
-      </BrowserRouter>
+      <App />
+      <Analytics />
+      <SpeedInsights />
     </QueryClientProvider>
   </React.StrictMode>,
 );
