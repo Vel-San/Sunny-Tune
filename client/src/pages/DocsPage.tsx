@@ -150,22 +150,27 @@ const CONTENT: Record<string, DocBlock[]> = {
                 the home page or My Configs page.
               </>,
               <>
-                Fill in your vehicle details (make, model, year) so the community
-                can find your config.
-              </>,
-              <>Adjust settings across the 8 sections using the sidebar. Subsection headers inside each section help you find specific parameters quickly.</>,
-              <>
-                Hover any <strong className="text-zinc-200">ⓘ</strong> icon to see
-                a help tooltip with description, recommended value, and tips.
+                Fill in your vehicle details (make, model, year) so the
+                community can find your config.
               </>,
               <>
-                Hit <strong className="text-zinc-200">Save</strong> — your config
-                is stored privately until you choose to share.
+                Adjust settings across the 8 sections using the sidebar.
+                Subsection headers inside each section help you find specific
+                parameters quickly.
+              </>,
+              <>
+                Hover any <strong className="text-zinc-200">ⓘ</strong> icon to
+                see a help tooltip with description, recommended value, and
+                tips.
+              </>,
+              <>
+                Hit <strong className="text-zinc-200">Save</strong> — your
+                config is stored privately until you choose to share.
               </>,
               <>
                 When ready, click{" "}
-                <strong className="text-zinc-200">Share</strong> to publish it and
-                generate a public URL + QR code.
+                <strong className="text-zinc-200">Share</strong> to publish it
+                and generate a public URL + QR code.
               </>,
             ]}
           />
@@ -179,54 +184,63 @@ const CONTENT: Record<string, DocBlock[]> = {
       content: (
         <>
           <P>
-            The editor is split into <strong className="text-zinc-200">8 sections</strong>, accessible via the left
-            sidebar (desktop) or section pills on mobile. Each section is further divided into
-            labelled subsections so you can quickly find the parameter you're looking for.
-            Every parameter has a <strong className="text-zinc-200">ⓘ help tooltip</strong> — hover it to
-            see a description, recommended value, tips, and a link to the community docs.
+            The editor is split into{" "}
+            <strong className="text-zinc-200">8 sections</strong>, accessible
+            via the left sidebar (desktop) or section pills on mobile. Each
+            section is further divided into labelled subsections so you can
+            quickly find the parameter you're looking for. Every parameter has a{" "}
+            <strong className="text-zinc-200">ⓘ help tooltip</strong> — hover it
+            to see a description, recommended value, tips, and a link to the
+            community docs.
           </P>
           <H3>Sections overview</H3>
           <UL
             items={[
               <>
-                <strong className="text-zinc-200">Vehicle</strong>{" "}
-                — <em>Vehicle Info</em>: make, model, year.{" "}
-                <em>Hardware &amp; Software</em>: Comma AI hardware, SP version, branch
-                (stable-sp / dev-sp / staging-sp / nightly), and active driving model
-                (ModelManager_ActiveBundle)
+                <strong className="text-zinc-200">Vehicle</strong> —{" "}
+                <em>Vehicle Info</em>: make, model, year.{" "}
+                <em>Hardware &amp; Software</em>: Comma AI hardware, SP version,
+                branch (stable-sp / dev-sp / staging-sp / nightly), and active
+                driving model (ModelManager_ActiveBundle)
               </>,
               <>
                 <strong className="text-zinc-200">Toggles</strong> —
-                <em>Driving Personality</em>: relaxed / standard / sport / traffic.{" "}
-                <em>Experimental Mode</em>: E2E long, dynamic experimental control.{" "}
-                <em>Safety</em>: disengage on gas, close-to-road alert.{" "}
-                <em>Recording &amp; Uploads</em>: drive recording, driver monitoring
+                <em>Driving Personality</em>: relaxed / standard / sport /
+                traffic. <em>Experimental Mode</em>: E2E long, dynamic
+                experimental control. <em>Safety</em>: disengage on gas,
+                close-to-road alert. <em>Recording &amp; Uploads</em>: drive
+                recording, driver monitoring
               </>,
               <>
                 <strong className="text-zinc-200">Steering</strong> —
-                <em>M.A.D.S.</em>: steering mode, unified engagement, disengage behaviour.{" "}
-                <em>Lateral Assist</em>: camera offset, NNLC, LAGD, enforce torque control.{" "}
-                <em>Torque</em>: live torque, friction, lateral accel override.{" "}
-                <em>Lane Change</em>: auto-lane-change timer, blinker threshold, BSM pause
+                <em>M.A.D.S.</em>: steering mode, unified engagement, disengage
+                behaviour. <em>Lateral Assist</em>: camera offset, NNLC, LAGD,
+                enforce torque control. <em>Torque</em>: live torque, friction,
+                lateral accel override. <em>Lane Change</em>: auto-lane-change
+                timer, blinker threshold, BSM pause
               </>,
               <>
                 <strong className="text-zinc-200">Cruise</strong> —
-                <em>Longitudinal Control</em>: Alpha Longitudinal, Hyundai tuning, Plan+, ACC increments.{" "}
-                <em>Smart Cruise Control</em>: dynamic experimental control, ICBM.{" "}
-                <em>Speed Limit</em>: SLC mode, policy, and offset; curve speed reduction (SCC-V / SCC-M)
+                <em>Longitudinal Control</em>: Alpha Longitudinal, Hyundai
+                tuning, Plan+, ACC increments. <em>Smart Cruise Control</em>:
+                dynamic experimental control, ICBM. <em>Speed Limit</em>: SLC
+                mode, policy, and offset; curve speed reduction (SCC-V / SCC-M)
               </>,
               <>
-                <strong className="text-zinc-200">Maps</strong> — OSM local maps speed-limit data toggle
+                <strong className="text-zinc-200">Maps</strong> — OSM local maps
+                speed-limit data toggle
               </>,
               <>
                 <strong className="text-zinc-200">Visuals</strong> —
-                <em>HUD Overlays</em>: blind spot warnings, steering arc, true speed, chevron info.{" "}
-                <em>Display</em>: screen brightness, metric units, quiet mode
+                <em>HUD Overlays</em>: blind spot warnings, steering arc, true
+                speed, chevron info. <em>Display</em>: screen brightness, metric
+                units, quiet mode
               </>,
               <>
                 <strong className="text-zinc-200">Device</strong> —
                 <em>Connectivity</em>: SunnyLink Connect integration.{" "}
-                <em>Device Settings</em>: always-on connectivity, wide-camera lead, auto-shutdown
+                <em>Device Settings</em>: always-on connectivity, wide-camera
+                lead, auto-shutdown
               </>,
               <>
                 <strong className="text-zinc-200">Developer</strong> —
@@ -238,10 +252,10 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>Help tooltips</H3>
           <P>
             Every parameter row has a <Code>ⓘ</Code> icon. Hovering (or tapping
-            on mobile) opens a tooltip panel showing the parameter’s description,
-            recommended value, tips, tradeoffs, and a link to the sunnypilot
-            community documentation. The panel auto-positions itself so it never
-            clips off the screen edge.
+            on mobile) opens a tooltip panel showing the parameter’s
+            description, recommended value, tips, tradeoffs, and a link to the
+            sunnypilot community documentation. The panel auto-positions itself
+            so it never clips off the screen edge.
           </P>
           <H3>Unsaved-change guard</H3>
           <P>
@@ -282,9 +296,10 @@ const CONTENT: Record<string, DocBlock[]> = {
       content: (
         <>
           <P>
-            The <strong className="text-zinc-200">Compare</strong> button appears
-            in the action bar of every shared config page. It lets you diff the
-            current config against any other config — public or your own.
+            The <strong className="text-zinc-200">Compare</strong> button
+            appears in the action bar of every shared config page. It lets you
+            diff the current config against any other config — public or your
+            own.
           </P>
           <H3>Comparing against a public config</H3>
           <UL
@@ -312,9 +327,20 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>Reading the diff</H3>
           <UL
             items={[
-              <>Parameters are grouped by section label (e.g. <strong className="text-zinc-200">Steering</strong>, <strong className="text-zinc-200">Cruise</strong>).</>,
-              <>The <strong className="text-zinc-200">base config</strong> (the page you opened Compare from) values appear in red with a strikethrough.</>,
-              <>The <strong className="text-zinc-200">comparison config</strong> values appear in green.</>,
+              <>
+                Parameters are grouped by section label (e.g.{" "}
+                <strong className="text-zinc-200">Steering</strong>,{" "}
+                <strong className="text-zinc-200">Cruise</strong>).
+              </>,
+              <>
+                The <strong className="text-zinc-200">base config</strong> (the
+                page you opened Compare from) values appear in red with a
+                strikethrough.
+              </>,
+              <>
+                The <strong className="text-zinc-200">comparison config</strong>{" "}
+                values appear in green.
+              </>,
               'If the configs are identical, "Configs are identical" is shown instead of a diff table.',
             ]}
           />
@@ -824,10 +850,12 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             Copy your token from the Token modal on your original device. On the
             new device, open the Token modal and click{" "}
-            <strong className="text-zinc-200">Use token from another device…</strong>,
-            paste the token, and confirm. See the{" "}
-            <strong className="text-zinc-200">Authentication</strong> section for
-            full details.
+            <strong className="text-zinc-200">
+              Use token from another device…
+            </strong>
+            , paste the token, and confirm. See the{" "}
+            <strong className="text-zinc-200">Authentication</strong> section
+            for full details.
           </P>
           <H3>What is the SP Docs Sync badge?</H3>
           <P>

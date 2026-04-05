@@ -407,7 +407,11 @@ export function parseSunnyLinkExportObject(
   );
 
   // ── speedControl ─────────────────────────────────────────────────────────
-  const slcMode = Math.max(0, Math.min(3, slInt(s["SpeedLimitMode"], 0))) as 0 | 1 | 2 | 3;
+  const slcMode = Math.max(0, Math.min(3, slInt(s["SpeedLimitMode"], 0))) as
+    | 0
+    | 1
+    | 2
+    | 3;
   cfg.speedControl.speedLimitControl.mode = slcMode;
   cfg.speedControl.speedLimitControl.policy = slInt(
     s["SpeedLimitSource"] ?? s["SpeedLimitPolicy"],

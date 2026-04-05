@@ -6,10 +6,12 @@ import { ConfigSection, ParamRow } from "../ConfigSection";
 
 export const AdvancedSection: React.FC = () => {
   const { editingConfig, updateField } = useConfigStore();
-  const a   = editingConfig.advanced;
+  const a = editingConfig.advanced;
   const lon = editingConfig.longitudinal;
-  const set    = <K extends keyof typeof a  >(k: K, val: (typeof a  )[K]) => updateField("advanced",      k, val);
-  const setLon = <K extends keyof typeof lon>(k: K, val: (typeof lon)[K]) => updateField("longitudinal", k, val);
+  const set = <K extends keyof typeof a>(k: K, val: (typeof a)[K]) =>
+    updateField("advanced", k, val);
+  const setLon = <K extends keyof typeof lon>(k: K, val: (typeof lon)[K]) =>
+    updateField("longitudinal", k, val);
 
   return (
     <ConfigSection
@@ -28,7 +30,10 @@ export const AdvancedSection: React.FC = () => {
         spKey="AlphaLongitudinalEnabled"
         description="AlphaLongitudinalEnabled — next-generation experimental SP longitudinal improvements. Disables AEB. Test in a safe environment first."
       >
-        <Toggle checked={lon.alphaLongEnabled} onChange={(v) => setLon("alphaLongEnabled", v)} />
+        <Toggle
+          checked={lon.alphaLongEnabled}
+          onChange={(v) => setLon("alphaLongEnabled", v)}
+        />
       </ParamRow>
 
       <div className="divider" />
@@ -46,4 +51,3 @@ export const AdvancedSection: React.FC = () => {
     </ConfigSection>
   );
 };
-

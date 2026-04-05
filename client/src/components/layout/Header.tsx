@@ -42,7 +42,8 @@ export const Header: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { user, token, rerolling, importing, rerollToken, importToken } = useAuthStore();
+  const { user, token, rerolling, importing, rerollToken, importToken } =
+    useAuthStore();
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rollConfirm, setRollConfirm] = useState(false);
@@ -188,7 +189,10 @@ export const Header: React.FC = () => {
                 to={to}
                 onClick={() => {
                   if (to === "/changelog" && hasNewVersion) {
-                    localStorage.setItem("sunnyTune_lastSeenVersion", APP_VERSION);
+                    localStorage.setItem(
+                      "sunnyTune_lastSeenVersion",
+                      APP_VERSION,
+                    );
                     setHasNewVersion(false);
                   }
                 }}
@@ -363,7 +367,10 @@ export const Header: React.FC = () => {
                 onClick={() => {
                   setMobileMenuOpen(false);
                   if (to === "/changelog" && hasNewVersion) {
-                    localStorage.setItem("sunnyTune_lastSeenVersion", APP_VERSION);
+                    localStorage.setItem(
+                      "sunnyTune_lastSeenVersion",
+                      APP_VERSION,
+                    );
                     setHasNewVersion(false);
                   }
                 }}

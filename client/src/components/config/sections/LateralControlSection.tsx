@@ -15,24 +15,27 @@ const TUNE_OPTS = [
 const MADS_STEERING_OPTS = [
   { value: "0", label: "Remain Active — steering stays active while braking" },
   { value: "1", label: "Pause — pauses on brake, resumes on release" },
-  { value: "2", label: "Disengage — steering disengages, must re-engage manually" },
+  {
+    value: "2",
+    label: "Disengage — steering disengages, must re-engage manually",
+  },
 ];
 
 const TIMER_OPTS = [
   { value: "-1", label: "Off (auto disabled)" },
-  { value: "0",  label: "Nudge required" },
-  { value: "1",  label: "Nudgeless (immediate)" },
-  { value: "2",  label: "0.5 s after signal" },
-  { value: "3",  label: "1.0 s after signal" },
-  { value: "4",  label: "2.0 s after signal" },
-  { value: "5",  label: "3.0 s after signal" },
+  { value: "0", label: "Nudge required" },
+  { value: "1", label: "Nudgeless (immediate)" },
+  { value: "2", label: "0.5 s after signal" },
+  { value: "3", label: "1.0 s after signal" },
+  { value: "4", label: "2.0 s after signal" },
+  { value: "5", label: "3.0 s after signal" },
 ];
 
 export const LateralControlSection: React.FC = () => {
   const { editingConfig, updateField, updateSection } = useConfigStore();
   const lat = editingConfig.lateral;
-  const ai  = editingConfig.commaAI;
-  const lc  = editingConfig.laneChange;
+  const ai = editingConfig.commaAI;
+  const lc = editingConfig.laneChange;
   const set = <K extends keyof typeof lat>(k: K, val: (typeof lat)[K]) =>
     updateField("lateral", k, val);
   const setAi = <K extends keyof typeof ai>(k: K, val: (typeof ai)[K]) =>
@@ -55,13 +58,13 @@ export const LateralControlSection: React.FC = () => {
       title="Steering"
       subtitle="MADS, lateral assist, torque tuning, and lane change"
     >
-
       {/* ─── MADS ─── */}
       <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
         MADS — Steering
       </p>
       <p className="text-xs text-zinc-600 -mt-2">
-        Modular Automated Driving System — allows steering assist independently of ACC.
+        Modular Automated Driving System — allows steering assist independently
+        of ACC.
       </p>
 
       <ParamRow
@@ -356,7 +359,9 @@ export const LateralControlSection: React.FC = () => {
       >
         <Select
           value={String(lc.autoTimer)}
-          onChange={(v) => setLc("autoTimer", parseInt(v, 10) as typeof lc.autoTimer)}
+          onChange={(v) =>
+            setLc("autoTimer", parseInt(v, 10) as typeof lc.autoTimer)
+          }
           options={TIMER_OPTS}
           disabled={!lc.enabled}
         />

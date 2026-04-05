@@ -1,45 +1,45 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    ArrowLeft,
-    ArrowUpDown,
-    BarChart3,
-    Calendar,
-    Car,
-    ChevronDown,
-    ChevronUp,
-    Clock,
-    Copy,
-    Cpu,
-    Download,
-    ExternalLink,
-    Eye,
-    Gauge,
-    GitBranch,
-    GitCompare,
-    GitFork,
-    Heart,
-    Loader2,
-    Lock,
-    Map,
-    Monitor,
-    Share2,
-    Star,
-    Tag,
-    Wrench,
+  ArrowLeft,
+  ArrowUpDown,
+  BarChart3,
+  Calendar,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  Cpu,
+  Download,
+  ExternalLink,
+  Eye,
+  Gauge,
+  GitBranch,
+  GitCompare,
+  GitFork,
+  Heart,
+  Loader2,
+  Lock,
+  Map,
+  Monitor,
+  Share2,
+  Star,
+  Tag,
+  Wrench,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-    addFavorite,
-    cloneConfig,
-    deleteRating,
-    fetchFavoriteStatus,
-    fetchMyRating,
-    fetchRatingSummary,
-    fetchSharedConfig,
-    rateConfig,
-    removeFavorite,
+  addFavorite,
+  cloneConfig,
+  deleteRating,
+  fetchFavoriteStatus,
+  fetchMyRating,
+  fetchRatingSummary,
+  fetchSharedConfig,
+  rateConfig,
+  removeFavorite,
 } from "../api";
 import { CommentSection } from "../components/config/CommentSection";
 import { CompareModal } from "../components/config/CompareModal";
@@ -55,9 +55,9 @@ import { exportConfigAsJson } from "../lib/configExport";
 import { FIELD_HELP } from "../lib/fieldHelp";
 import { useAuthStore } from "../store/authStore";
 import type {
-    ConfigRecord,
-    RatingRecord,
-    RatingSummary,
+  ConfigRecord,
+  RatingRecord,
+  RatingSummary,
 } from "../types/config";
 import { CATEGORIES } from "../types/config";
 
@@ -661,9 +661,7 @@ export default function SharedConfigPage() {
               label="LAGD"
               spKey="LagdToggle"
               value={
-                c.lateral.lagdEnabled
-                  ? `On (${c.lateral.lagdDelay}s)`
-                  : "Off"
+                c.lateral.lagdEnabled ? `On (${c.lateral.lagdDelay}s)` : "Off"
               }
             />
             {c.lateral.torqueOverride?.enabled && (

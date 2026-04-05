@@ -76,14 +76,7 @@ export const ParamRow: React.FC<{
    * When provided, a ⓘ tooltip icon is shown sourced from FIELD_HELP.
    */
   spKey?: string;
-}> = ({
-  label,
-  description,
-  children,
-  htmlFor,
-  wide = false,
-  spKey,
-}) => {
+}> = ({ label, description, children, htmlFor, wide = false, spKey }) => {
   const help = spKey ? FIELD_HELP[spKey] : undefined;
 
   return (

@@ -118,7 +118,9 @@ export const CompareModal: React.FC<CompareModalProps> = ({
           <span className="text-zinc-400 font-medium truncate">{baseName}</span>
           <ArrowRight className="w-3 h-3 flex-shrink-0 text-zinc-700" />
           {compareName ? (
-            <span className="text-blue-400 font-medium truncate">{compareName}</span>
+            <span className="text-blue-400 font-medium truncate">
+              {compareName}
+            </span>
           ) : (
             <span className="italic">pick a config to compare</span>
           )}
@@ -142,7 +144,9 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               size="sm"
               loading={loading}
               disabled={!urlInput.trim()}
-              leftIcon={loading ? undefined : <Search className="w-3.5 h-3.5" />}
+              leftIcon={
+                loading ? undefined : <Search className="w-3.5 h-3.5" />
+              }
               onClick={handleFetchByToken}
             >
               Fetch
@@ -170,7 +174,9 @@ export const CompareModal: React.FC<CompareModalProps> = ({
               {myConfigs.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
-                  {c.vehicleMake ? ` — ${c.vehicleMake} ${c.vehicleModel ?? ""}` : ""}
+                  {c.vehicleMake
+                    ? ` — ${c.vehicleMake} ${c.vehicleModel ?? ""}`
+                    : ""}
                 </option>
               ))}
             </select>

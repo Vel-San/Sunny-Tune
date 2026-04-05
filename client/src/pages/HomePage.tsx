@@ -1,10 +1,10 @@
 import {
-    ArrowRight,
-    Compass,
-    GitCompare,
-    Plus,
-    Share2,
-    Sliders,
+  ArrowRight,
+  Compass,
+  GitCompare,
+  Plus,
+  Share2,
+  Sliders,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";

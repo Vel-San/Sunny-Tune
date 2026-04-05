@@ -30,7 +30,6 @@ export const LaneChangeSection: React.FC = () => {
       title="Steering — Lane Change"
       subtitle="Auto lane change, blinker pause, and BSM integration"
     >
-
       <ParamRow
         label="Lane Change Assist"
         description="Enable openpilot-assisted lane changes when the turn signal is held."

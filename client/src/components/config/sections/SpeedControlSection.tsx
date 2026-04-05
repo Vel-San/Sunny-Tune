@@ -23,15 +23,18 @@ const SLC_MODE_OPTS = [
 const SLC_SOURCE_OPTS = [
   { value: "0", label: "Car State Only — vehicle sign recognition" },
   { value: "1", label: "Map Data Only — OSM database" },
-  { value: "2", label: "Car State Priority — car data, fall back to map (recommended)" },
+  {
+    value: "2",
+    label: "Car State Priority — car data, fall back to map (recommended)",
+  },
   { value: "3", label: "Map Data Priority — map data, fall back to car" },
   { value: "4", label: "Combined — use the higher of both sources" },
 ];
 
 // SpeedLimitOffsetType — None / Fixed value / Percentage
 const SLC_OFFSET_OPTS = [
-  { value: "none",       label: "None — match limit exactly" },
-  { value: "fixed",      label: "Fixed — add/subtract a set amount" },
+  { value: "none", label: "None — match limit exactly" },
+  { value: "fixed", label: "Fixed — add/subtract a set amount" },
   { value: "percentage", label: "% — apply a percentage above/below limit" },
 ];
 
@@ -59,7 +62,10 @@ export const SpeedControlSection: React.FC = () => {
         spKey="IntelligentCruiseButtonManagement"
         description="IntelligentCruiseButtonManagement — Alpha feature that intelligently manages cruise control button behaviour for better sunnypilot integration."
       >
-        <Toggle checked={s.icbmEnabled} onChange={(v) => set("icbmEnabled", v)} />
+        <Toggle
+          checked={s.icbmEnabled}
+          onChange={(v) => set("icbmEnabled", v)}
+        />
       </ParamRow>
 
       {/* ─── Speed Limit Control ─── */}
@@ -128,7 +134,11 @@ export const SpeedControlSection: React.FC = () => {
                       max={30}
                       step={1}
                       decimals={0}
-                      unit={s.speedLimitControl.offsetType === "percentage" ? "%" : ""}
+                      unit={
+                        s.speedLimitControl.offsetType === "percentage"
+                          ? "%"
+                          : ""
+                      }
                     />
                   </ParamRow>
                 )}

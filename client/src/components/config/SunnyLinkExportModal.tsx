@@ -9,18 +9,18 @@
  */
 
 import {
-    AlertTriangle,
-    CheckCircle,
-    Download,
-    ExternalLink,
-    Info,
-    X,
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  ExternalLink,
+  Info,
+  X,
 } from "lucide-react";
 import React, { useMemo } from "react";
 import { exportAsSunnyLink } from "../../lib/configExport";
 import {
-    validateForSunnyLinkExport,
-    type ValidationSeverity,
+  validateForSunnyLinkExport,
+  type ValidationSeverity,
 } from "../../lib/sunnyLinkValidation";
 import type { SPConfig } from "../../types/config";
 import { Button } from "../ui/Button";
@@ -78,7 +78,11 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
     1: "Dynamic",
     2: "Predictive",
   };
-  const madsMode: Record<number, string> = { 0: "Remain Active", 1: "Pause", 2: "Disengage" };
+  const madsMode: Record<number, string> = {
+    0: "Remain Active",
+    1: "Pause",
+    2: "Disengage",
+  };
 
   return [
     {
@@ -87,7 +91,8 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
         {
           key: "LongitudinalPersonality",
           label: "Personality",
-          value: lpLabel[dp.longitudinalPersonality] ?? dp.longitudinalPersonality,
+          value:
+            lpLabel[dp.longitudinalPersonality] ?? dp.longitudinalPersonality,
         },
         {
           key: "ExperimentalMode",
@@ -217,7 +222,9 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
         {
           key: "AutoLaneChangeTimer",
           label: "Auto Lane Change Timer",
-          value: alctLabel[String(lc.autoTimer) as unknown as number] ?? String(lc.autoTimer),
+          value:
+            alctLabel[String(lc.autoTimer) as unknown as number] ??
+            String(lc.autoTimer),
         },
         {
           key: "BlindSpot",
@@ -237,7 +244,8 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
         {
           key: "HyundaiLongitudinalTuning",
           label: "Hyundai Tuning",
-          value: hyundaiLabel[lon.hyundaiLongTune] ?? String(lon.hyundaiLongTune),
+          value:
+            hyundaiLabel[lon.hyundaiLongTune] ?? String(lon.hyundaiLongTune),
         },
         {
           key: "PlanplusControl",

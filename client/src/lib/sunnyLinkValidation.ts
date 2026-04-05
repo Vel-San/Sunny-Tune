@@ -32,7 +32,8 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "DynamicExperimentalControl",
       message:
         "Dynamic E2E Switch is ON but Experimental Mode (E2E) is OFF — Dynamic E2E has no effect without it.",
-      docsUrl: "https://docs.sunnypilot.ai/features/cruise/dynamic-experimental-control/",
+      docsUrl:
+        "https://docs.sunnypilot.ai/features/cruise/dynamic-experimental-control/",
     });
   }
 

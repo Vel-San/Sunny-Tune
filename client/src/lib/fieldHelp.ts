@@ -384,7 +384,8 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
   // ── Speed Control ────────────────────────────────────────────────────────
 
   IntelligentCruiseButtonManagement: {
-    summary: "Alpha feature that intelligently manages the cruise control button behaviour for better sunnypilot integration.",
+    summary:
+      "Alpha feature that intelligently manages the cruise control button behaviour for better sunnypilot integration.",
     tradeoffs: [
       "Alpha quality — test carefully before relying on it.",
       "Mutually exclusive with Alpha Longitudinal.",
@@ -444,8 +445,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
   },
 
   SpeedLimitSource: {
-    summary:
-      "Selects which data source(s) provide the current speed limit.",
+    summary: "Selects which data source(s) provide the current speed limit.",
     tips: [
       "'Car State Priority' (2) is a good default for vehicles with built-in traffic sign recognition.",
       "'Map Data Only' (1) or 'Map Data Priority' (3) are best when your car has no sign recognition — download OSM data first.",
@@ -611,7 +611,8 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
   },
 
   BlindSpotDetection: {
-    summary: "Shows blind spot warning icons on the HUD when vehicles are detected in the adjacent lane.",
+    summary:
+      "Shows blind spot warning icons on the HUD when vehicles are detected in the adjacent lane.",
     tips: [
       "Only works if your car has factory BSM hardware.",
       "Different from the BSM lane-change guard — this is purely a HUD display overlay.",
@@ -621,27 +622,31 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
   },
 
   SteeringArc: {
-    summary: "Displays a projected steering arc on the onroad HUD based on the current steering angle.",
+    summary:
+      "Displays a projected steering arc on the onroad HUD based on the current steering angle.",
     tips: ["Useful for visualising the projected path during curves."],
     defaultNote: "OFF",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   TrueVEgoUI: {
-    summary: "Always shows the GPS-derived ground speed on the HUD instead of the odometer-based speed.",
+    summary:
+      "Always shows the GPS-derived ground speed on the HUD instead of the odometer-based speed.",
     tips: ["Useful for vehicles with inaccurate speedometers."],
     defaultNote: "OFF",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   ChevronInfo: {
-    summary: "Displays additional metrics (distance to lead, speed delta) below the lead-car chevron.",
+    summary:
+      "Displays additional metrics (distance to lead, speed delta) below the lead-car chevron.",
     defaultNote: "OFF",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   RainbowMode: {
-    summary: "Enable Rainbow Mode on Tesla vehicles — cosmetic steering wheel colour effect on the HUD.",
+    summary:
+      "Enable Rainbow Mode on Tesla vehicles — cosmetic steering wheel colour effect on the HUD.",
     tips: [
       "Cosmetic only — no effect on driving behaviour.",
       "Tesla vehicles only.",

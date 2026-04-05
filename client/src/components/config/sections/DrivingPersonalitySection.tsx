@@ -6,21 +6,37 @@ import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow } from "../ConfigSection";
 
 const LONG_PERSONALITY_OPTS = [
-  { value: "relaxed",    label: "Relaxed",    description: "Smooth acceleration, larger follow gap — ideal for comfort" },
-  { value: "standard",   label: "Standard",   description: "Balanced behaviour matching most driving conditions" },
-  { value: "aggressive", label: "Aggressive", description: "Quicker acceleration, tighter follow gap — sport feel" },
+  {
+    value: "relaxed",
+    label: "Relaxed",
+    description: "Smooth acceleration, larger follow gap — ideal for comfort",
+  },
+  {
+    value: "standard",
+    label: "Standard",
+    description: "Balanced behaviour matching most driving conditions",
+  },
+  {
+    value: "aggressive",
+    label: "Aggressive",
+    description: "Quicker acceleration, tighter follow gap — sport feel",
+  },
 ];
 
 export const DrivingPersonalitySection: React.FC = () => {
   const { editingConfig, updateField } = useConfigStore();
-  const d   = editingConfig.drivingPersonality;
-  const ai  = editingConfig.commaAI;
+  const d = editingConfig.drivingPersonality;
+  const ai = editingConfig.commaAI;
   const lon = editingConfig.longitudinal;
   const ifc = editingConfig.interface;
-  const setD   = <K extends keyof typeof d  >(k: K, v: (typeof d  )[K]) => updateField("drivingPersonality", k, v);
-  const setAi  = <K extends keyof typeof ai >(k: K, v: (typeof ai )[K]) => updateField("commaAI",            k, v);
-  const setLon = <K extends keyof typeof lon>(k: K, v: (typeof lon)[K]) => updateField("longitudinal",        k, v);
-  const setIfc = <K extends keyof typeof ifc>(k: K, v: (typeof ifc)[K]) => updateField("interface",           k, v);
+  const setD = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) =>
+    updateField("drivingPersonality", k, v);
+  const setAi = <K extends keyof typeof ai>(k: K, v: (typeof ai)[K]) =>
+    updateField("commaAI", k, v);
+  const setLon = <K extends keyof typeof lon>(k: K, v: (typeof lon)[K]) =>
+    updateField("longitudinal", k, v);
+  const setIfc = <K extends keyof typeof ifc>(k: K, v: (typeof ifc)[K]) =>
+    updateField("interface", k, v);
 
   return (
     <ConfigSection
@@ -43,7 +59,12 @@ export const DrivingPersonalitySection: React.FC = () => {
         <RadioGroup
           name="long-personality"
           value={d.longitudinalPersonality}
-          onChange={(v) => setD("longitudinalPersonality", v as typeof d.longitudinalPersonality)}
+          onChange={(v) =>
+            setD(
+              "longitudinalPersonality",
+              v as typeof d.longitudinalPersonality,
+            )
+          }
           options={LONG_PERSONALITY_OPTS}
           layout="vertical"
         />
@@ -61,7 +82,10 @@ export const DrivingPersonalitySection: React.FC = () => {
         spKey="ExperimentalMode"
         description="ExperimentalMode — use Comma AI’s neural-network E2E model for longitudinal control. Best on well-mapped US highways. Overrides manual tuning."
       >
-        <Toggle checked={lon.e2eEnabled} onChange={(v) => setLon("e2eEnabled", v)} />
+        <Toggle
+          checked={lon.e2eEnabled}
+          onChange={(v) => setLon("e2eEnabled", v)}
+        />
       </ParamRow>
 
       <div className="divider" />
@@ -76,7 +100,10 @@ export const DrivingPersonalitySection: React.FC = () => {
         spKey="AlwaysOnDM"
         description="AlwaysOnDM — keep driver monitoring active even when ACC is disengaged."
       >
-        <Toggle checked={ifc.alwaysOnDM} onChange={(v) => setIfc("alwaysOnDM", v)} />
+        <Toggle
+          checked={ifc.alwaysOnDM}
+          onChange={(v) => setIfc("alwaysOnDM", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -84,7 +111,10 @@ export const DrivingPersonalitySection: React.FC = () => {
         spKey="DisengageOnAccelerator"
         description="DisengageOnAccelerator — press the accelerator to immediately disengage openpilot longitudinal."
       >
-        <Toggle checked={ai.disengageOnAccelerator} onChange={(v) => setAi("disengageOnAccelerator", v)} />
+        <Toggle
+          checked={ai.disengageOnAccelerator}
+          onChange={(v) => setAi("disengageOnAccelerator", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -92,7 +122,10 @@ export const DrivingPersonalitySection: React.FC = () => {
         spKey="IsLdwEnabled"
         description="IsLdwEnabled — audible chime when openpilot detects the vehicle crossing a lane line without a turn signal."
       >
-        <Toggle checked={ai.ldwEnabled} onChange={(v) => setAi("ldwEnabled", v)} />
+        <Toggle
+          checked={ai.ldwEnabled}
+          onChange={(v) => setAi("ldwEnabled", v)}
+        />
       </ParamRow>
 
       <div className="divider" />
@@ -107,7 +140,10 @@ export const DrivingPersonalitySection: React.FC = () => {
         spKey="RecordFront"
         description="RecordFront — continuously record all cameras to onboard storage."
       >
-        <Toggle checked={ai.recordDrives} onChange={(v) => setAi("recordDrives", v)} />
+        <Toggle
+          checked={ai.recordDrives}
+          onChange={(v) => setAi("recordDrives", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -136,4 +172,3 @@ export const DrivingPersonalitySection: React.FC = () => {
     </ConfigSection>
   );
 };
-

@@ -23,14 +23,17 @@ const SLC_MODE_OPTS = [
 const SLC_SOURCE_OPTS = [
   { value: "0", label: "Car State Only — vehicle sign recognition" },
   { value: "1", label: "Map Data Only — OSM database" },
-  { value: "2", label: "Car State Priority — car data, fall back to map (recommended)" },
+  {
+    value: "2",
+    label: "Car State Priority — car data, fall back to map (recommended)",
+  },
   { value: "3", label: "Map Data Priority — map data, fall back to car" },
   { value: "4", label: "Combined — use the higher of both sources" },
 ];
 
 const SLC_OFFSET_OPTS = [
-  { value: "none",       label: "None — match limit exactly" },
-  { value: "fixed",      label: "Fixed — add/subtract a set amount" },
+  { value: "none", label: "None — match limit exactly" },
+  { value: "fixed", label: "Fixed — add/subtract a set amount" },
   { value: "percentage", label: "% — apply a percentage above/below limit" },
 ];
 
@@ -38,10 +41,15 @@ export const LongitudinalSection: React.FC = () => {
   const { editingConfig, updateField, updateSection } = useConfigStore();
   const l = editingConfig.longitudinal;
   const s = editingConfig.speedControl;
-  const set    = <K extends keyof typeof l>(k: K, val: (typeof l)[K]) => updateField("longitudinal", k, val);
-  const setSpd = <K extends keyof typeof s>(k: K, val: (typeof s)[K]) => updateField("speedControl",  k, val);
+  const set = <K extends keyof typeof l>(k: K, val: (typeof l)[K]) =>
+    updateField("longitudinal", k, val);
+  const setSpd = <K extends keyof typeof s>(k: K, val: (typeof s)[K]) =>
+    updateField("speedControl", k, val);
   const setSlc = (k: keyof typeof s.speedLimitControl, v: unknown) =>
-    updateSection("speedControl", { ...s, speedLimitControl: { ...s.speedLimitControl, [k]: v } });
+    updateSection("speedControl", {
+      ...s,
+      speedLimitControl: { ...s.speedLimitControl, [k]: v },
+    });
 
   return (
     <ConfigSection
@@ -79,7 +87,10 @@ export const LongitudinalSection: React.FC = () => {
         spKey="PlanplusControl"
         description="PlanplusControl — SP-developed planner for smoother, more predictive acceleration and braking."
       >
-        <Toggle checked={l.planplusEnabled} onChange={(v) => set("planplusEnabled", v)} />
+        <Toggle
+          checked={l.planplusEnabled}
+          onChange={(v) => set("planplusEnabled", v)}
+        />
       </ParamRow>
 
       <div className="divider" />
@@ -92,7 +103,10 @@ export const LongitudinalSection: React.FC = () => {
         spKey="CustomAccIncrementsEnabled"
         description="CustomAccIncrementsEnabled — replace stock cruise +/− button step sizes with custom values."
       >
-        <Toggle checked={l.customAccEnabled} onChange={(v) => set("customAccEnabled", v)} />
+        <Toggle
+          checked={l.customAccEnabled}
+          onChange={(v) => set("customAccEnabled", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -103,7 +117,11 @@ export const LongitudinalSection: React.FC = () => {
         <NumberInput
           value={l.customAccShort}
           onChange={(v) => set("customAccShort", v)}
-          min={1} max={10} step={1} decimals={0} unit="km/h"
+          min={1}
+          max={10}
+          step={1}
+          decimals={0}
+          unit="km/h"
           disabled={!l.customAccEnabled}
         />
       </ParamRow>
@@ -116,7 +134,11 @@ export const LongitudinalSection: React.FC = () => {
         <NumberInput
           value={l.customAccLong}
           onChange={(v) => set("customAccLong", v)}
-          min={1} max={20} step={1} decimals={0} unit="km/h"
+          min={1}
+          max={20}
+          step={1}
+          decimals={0}
+          unit="km/h"
           disabled={!l.customAccEnabled}
         />
       </ParamRow>
@@ -132,7 +154,10 @@ export const LongitudinalSection: React.FC = () => {
         spKey="IntelligentCruiseButtonManagement"
         description="IntelligentCruiseButtonManagement — Alpha feature that intelligently manages cruise control button behaviour for better sunnypilot integration."
       >
-        <Toggle checked={s.icbmEnabled} onChange={(v) => setSpd("icbmEnabled", v)} />
+        <Toggle
+          checked={s.icbmEnabled}
+          onChange={(v) => setSpd("icbmEnabled", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -140,7 +165,10 @@ export const LongitudinalSection: React.FC = () => {
         spKey="SmartCruiseControlVision"
         description="SmartCruiseControlVision — use camera-detected curve geometry to pre-slow for turns."
       >
-        <Toggle checked={s.visionEnabled} onChange={(v) => setSpd("visionEnabled", v)} />
+        <Toggle
+          checked={s.visionEnabled}
+          onChange={(v) => setSpd("visionEnabled", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -148,7 +176,10 @@ export const LongitudinalSection: React.FC = () => {
         spKey="SmartCruiseControlMap"
         description="SmartCruiseControlMap — use OSM map data to look ahead for curves and slow pre-emptively."
       >
-        <Toggle checked={s.mapEnabled} onChange={(v) => setSpd("mapEnabled", v)} />
+        <Toggle
+          checked={s.mapEnabled}
+          onChange={(v) => setSpd("mapEnabled", v)}
+        />
       </ParamRow>
 
       {/* ─── Cruise — Speed Limit (SLC) ─── */}
@@ -211,8 +242,15 @@ export const LongitudinalSection: React.FC = () => {
                     <Slider
                       value={s.speedLimitControl.offsetValue}
                       onChange={(v) => setSlc("offsetValue", v)}
-                      min={-30} max={30} step={1} decimals={0}
-                      unit={s.speedLimitControl.offsetType === "percentage" ? "%" : ""}
+                      min={-30}
+                      max={30}
+                      step={1}
+                      decimals={0}
+                      unit={
+                        s.speedLimitControl.offsetType === "percentage"
+                          ? "%"
+                          : ""
+                      }
                     />
                   </ParamRow>
                 )}

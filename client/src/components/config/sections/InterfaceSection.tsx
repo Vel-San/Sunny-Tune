@@ -74,7 +74,6 @@ export const InterfaceSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-
         label="Show Turn Signals"
         spKey="ShowTurnSignals"
         description="ShowTurnSignals — display animated turn signal arrows on the onroad HUD."
@@ -120,7 +119,10 @@ export const InterfaceSection: React.FC = () => {
         spKey="BlindSpotDetection"
         description="BlindSpotDetection — display blind spot warning indicators on HUD when vehicles are detected in adjacent lanes."
       >
-        <Toggle checked={ui.blindSpotHUD} onChange={(v) => set("blindSpotHUD", v)} />
+        <Toggle
+          checked={ui.blindSpotHUD}
+          onChange={(v) => set("blindSpotHUD", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -128,7 +130,10 @@ export const InterfaceSection: React.FC = () => {
         spKey="SteeringArc"
         description="SteeringArc — show a steering arc overlay indicating the projected path based on current steering angle."
       >
-        <Toggle checked={ui.steeringArc} onChange={(v) => set("steeringArc", v)} />
+        <Toggle
+          checked={ui.steeringArc}
+          onChange={(v) => set("steeringArc", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -136,7 +141,10 @@ export const InterfaceSection: React.FC = () => {
         spKey="TrueVEgoUI"
         description="TrueVEgoUI — always display GPS-based true ground speed instead of odometer speed on the HUD."
       >
-        <Toggle checked={ui.trueVegoUI} onChange={(v) => set("trueVegoUI", v)} />
+        <Toggle
+          checked={ui.trueVegoUI}
+          onChange={(v) => set("trueVegoUI", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -144,7 +152,10 @@ export const InterfaceSection: React.FC = () => {
         spKey="ChevronInfo"
         description="ChevronInfo — display additional metrics (distance to lead, speed delta) below the lead-car chevron."
       >
-        <Toggle checked={ui.chevronInfo} onChange={(v) => set("chevronInfo", v)} />
+        <Toggle
+          checked={ui.chevronInfo}
+          onChange={(v) => set("chevronInfo", v)}
+        />
       </ParamRow>
 
       <ParamRow
@@ -152,7 +163,10 @@ export const InterfaceSection: React.FC = () => {
         spKey="RainbowMode"
         description="RainbowMode — enable Rainbow Mode on Tesla vehicles (cosmetic steering wheel colour effect only)."
       >
-        <Toggle checked={ui.rainbowMode} onChange={(v) => set("rainbowMode", v)} />
+        <Toggle
+          checked={ui.rainbowMode}
+          onChange={(v) => set("rainbowMode", v)}
+        />
       </ParamRow>
 
       <div className="divider" />
@@ -185,7 +199,6 @@ export const InterfaceSection: React.FC = () => {
           options={SCREEN_OFF_OPTS}
         />
       </ParamRow>
-
     </ConfigSection>
   );
 };

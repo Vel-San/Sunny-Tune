@@ -20,7 +20,9 @@ function normalizeConfig(raw: SPConfig): SPConfig {
     interface?: Record<string, unknown>;
   };
 
-  const slc = cfg.speedControl?.speedLimitControl as Record<string, unknown> | undefined;
+  const slc = cfg.speedControl?.speedLimitControl as
+    | Record<string, unknown>
+    | undefined;
   if (slc) {
     // Migration 1: boolean enabled → integer mode
     if (typeof slc["enabled"] === "boolean") {
@@ -32,7 +34,10 @@ function normalizeConfig(raw: SPConfig): SPConfig {
       slc["mode"] = 0;
     }
     // Migration 2: fixed_mph / fixed_kph → fixed
-    if (slc["offsetType"] === "fixed_mph" || slc["offsetType"] === "fixed_kph") {
+    if (
+      slc["offsetType"] === "fixed_mph" ||
+      slc["offsetType"] === "fixed_kph"
+    ) {
       slc["offsetType"] = "fixed" as SLCOffsetType;
     }
   }
@@ -45,7 +50,13 @@ function normalizeConfig(raw: SPConfig): SPConfig {
   // Forward-fill new interface fields
   const iface = cfg.interface as Record<string, unknown> | undefined;
   if (iface) {
-    const boolDefaults: string[] = ["blindSpotHUD", "steeringArc", "trueVegoUI", "chevronInfo", "rainbowMode"];
+    const boolDefaults: string[] = [
+      "blindSpotHUD",
+      "steeringArc",
+      "trueVegoUI",
+      "chevronInfo",
+      "rainbowMode",
+    ];
     for (const key of boolDefaults) {
       if (typeof iface[key] !== "boolean") iface[key] = false;
     }
