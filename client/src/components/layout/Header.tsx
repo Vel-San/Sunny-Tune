@@ -1,32 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-    AlertCircle,
-    BarChart2,
-    Bell,
-    Book,
-    Check,
-    ChevronDown,
-    Compass,
-    Copy,
-    GitBranch,
-    GitFork,
-    Info,
-    KeyRound,
-    LayoutList,
-    Menu,
-    RotateCcw,
-    Star,
-    Tag,
-    X,
+  AlertCircle,
+  BarChart2,
+  Bell,
+  Book,
+  Check,
+  ChevronDown,
+  Compass,
+  Copy,
+  ExternalLink,
+  GitBranch,
+  GitFork,
+  Info,
+  KeyRound,
+  LayoutList,
+  Menu,
+  RotateCcw,
+  Star,
+  Tag,
+  X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-    deleteNotification,
-    fetchNotifications,
-    fetchUnreadCount,
-    markNotificationsRead,
+  deleteNotification,
+  fetchNotifications,
+  fetchUnreadCount,
+  markNotificationsRead,
 } from "../../api";
 import { useAuthStore } from "../../store/authStore";
 import type { NotificationRecord } from "../../types/config";
@@ -177,6 +178,15 @@ export const Header: React.FC = () => {
                 {label}
               </Link>
             ))}
+            <a
+              href="https://sunnylink.wiki/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Wiki
+            </a>
           </nav>
 
           {/* Right: notifications + user token + hamburger */}
@@ -313,6 +323,16 @@ export const Header: React.FC = () => {
                 {label}
               </Link>
             ))}
+            <a
+              href="https://sunnylink.wiki/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+            >
+              <ExternalLink className="w-4 h-4 flex-shrink-0" />
+              SunnyLink Wiki
+            </a>
 
             {/* Token row in mobile menu */}
             <div className="pt-2 border-t border-zinc-800 mt-2">

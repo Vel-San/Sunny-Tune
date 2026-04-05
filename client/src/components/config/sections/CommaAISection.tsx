@@ -35,6 +35,7 @@ export const CommaAISection: React.FC = () => {
         label="Record Drives"
         source="openpilot"
         since="2021"
+        spKey="RecordFront"
         description="RecordFront — continuously record all cameras to onboard storage."
       >
         <Toggle
@@ -47,6 +48,7 @@ export const CommaAISection: React.FC = () => {
         label="Upload Only on Wi-Fi"
         source="openpilot"
         since="2021"
+        spKey="GsmMetered"
         description="GsmMetered — restrict uploads to Wi-Fi only. Prevents unexpected cellular data charges."
       >
         <Toggle
@@ -60,6 +62,7 @@ export const CommaAISection: React.FC = () => {
         label="Record Audio Feedback"
         source="sunnypilot"
         since="2023"
+        spKey="RecordAudioFeedback"
         description="RecordAudioFeedback — record cabin audio alongside onroad drive footage."
       >
         <Toggle
@@ -79,6 +82,7 @@ export const CommaAISection: React.FC = () => {
         label="Disengage on Accelerator"
         source="openpilot"
         since="2021"
+        spKey="DisengageOnAccelerator"
         description="DisengageOnAccelerator — press the accelerator to immediately disengage openpilot longitudinal."
       >
         <Toggle
@@ -91,6 +95,7 @@ export const CommaAISection: React.FC = () => {
         label="Lane Departure Warning"
         source="openpilot"
         since="2021"
+        spKey="IsLdwEnabled"
         description="IsLdwEnabled — audible chime when openpilot detects the vehicle crossing a lane line without a turn signal."
       >
         <Toggle checked={c.ldwEnabled} onChange={(v) => set("ldwEnabled", v)} />
@@ -106,6 +111,7 @@ export const CommaAISection: React.FC = () => {
         label="SunnyLink Connect"
         source="sunnypilot"
         since="2024"
+        spKey="SunnylinkEnabled"
         description="SunnylinkEnabled — enable SunnyLink cloud connection for remote config import/export and drive sync."
       >
         <Toggle
@@ -127,6 +133,7 @@ export const CommaAISection: React.FC = () => {
         label="Enable MADS"
         source="sunnypilot"
         since="2023"
+        spKey="Mads"
         description="Mads — allow steering assist to operate without ACC engaged."
       >
         <Toggle checked={c.mads} onChange={(v) => set("mads", v)} />
@@ -136,6 +143,7 @@ export const CommaAISection: React.FC = () => {
         label="Main Cruise Toggle"
         source="sunnypilot"
         since="2023"
+        spKey="MadsMainCruiseAllowed"
         description="MadsMainCruiseAllowed — allow the main cruise button to engage/disengage MADS lateral control."
       >
         <Toggle
@@ -149,6 +157,7 @@ export const CommaAISection: React.FC = () => {
         label="Steering Mode"
         source="sunnypilot"
         since="2023"
+        spKey="MadsSteeringMode"
         description="MadsSteeringMode — controls how MADS steering blends with ACC."
       >
         <Select
@@ -163,6 +172,7 @@ export const CommaAISection: React.FC = () => {
         label="Unified Engagement"
         source="sunnypilot"
         since="2023"
+        spKey="MadsUnifiedEngagementMode"
         description="MadsUnifiedEngagementMode — engage both MADS lateral and ACC longitudinal together with a single button press."
       >
         <Toggle

@@ -45,6 +45,7 @@ export const LaneChangeSection: React.FC = () => {
         label="Auto Timer"
         source="sunnypilot"
         since="2022"
+        spKey="AutoLaneChangeTimer"
         description="AutoLaneChangeTimer — how long the signal must be held before the lane change begins. 0 = nudge always required."
       >
         <Select
@@ -61,6 +62,7 @@ export const LaneChangeSection: React.FC = () => {
         label="Minimum Speed"
         source="sunnypilot"
         since="2022"
+        spKey="BlinkerMinLateralControlSpeed"
         description="BlinkerMinLateralControlSpeed — lane change will not trigger below this speed."
       >
         <Slider
@@ -79,6 +81,7 @@ export const LaneChangeSection: React.FC = () => {
         label="Blind Spot Monitoring"
         source="sunnypilot"
         since="2022"
+        spKey="BlindSpot"
         description="BlindSpot — integrate BSM radar data to block the lane change when a vehicle is detected in the blind spot."
       >
         <Toggle
@@ -97,6 +100,7 @@ export const LaneChangeSection: React.FC = () => {
         label="Pause Lateral on Blinker"
         source="sunnypilot"
         since="2024"
+        spKey="BlinkerPauseLateralControl"
         description="BlinkerPauseLateralControl — suspend steering control while the turn signal is active. Gives full manual steering during signalling."
       >
         <Toggle
@@ -109,6 +113,7 @@ export const LaneChangeSection: React.FC = () => {
         label="Lateral Re-engage Delay"
         source="sunnypilot"
         since="2024"
+        spKey="BlinkerLateralReengageDelay"
         description="BlinkerLateralReengageDelay — seconds after the blinker turns off before lateral control re-engages."
       >
         <Slider

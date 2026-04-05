@@ -37,6 +37,7 @@ export const DrivingPersonalitySection: React.FC = () => {
     >
       <ParamRow
         label="Longitudinal Personality"
+        spKey="DrivingPersonality"
         description="LongitudinalPersonality — Comma AI's coarse-level tuning layer that controls follow distance and acceleration feel."
         source="openpilot"
         since="2022"

@@ -2,6 +2,7 @@ import { Response, Router } from "express";
 import { prisma } from "../config/database";
 import { validateUuidParams } from "../lib/guards";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import { logger } from "../lib/logger";
 
 export const notificationsRouter = Router();
 notificationsRouter.use(authenticate);
@@ -20,7 +21,8 @@ notificationsRouter.get(
         take: 50,
       });
       res.json(notifications);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch notifications", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch notifications" });
     }
   },
@@ -35,7 +37,8 @@ notificationsRouter.get(
         where: { userId: req.userId, readAt: null },
       });
       res.json({ count });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch unread count", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch unread count" });
     }
   },
@@ -51,7 +54,10 @@ notificationsRouter.post(
         data: { readAt: new Date() },
       });
       res.json({ ok: true });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to mark notifications as read", {
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to mark notifications as read" });
     }
   },
@@ -67,7 +73,8 @@ notificationsRouter.delete(
         where: { id: req.params.id, userId: req.userId },
       });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to delete notification", { err: String(err) });
       res.status(500).json({ error: "Failed to delete notification" });
     }
   },

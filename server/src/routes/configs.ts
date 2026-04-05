@@ -16,6 +16,7 @@ import {
   optionalAuthenticate,
 } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 const nanoid = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 16);
 
@@ -167,7 +168,8 @@ configsRouter.get(
         page,
         limit,
       });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch configurations", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch configurations" });
     }
   },
@@ -192,7 +194,8 @@ configsRouter.post(
         data: { ...rest, config: configData as object, userId: req.userId! },
       });
       res.status(201).json(config);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to create configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to create configuration" });
     }
   },
@@ -220,7 +223,8 @@ configsRouter.get(
       }
       // Increment view count for shared configs viewed by others
       res.json(config);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch configuration" });
     }
   },
@@ -286,7 +290,8 @@ configsRouter.put(
         },
       });
       res.json(updated);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to update configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to update configuration" });
     }
   },
@@ -312,7 +317,8 @@ configsRouter.delete(
       }
       await prisma.configuration.delete({ where: { id: req.params.id } });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to delete configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to delete configuration" });
     }
   },
@@ -373,7 +379,8 @@ configsRouter.post(
         },
       });
       res.json({ shareToken: updated.shareToken });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to share configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to share configuration" });
     }
   },
@@ -418,7 +425,11 @@ configsRouter.post(
               payload: {},
             },
           })
-          .catch(() => {});
+          .catch((notifErr: unknown) => {
+            logger.warn("Background notification failed", {
+              err: String(notifErr),
+            });
+          });
       }
 
       const cloned = await prisma.configuration.create({
@@ -439,7 +450,8 @@ configsRouter.post(
         },
       });
       res.status(201).json(cloned);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to clone configuration", { err: String(err) });
       res.status(500).json({ error: "Failed to clone configuration" });
     }
   },
@@ -469,7 +481,8 @@ configsRouter.get(
         orderBy: { version: "desc" },
       });
       res.json(snapshots);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch history", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch history" });
     }
   },
@@ -501,7 +514,8 @@ configsRouter.get(
         return;
       }
       res.json(snapshot);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch snapshot", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch snapshot" });
     }
   },
@@ -556,7 +570,10 @@ sharedConfigRouter.get(
       // Strip internal userId; expose isOwn flag so the client can hide self-rating
       const { userId, ...rest } = config;
       res.json({ ...rest, isOwn: req.userId === userId });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch shared configuration", {
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to fetch shared configuration" });
     }
   },

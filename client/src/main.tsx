@@ -6,6 +6,8 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
+// Import logger to activate global window.onerror / unhandledrejection catchers
+import "./lib/logger";
 
 const queryClient = new QueryClient({
   defaultOptions: {

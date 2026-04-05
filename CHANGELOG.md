@@ -4,6 +4,30 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.0.2] — 2026-04-05
+
+### Added
+
+- Context-sensitive help tooltips on every config parameter — hover the ⓘ icon to see a description, recommended value, tips, and tradeoffs sourced from the SunnyLink wiki
+- SunnyLink export modal — review your config as a SunnyLink-compatible JSON payload, see pre-flight validation warnings (e.g. conflicting settings), and download a device-ready file
+- SunnyLink export available on the Shared Config page for config owners, not just inside the editor
+- Structured server logging: every HTTP request logged with method, path, status, and duration; requests slower than 500 ms are flagged. Dev outputs coloured human-readable lines; production emits newline-delimited JSON parseable by Railway, Vercel Log Drains, Datadog, Loki, etc.
+- Client-side logger: API errors and unhandled exceptions always forwarded to `console.error` (visible in Vercel Runtime Logs and browser DevTools); debug/info/warn output suppressed in production builds
+- `LOG_LEVEL` environment variable support — override the default log level per environment (`debug` | `info` | `warn` | `error`)
+- Prisma DB errors and warnings now forwarded through the structured logger so database issues appear in Railway / production logs alongside application errors
+
+### Changed
+
+- All bare `catch` blocks across every server route and middleware now capture and log errors via the structured logger — previously all server-side exceptions were silently swallowed with no visible trace
+- Admin auth failures (wrong secret, blocked IP, missing header) now logged at `warn` level for security visibility
+
+### Fixed
+
+- Help tooltip panel no longer clipped or hidden by section card borders — panel renders in a React Portal at `document.body` with viewport-aware smart positioning (auto-flips left/right near screen edge)
+- Section auto-scroll (sidebar nav + mobile section pills + hash deep-links) now lands with correct clearance above the sticky header + name bar — was previously under-scrolled by ~33px on desktop
+
+---
+
 ## [2.0.1] — 2026-04-05
 
 ### Added

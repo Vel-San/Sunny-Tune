@@ -526,8 +526,8 @@ export async function parseSunnyLinkFile(file: File): Promise<SunnyTuneExport> {
  * included. Device-specific values (DongleId, GPS, upload queues, etc.)
  * are omitted.
  */
-export function exportAsSunnyLink(config: ConfigRecord): void {
-  const c = config.config;
+export function exportAsSunnyLink(config: SPConfig, name?: string): void {
+  const c = config;
   const lpMap = {
     aggressive: "0",
     standard: "1",
@@ -640,7 +640,7 @@ export function exportAsSunnyLink(config: ConfigRecord): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${config.name.replace(/[^a-z0-9_-]/gi, "_")}.sunnylink.json`;
+  a.download = `${(name ?? "config").replace(/[^a-z0-9_-]/gi, "_")}.sunnylink.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

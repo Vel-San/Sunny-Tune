@@ -7,6 +7,7 @@ import { logger } from "./lib/logger";
 import { errorHandler } from "./middleware/errorHandler";
 import { trackPageView } from "./middleware/pageView";
 import { globalLimiter } from "./middleware/rateLimiter";
+import { requestLogger } from "./middleware/requestLogger";
 import { apiRouter } from "./routes";
 import { sharedConfigRouter } from "./routes/configs";
 
@@ -42,6 +43,9 @@ app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(globalLimiter);
 
+// ─── HTTP request logging ────────────────────────────────────────────────────
+app.use(requestLogger);
+
 // ─── Page view analytics (tracks GET requests to public paths) ───────────────
 app.use("/api/explore", trackPageView);
 app.use("/api/shared", trackPageView);
@@ -72,5 +76,8 @@ app.listen(PORT, () => {
   logger.info("Server started", {
     port: PORT,
     env: process.env.NODE_ENV ?? "development",
+    logLevel:
+      process.env.LOG_LEVEL ??
+      (process.env.NODE_ENV === "production" ? "info" : "debug"),
   });
 });

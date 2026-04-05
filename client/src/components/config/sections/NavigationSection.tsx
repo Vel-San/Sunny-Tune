@@ -21,6 +21,7 @@ export const NavigationSection: React.FC = () => {
         label="OSM Integration"
         source="sunnypilot"
         since="2024"
+        spKey="OsmLocal"
         description="OsmLocal — download and use OpenStreetMap data for speed limits, road classifications, and curve speed control."
       >
         <Toggle

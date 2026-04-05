@@ -13,6 +13,7 @@
 import { createHash } from "crypto";
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/database";
+import { logger } from "../lib/logger";
 
 /**
  * Derives a privacy-safe visitor ID from the client IP address by taking the
@@ -53,7 +54,9 @@ export function trackPageView(
   // Non-blocking write — do not await
   prisma.pageView
     .create({ data: { path, visitorId } })
-    .catch((err: unknown) => console.error("[pageview tracker]", err));
+    .catch((err: unknown) =>
+      logger.warn("pageview tracker failed", { err: String(err) }),
+    );
 
   next();
 }

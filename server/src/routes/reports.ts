@@ -4,6 +4,7 @@ import { prisma } from "../config/database";
 import { stripControlChars } from "../lib/sanitize";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { writeLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 export const reportsRouter = Router();
 reportsRouter.use(authenticate);
@@ -52,7 +53,8 @@ reportsRouter.post(
         },
       });
       res.status(201).json({ ok: true });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to submit report", { err: String(err) });
       res.status(500).json({ error: "Failed to submit report" });
     }
   },

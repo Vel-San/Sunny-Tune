@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/database";
+import { logger } from "../lib/logger";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -30,7 +31,8 @@ export async function authenticate(
     }
     req.userId = user.id;
     next();
-  } catch {
+  } catch (err) {
+    logger.error("Authentication error", { err: String(err) });
     res.status(500).json({ error: "Authentication error" });
   }
 }
@@ -52,8 +54,9 @@ export async function optionalAuthenticate(
       try {
         const user = await prisma.user.findUnique({ where: { token } });
         if (user) req.userId = user.id;
-      } catch {
-        // ignore errors — auth is optional here
+      } catch (err) {
+        // optional auth — log at debug so it doesn't noise up prod logs
+        logger.debug("optionalAuthenticate DB error", { err: String(err) });
       }
     }
   }

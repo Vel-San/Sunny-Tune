@@ -40,6 +40,7 @@ export const LateralControlSection: React.FC = () => {
         label="Camera Offset"
         source="openpilot"
         since="2021"
+        spKey="CameraOffset"
         description="CameraOffset — lateral offset of the camera from lane centre (m). Adjust if the car consistently drifts left or right of centre."
       >
         <Slider
@@ -58,6 +59,7 @@ export const LateralControlSection: React.FC = () => {
         label="Torque Control Tune"
         source="sunnypilot"
         since="2023"
+        spKey="TorqueControlTune"
         description="TorqueControlTune — tuning preset for the torque lateral controller."
       >
         <Select
@@ -71,6 +73,7 @@ export const LateralControlSection: React.FC = () => {
         label="Enforce Torque Control"
         source="sunnypilot"
         since="2024"
+        spKey="EnforceTorqueControl"
         description="EnforceTorqueControl — force SP's torque-based lateral controller even when the car's native steering system would otherwise take over."
       >
         <Toggle
@@ -83,6 +86,7 @@ export const LateralControlSection: React.FC = () => {
         label="Neural Network Lateral Model"
         source="sunnypilot"
         since="2025"
+        spKey="NeuralNetworkLateralControl"
         description="NeuralNetworkLateralControl — use an on-device trained NN model instead of the rule-based torque controller. Experimental."
       >
         <Toggle
@@ -106,6 +110,7 @@ export const LateralControlSection: React.FC = () => {
         label="Live Torque Parameters"
         source="sunnypilot"
         since="2023"
+        spKey="LiveTorqueParamsToggle"
         description="LiveTorqueParamsToggle — continuously learn friction and latAccelFactor from real drive data. Improves accuracy after several drives."
       >
         <Toggle
@@ -118,6 +123,7 @@ export const LateralControlSection: React.FC = () => {
         label="Relaxed Learning Rate"
         source="sunnypilot"
         since="2023"
+        spKey="LiveTorqueParamsRelaxedToggle"
         description="LiveTorqueParamsRelaxedToggle — use a slower learning rate for live torque updates. Reduces oscillation on noisy or winding roads."
       >
         <Toggle
@@ -137,6 +143,7 @@ export const LateralControlSection: React.FC = () => {
         label="LAGD Enabled"
         source="sunnypilot"
         since="2024"
+        spKey="LagdToggle"
         description="LagdToggle — estimate the actual hardware steer delay from drive data for more accurate lateral prediction."
       >
         <Toggle
@@ -149,6 +156,7 @@ export const LateralControlSection: React.FC = () => {
         label="LAGD Delay Offset"
         source="sunnypilot"
         since="2024"
+        spKey="LagdToggleDelay"
         description="LagdToggleDelay — manual offset added to the estimated actuator delay (seconds)."
       >
         <Slider
@@ -177,6 +185,7 @@ export const LateralControlSection: React.FC = () => {
         label="Enable Torque Override"
         source="sunnypilot"
         since="2024"
+        spKey="TorqueParamsOverrideEnabled"
         description="TorqueParamsOverrideEnabled — activate manually set friction + latAccelFactor values instead of learned or stock values."
       >
         <Toggle
@@ -189,6 +198,7 @@ export const LateralControlSection: React.FC = () => {
         label="Friction Override"
         source="sunnypilot"
         since="2024"
+        spKey="ManualTuneFriction"
         description="TorqueParamsOverrideFriction — rolling friction compensation (0.01–0.5). Higher = more steering resistance compensation."
       >
         <Slider

@@ -1,4 +1,4 @@
-name: Deploy
+# name: Deploy
 
 # ─── How deployments work ─────────────────────────────────────────────────────
 #
@@ -21,5 +21,5 @@ name: Deploy
 #   - Railway: dashboard → service → Deployments → Redeploy
 #   - Vercel:  dashboard → project → Deployments → Redeploy
 
-on:
-  workflow_dispatch: # manual trigger only — actual deploys are handled natively
+# on:
+# workflow_dispatch: # manual trigger only — actual deploys are handled natively

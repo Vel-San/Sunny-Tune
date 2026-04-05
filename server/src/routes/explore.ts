@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response, Router } from "express";
 import { prisma } from "../config/database";
+import { logger } from "../lib/logger";
 import { exploreQuerySchema } from "../lib/querySchemas";
 import { stripControlChars } from "../lib/sanitize";
 import { VERIFIED_VEHICLES } from "../lib/vehicles";
@@ -231,7 +232,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
       facets: { tags: topTags, makes },
     });
   } catch (err) {
-    console.error(err);
+    logger.error("explore/ failed", { err: String(err) });
     res.status(500).json({ error: "Failed to fetch explore data" });
   }
 });
@@ -314,7 +315,8 @@ exploreRouter.get(
         })),
         topTags,
       });
-    } catch {
+    } catch (err) {
+      logger.error("explore/stats failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   },

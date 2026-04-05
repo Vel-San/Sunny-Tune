@@ -9,6 +9,7 @@ import {
 import { stripControlChars } from "../lib/sanitize";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 export const collectionsRouter = Router();
 collectionsRouter.use(authenticate);
@@ -38,7 +39,8 @@ collectionsRouter.get(
           itemCount: _count.items,
         })),
       );
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch collections", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch collections" });
     }
   },
@@ -64,7 +66,8 @@ collectionsRouter.post(
       });
       const { _count, ...rest } = collection;
       res.status(201).json({ ...rest, itemCount: _count.items });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to create collection", { err: String(err) });
       res.status(500).json({ error: "Failed to create collection" });
     }
   },
@@ -115,7 +118,8 @@ collectionsRouter.get(
         return;
       }
       res.json(collection);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch collection", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch collection" });
     }
   },
@@ -151,7 +155,8 @@ collectionsRouter.put(
         data: parsed.data,
       });
       res.json(updated);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to update collection", { err: String(err) });
       res.status(500).json({ error: "Failed to update collection" });
     }
   },
@@ -177,7 +182,8 @@ collectionsRouter.delete(
       }
       await prisma.collection.delete({ where: { id: req.params.id } });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to delete collection", { err: String(err) });
       res.status(500).json({ error: "Failed to delete collection" });
     }
   },
@@ -231,7 +237,8 @@ collectionsRouter.post(
         },
       });
       res.status(201).json({ ok: true });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to add to collection", { err: String(err) });
       res.status(500).json({ error: "Failed to add to collection" });
     }
   },
@@ -264,7 +271,8 @@ collectionsRouter.delete(
         },
       });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to remove from collection", { err: String(err) });
       res.status(500).json({ error: "Failed to remove from collection" });
     }
   },

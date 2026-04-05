@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import axios from "axios";
+import { log } from "../lib/logger";
 import type {
   CollectionRecord,
   CommentRecord,
@@ -55,6 +56,13 @@ apiClient.interceptors.response.use(
     // Preserve the HTTP status so callers (e.g. authStore) can distinguish
     // a 401 "bad token" from a transient network error (status 0).
     const status: number = err?.response?.status ?? 0;
+    // Log at warn for 4xx (expected errors), error for 5xx/network failures
+    const url: string = err?.config?.url ?? "";
+    if (status === 0 || status >= 500) {
+      log.error("API request failed", { url, status, message });
+    } else if (status >= 400) {
+      log.warn("API request rejected", { url, status, message });
+    }
     return Promise.reject(new ApiError(message, status));
   },
 );

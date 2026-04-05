@@ -5,6 +5,7 @@ import { pruneNotificationsIfNeeded, validateUuidParams } from "../lib/guards";
 import { stripControlChars } from "../lib/sanitize";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 export const communityRouter = Router();
 
@@ -61,10 +62,15 @@ communityRouter.put(
             payload: { ratingValue: parsed.data.value },
           },
         })
-        .catch(() => {}); // don't fail the rating request if notification fails
+        .catch((notifErr: unknown) => {
+          logger.warn("Background notification failed", {
+            err: String(notifErr),
+          });
+        }); // don't fail the rating request if notification fails
 
       res.json(rating);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to save rating", { err: String(err) });
       res.status(500).json({ error: "Failed to save rating" });
     }
   },
@@ -81,7 +87,8 @@ communityRouter.delete(
         where: { userId: req.userId, configId: req.params.id },
       });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to delete rating", { err: String(err) });
       res.status(500).json({ error: "Failed to delete rating" });
     }
   },
@@ -98,7 +105,8 @@ communityRouter.get(
         },
       });
       res.json(rating ?? null);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch rating", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch rating" });
     }
   },
@@ -166,7 +174,8 @@ communityRouter.get(
       });
       const result = comments.map((c) => formatComment(c, req.userId));
       res.json(result);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch comments", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch comments" });
     }
   },
@@ -231,11 +240,16 @@ communityRouter.post(
               payload: { body: comment.body.slice(0, 120) },
             },
           })
-          .catch(() => {});
+          .catch((notifErr: unknown) => {
+            logger.warn("Background notification failed", {
+              err: String(notifErr),
+            });
+          });
       }
 
       res.status(201).json(formatComment(comment, req.userId));
-    } catch {
+    } catch (err) {
+      logger.error("Failed to create comment", { err: String(err) });
       res.status(500).json({ error: "Failed to create comment" });
     }
   },
@@ -261,7 +275,8 @@ communityRouter.delete(
       }
       await prisma.comment.delete({ where: { id: req.params.id } });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to delete comment", { err: String(err) });
       res.status(500).json({ error: "Failed to delete comment" });
     }
   },
@@ -299,7 +314,8 @@ publicCommentsRouter.get(
         updatedAt: c.updatedAt,
       }));
       res.json(result);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch comments", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch comments" });
     }
   },
@@ -333,7 +349,8 @@ publicCommentsRouter.get(
         count: ratings.length,
         breakdown,
       });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch ratings", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch ratings" });
     }
   },

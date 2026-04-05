@@ -20,6 +20,7 @@
 
 import { Request, Response, Router } from "express";
 import { prisma } from "../config/database";
+import { logger } from "../lib/logger";
 import {
   adminConfigsQuerySchema,
   adminListQuerySchema,
@@ -91,7 +92,7 @@ adminRouter.get(
         recentConfigs,
       });
     } catch (err) {
-      console.error("[admin/stats]", err);
+      logger.error("admin/stats failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   },
@@ -137,7 +138,7 @@ adminRouter.get(
 
       res.json({ users, total, page, limit });
     } catch (err) {
-      console.error("[admin/users]", err);
+      logger.error("admin/users failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch users" });
     }
   },
@@ -190,7 +191,10 @@ adminRouter.get(
 
       res.json(user);
     } catch (err) {
-      console.error("[admin/users/:id]", err);
+      logger.error("admin/users/:id failed", {
+        id: req.params.id,
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to fetch user" });
     }
   },
@@ -213,7 +217,10 @@ adminRouter.delete(
         res.status(404).json({ error: "User not found" });
         return;
       }
-      console.error("[admin/users/:id DELETE]", err);
+      logger.error("admin/users/:id DELETE failed", {
+        id: req.params.id,
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to delete user" });
     }
   },
@@ -279,7 +286,7 @@ adminRouter.get(
 
       res.json({ configs, total, page, limit });
     } catch (err) {
-      console.error("[admin/configs]", err);
+      logger.error("admin/configs failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch configs" });
     }
   },
@@ -302,7 +309,10 @@ adminRouter.delete(
         res.status(404).json({ error: "Config not found" });
         return;
       }
-      console.error("[admin/configs/:id DELETE]", err);
+      logger.error("admin/configs/:id DELETE failed", {
+        id: req.params.id,
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to delete config" });
     }
   },
@@ -336,7 +346,10 @@ adminRouter.put(
         res.status(404).json({ error: "Config not found" });
         return;
       }
-      console.error("[admin/configs/:id/unshare]", err);
+      logger.error("admin/configs/:id/unshare failed", {
+        id: req.params.id,
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to unshare config" });
     }
   },
@@ -380,7 +393,7 @@ adminRouter.get(
       ]);
       res.json({ reports, total, page, limit });
     } catch (err) {
-      console.error("[admin/reports]", err);
+      logger.error("admin/reports failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch reports" });
     }
   },
@@ -403,7 +416,10 @@ adminRouter.delete(
         res.status(404).json({ error: "Report not found" });
         return;
       }
-      console.error("[admin/reports/:id DELETE]", err);
+      logger.error("admin/reports/:id DELETE failed", {
+        id: req.params.id,
+        err: String(err),
+      });
       res.status(500).json({ error: "Failed to delete report" });
     }
   },
@@ -465,7 +481,7 @@ adminRouter.get(
         daily,
       });
     } catch (err) {
-      console.error("[admin/pageviews]", err);
+      logger.error("admin/pageviews failed", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch page view data" });
     }
   },

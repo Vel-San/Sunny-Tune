@@ -33,6 +33,7 @@ export const InterfaceSection: React.FC = () => {
         label="Developer UI"
         source="sunnypilot"
         since="2022"
+        spKey="DevUIInfo"
         description="DevUIInfo — show extended data overlay: speed, acceleration, lead car distance, and lat/long error."
       >
         <Toggle checked={ui.devUI} onChange={(v) => set("devUI", v)} />
@@ -42,6 +43,7 @@ export const InterfaceSection: React.FC = () => {
         label="Standstill Timer"
         source="sunnypilot"
         since="2023"
+        spKey="StandstillTimer"
         description="StandstillTimer — display the duration of the current complete stop on the HUD."
       >
         <Toggle
@@ -54,6 +56,7 @@ export const InterfaceSection: React.FC = () => {
         label="Green Light Alert"
         source="sunnypilot"
         since="2023"
+        spKey="GreenLightAlert"
         description="GreenLightAlert — chime and HUD notification when a traffic light ahead turns green."
       >
         <Toggle
@@ -66,6 +69,7 @@ export const InterfaceSection: React.FC = () => {
         label="Lead Depart Alert"
         source="sunnypilot"
         since="2023"
+        spKey="LeadDepartAlert"
         description="LeadDepartAlert — alert when the lead vehicle begins moving away while you are stationary."
       >
         <Toggle
@@ -78,6 +82,7 @@ export const InterfaceSection: React.FC = () => {
         label="Always-On Driver Monitoring"
         source="sunnypilot"
         since="2023"
+        spKey="AlwaysOnDM"
         description="AlwaysOnDM — keep driver monitoring active even when ACC is disengaged."
       >
         <Toggle
@@ -90,6 +95,7 @@ export const InterfaceSection: React.FC = () => {
         label="Show Turn Signals"
         source="sunnypilot"
         since="2023"
+        spKey="ShowTurnSignals"
         description="ShowTurnSignals — display animated turn signal arrows on the onroad HUD."
       >
         <Toggle
@@ -102,6 +108,7 @@ export const InterfaceSection: React.FC = () => {
         label="Road Name Display"
         source="sunnypilot"
         since="2023"
+        spKey="RoadNameToggle"
         description="RoadNameToggle — show the current road name on the HUD using OSM data."
       >
         <Toggle
@@ -114,6 +121,7 @@ export const InterfaceSection: React.FC = () => {
         label="Quiet Mode"
         source="sunnypilot"
         since="2024"
+        spKey="QuietMode"
         description="QuietMode — suppress non-critical audio chimes. Critical safety warnings still play."
       >
         <Toggle checked={ui.quietMode} onChange={(v) => set("quietMode", v)} />
@@ -123,6 +131,7 @@ export const InterfaceSection: React.FC = () => {
         label="Hide Speed on HUD"
         source="sunnypilot"
         since="2024"
+        spKey="HideVEgoUI"
         description="HideVEgoUI — remove the vehicle speed (vEgo) readout from the onroad HUD."
       >
         <Toggle
@@ -135,6 +144,7 @@ export const InterfaceSection: React.FC = () => {
         label="Torque Bar"
         source="sunnypilot"
         since="2024"
+        spKey="TorqueBar"
         description="TorqueBar — display a visual bar showing the current lateral torque output on the HUD."
       >
         <Toggle checked={ui.torqueBar} onChange={(v) => set("torqueBar", v)} />
@@ -193,6 +203,7 @@ export const InterfaceSection: React.FC = () => {
         label="Disable Onroad Uploads"
         source="sunnypilot"
         since="2023"
+        spKey="OnroadUploads"
         description="OnroadUploads — prevent drive footage from uploading while the vehicle is in motion."
       >
         <Toggle

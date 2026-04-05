@@ -33,6 +33,7 @@ export const LongitudinalSection: React.FC = () => {
         label="End-to-End Longitudinal"
         source="openpilot"
         since="2022"
+        spKey="ExperimentalMode"
         description="ExperimentalMode — use Comma AI's neural-network E2E model for longitudinal control. Best on well-mapped US highways. Overrides manual tuning."
       >
         <Toggle checked={l.e2eEnabled} onChange={(v) => set("e2eEnabled", v)} />
@@ -42,6 +43,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Dynamic E2E Switch"
         source="sunnypilot"
         since="2023"
+        spKey="DynamicExperimentalControl"
         description="DynamicExperimentalControl — automatically switches between E2E and manual longitudinal based on road/traffic conditions."
       >
         <Toggle checked={l.dynamicE2E} onChange={(v) => set("dynamicE2E", v)} />
@@ -56,6 +58,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Alpha Longitudinal"
         source="sunnypilot"
         since="2025"
+        spKey="AlphaLongitudinalEnabled"
         description="AlphaLongitudinalEnabled — next-generation experimental SP longitudinal improvements. Test in a safe environment first."
       >
         <Toggle
@@ -68,6 +71,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Hyundai/Kia/Genesis Tune"
         source="sunnypilot"
         since="2025"
+        spKey="HyundaiLongitudinalTuning"
         description="HyundaiLongitudinalTuning — longitudinal tuning preset for Hyundai/Kia/Genesis vehicles. 0=Off (standard openpilot), 1=Dynamic (more responsive acceleration and braking for a sportier feel), 2=Predictive (smoother, anticipatory speed changes that prioritize comfort)."
       >
         <Select
@@ -81,6 +85,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Planplus Longitudinal"
         source="sunnypilot"
         since="2025"
+        spKey="PlanplusControl"
         description="PlanplusControl — SP-developed planner for smoother, more predictive acceleration and braking."
       >
         <Toggle
@@ -98,6 +103,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Custom ACC Increments"
         source="sunnypilot"
         since="2024"
+        spKey="CustomAccIncrementsEnabled"
         description="CustomAccIncrementsEnabled — replace stock cruise +/− button step sizes with custom values."
       >
         <Toggle
@@ -110,6 +116,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Short-Press Increment"
         source="sunnypilot"
         since="2024"
+        spKey="CustomAccShortPressIncrement"
         description="CustomAccShortPressIncrement — speed change on a brief tap of the cruise +/− button (km/h)."
       >
         <NumberInput
@@ -128,6 +135,7 @@ export const LongitudinalSection: React.FC = () => {
         label="Long-Press Increment"
         source="sunnypilot"
         since="2024"
+        spKey="CustomAccLongPressIncrement"
         description="CustomAccLongPressIncrement — speed change when the cruise +/− button is held (km/h)."
       >
         <NumberInput

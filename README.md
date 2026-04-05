@@ -6,7 +6,7 @@
 
 [![Live](https://img.shields.io/badge/Live-sunny--tune.vercel.app-black?logo=vercel&logoColor=white)](https://sunny-tune.vercel.app)
 [![API](https://img.shields.io/badge/API-Railway-7B2FBE?logo=railway&logoColor=white)](https://railway.app)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.2-blue)](CHANGELOG.md)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -400,7 +400,20 @@ Then:
 
 1. Add the field to both the `SPConfig` interface and `createDefaultConfig()` in `client/src/types/config.ts`
 2. For dynamically-rendered sections the `<ParamRow>` is auto-generated from the registry
-3. For manually-laid-out sections (e.g. `VehicleSection`), add a `<ParamRow>` in the component
+3. For manually-laid-out sections (e.g. `VehicleSection`), add a `<ParamRow spKey="MY_NEW_FEATURE_PARAM" ...>` in the component
+4. **Optionally** register help text in `client/src/lib/fieldHelp.ts` — when present, a ⓘ icon appears on hover in the config editor and shared config page:
+
+```typescript
+// client/src/lib/fieldHelp.ts — add to FIELD_HELP:
+MY_NEW_FEATURE_PARAM: {
+  summary: "One-sentence description shown in the tooltip.",
+  tips: ["Practical tip for users."],
+  tradeoffs: ["Any downsides or caveats."],
+  defaultNote: "Disabled",
+  recommended: "Enabled for most cars",
+  wikiUrl: "https://sunnylink.wiki/#MyNewFeatureParam",
+},
+```
 
 ---
 
@@ -658,10 +671,15 @@ sunny-tune/
 │   │   ├── api/                    # Axios API client + admin API
 │   │   ├── components/
 │   │   │   ├── config/sections/    # One component per config section
+│   │   │   │   ├── SunnyLinkExportModal.tsx  # SunnyLink device export with validation
+│   │   │   │   └── ...             # Other config modals / shared config card
 │   │   │   ├── layout/             # Header, Layout
-│   │   │   └── ui/                 # Button, Modal, Badge, etc.
+│   │   │   └── ui/                 # Button, Modal, Badge, HelpTooltip, etc.
 │   │   ├── lib/
-│   │   │   └── featureRegistry.ts  # ← Add new SP/Comma AI params here
+│   │   │   ├── featureRegistry.ts        # ← Add new SP/Comma AI params here
+│   │   │   ├── fieldHelp.ts             # ← Register tooltip help text for each spKey
+│   │   │   ├── sunnyLinkValidation.ts   # SunnyLink export pre-flight validation rules
+│   │   │   └── configExport.ts          # JSON + SunnyLink import/export logic
 │   │   ├── pages/
 │   │   │   ├── HomePage.tsx
 │   │   │   ├── ConfiguratorPage.tsx

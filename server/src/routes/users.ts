@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { prisma } from "../config/database";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, registerLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 export const usersRouter = Router();
 
@@ -19,7 +20,8 @@ usersRouter.post(
         userId: user.id,
         createdAt: user.createdAt,
       });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to register user", { err: String(err) });
       res.status(500).json({ error: "Failed to register user" });
     }
   },
@@ -39,7 +41,8 @@ usersRouter.post(
         data: { token: newToken },
       });
       res.json({ token: user.token });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to revoke token", { err: String(err) });
       res.status(500).json({ error: "Failed to revoke token" });
     }
   },
@@ -66,7 +69,8 @@ usersRouter.get(
         return;
       }
       res.json(user);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch user", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch user" });
     }
   },

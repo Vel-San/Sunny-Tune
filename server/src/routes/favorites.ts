@@ -14,6 +14,7 @@ import { prisma } from "../config/database";
 import { validateUuidParams } from "../lib/guards";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
+import { logger } from "../lib/logger";
 
 export const favoritesRouter = Router();
 
@@ -48,7 +49,8 @@ favoritesRouter.post(
       });
 
       res.status(201).json(favorite);
-    } catch {
+    } catch (err) {
+      logger.error("Failed to save favorite", { err: String(err) });
       res.status(500).json({ error: "Failed to save favorite" });
     }
   },
@@ -65,7 +67,8 @@ favoritesRouter.delete(
         where: { userId: req.userId!, configId: req.params.configId },
       });
       res.status(204).send();
-    } catch {
+    } catch (err) {
+      logger.error("Failed to remove favorite", { err: String(err) });
       res.status(500).json({ error: "Failed to remove favorite" });
     }
   },
@@ -129,7 +132,8 @@ favoritesRouter.get(
           };
         }),
       );
-    } catch {
+    } catch (err) {
+      logger.error("Failed to fetch favorites", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch favorites" });
     }
   },
@@ -149,7 +153,8 @@ favoritesRouter.get(
         },
       });
       res.json({ isFavorited: !!favorite });
-    } catch {
+    } catch (err) {
+      logger.error("Failed to check favorite status", { err: String(err) });
       res.status(500).json({ error: "Failed to check favorite status" });
     }
   },

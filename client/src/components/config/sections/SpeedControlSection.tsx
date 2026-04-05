@@ -50,6 +50,7 @@ export const SpeedControlSection: React.FC = () => {
           label="Enable SLC"
           source="sunnypilot"
           since="2022"
+          spKey="SpeedLimitMode"
           description="SpeedLimitMode — automatically adjust cruise speed to match posted speed limits."
         >
           <Toggle
@@ -64,6 +65,7 @@ export const SpeedControlSection: React.FC = () => {
               label="SLC Policy"
               source="sunnypilot"
               since="2023"
+              spKey="SpeedLimitPolicy"
               description="SpeedLimitPolicy — data source and fallback strategy for speed limit data."
             >
               <Select
@@ -77,6 +79,7 @@ export const SpeedControlSection: React.FC = () => {
               label="Speed Above Limit"
               source="sunnypilot"
               since="2022"
+              spKey="SpeedLimitOffsetType"
               description="SpeedLimitOffsetType — how much faster than the posted limit to cruise."
             >
               <Select
@@ -130,6 +133,7 @@ export const SpeedControlSection: React.FC = () => {
           label="Vision Turn Speed Control"
           source="sunnypilot"
           since="2023"
+          spKey="SmartCruiseControlVision"
           description="SmartCruiseControlVision — use camera-detected curve geometry to pre-slow for turns."
         >
           <Toggle
@@ -142,6 +146,7 @@ export const SpeedControlSection: React.FC = () => {
           label="Map Turn Speed Control"
           source="sunnypilot"
           since="2023"
+          spKey="SmartCruiseControlMap"
           description="SmartCruiseControlMap — use OSM map data to look ahead for curves and slow pre-emptively."
         >
           <Toggle

@@ -9,6 +9,49 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.0.2",
+    date: "2026-04-05",
+    tags: ["feature", "fix", "ux"],
+    changes: [
+      {
+        type: "added",
+        text: "Context-sensitive help tooltips on every config parameter — hover the ⓘ icon to see a description, recommended value, tips, and tradeoffs sourced from the SunnyLink wiki",
+      },
+      {
+        type: "added",
+        text: "SunnyLink export modal — review your config as a SunnyLink-compatible JSON payload, see pre-flight validation warnings (e.g. conflicting settings), and download a device-ready file",
+      },
+      {
+        type: "added",
+        text: "SunnyLink export available on the Shared Config page for config owners, not just inside the editor",
+      },
+      {
+        type: "fixed",
+        text: "Help tooltip panel no longer clipped or hidden by section card borders — panel now renders in a React Portal at document.body level with viewport-aware smart positioning (auto-flips left/right when near screen edge)",
+      },
+      {
+        type: "fixed",
+        text: "Section auto-scroll (sidebar nav + mobile section pills + hash deep-links) now lands with correct clearance above the sticky header + name bar — was previously under-scrolled by ~33px on desktop",
+      },
+      {
+        type: "added",
+        text: "Structured server logging: every HTTP request now logged with method, path, status, and duration; slow requests (>500 ms) flagged automatically. Dev shows coloured human-readable output; production emits newline-delimited JSON parseable by Railway, Vercel Log Drains, Datadog, etc.",
+      },
+      {
+        type: "added",
+        text: "Client-side logger: API errors and unhandled exceptions always reported (visible in Vercel Runtime Logs); debug/info/warn output only shown in development builds",
+      },
+      {
+        type: "changed",
+        text: "All bare catch blocks across every server route and middleware now capture and log errors via the structured logger — previously all server-side exceptions were silently swallowed with no trace in logs",
+      },
+      {
+        type: "added",
+        text: "Prisma DB errors and warnings now forwarded through the structured logger so database issues appear in Railway / production logs alongside application errors",
+      },
+    ],
+  },
+  {
     version: "2.0.1",
     date: "2026-04-05",
     tags: ["feature", "fix", "ux", "mobile"],

@@ -16,7 +16,7 @@ import { compare } from "bcryptjs";
 import { timingSafeEqual } from "crypto";
 import { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-
+import { logger } from "../lib/logger";
 /**
  * Strict rate limiter applied to all admin endpoints.
  * Limits to 10 requests per minute per IP address.
@@ -59,6 +59,7 @@ export async function adminAuth(
     (!secretHash || secretHash.trim().length === 0) &&
     (!secretPlain || secretPlain.length < 8)
   ) {
+    logger.warn("Admin request blocked: admin secret not configured");
     res
       .status(503)
       .json({ error: "Admin panel is not configured on this server" });
@@ -80,6 +81,10 @@ export async function adminAuth(
       req.socket.remoteAddress ??
       "";
     if (!allowedIps.includes(clientIp)) {
+      logger.warn("Admin access denied: IP not allowlisted", {
+        ip: clientIp,
+        path: req.path,
+      });
       res.status(403).json({ error: "Access denied" });
       return;
     }
@@ -88,6 +93,9 @@ export async function adminAuth(
   const provided = req.headers["x-admin-secret"];
 
   if (typeof provided !== "string" || provided.length === 0) {
+    logger.warn("Admin request rejected: missing X-Admin-Secret header", {
+      path: req.path,
+    });
     res.status(401).json({ error: "Missing X-Admin-Secret header" });
     return;
   }
@@ -97,11 +105,16 @@ export async function adminAuth(
     try {
       const match = await compare(provided, secretHash.trim());
       if (!match) {
+        logger.warn("Admin auth failed: invalid secret (bcrypt mode)", {
+          path: req.path,
+        });
         res.status(401).json({ error: "Invalid admin secret" });
         return;
       }
+      logger.debug("Admin authenticated (bcrypt mode)", { path: req.path });
       next();
-    } catch {
+    } catch (err) {
+      logger.error("Admin authentication error", { err: String(err) });
       res.status(500).json({ error: "Admin authentication error" });
     }
     return;
@@ -115,9 +128,13 @@ export async function adminAuth(
   const match = timingSafeEqual(secretBuf, providedBuf);
 
   if (!match || provided.length !== secretPlain!.length) {
+    logger.warn("Admin auth failed: invalid secret (plaintext mode)", {
+      path: req.path,
+    });
     res.status(401).json({ error: "Invalid admin secret" });
     return;
   }
 
+  logger.debug("Admin authenticated (plaintext mode)", { path: req.path });
   next();
 }

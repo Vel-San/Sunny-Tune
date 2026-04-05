@@ -1,6 +1,8 @@
 import { clsx } from "clsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
+import { FIELD_HELP } from "../../lib/fieldHelp";
+import { HelpTooltip } from "../ui/HelpTooltip";
 
 interface ConfigSectionProps {
   id: string;
@@ -112,8 +114,13 @@ export const ParamRow: React.FC<{
   wide?: boolean;
   /** When set, shows a small SP or OP chip next to the label. */
   source?: "sunnypilot" | "openpilot";
-  /** Year this feature was introduced — shown as a small \"Since YYYY\" badge. */
+  /** Year this feature was introduced — shown as a small "Since YYYY" badge. */
   since?: string;
+  /**
+   * The exact openpilot / sunnypilot parameter name.
+   * When provided, a ⓘ tooltip icon is shown sourced from FIELD_HELP.
+   */
+  spKey?: string;
 }> = ({
   label,
   description,
@@ -122,39 +129,50 @@ export const ParamRow: React.FC<{
   wide = false,
   source,
   since,
-}) => (
-  <div
-    className={clsx(
-      "flex gap-4",
-      wide
-        ? "flex-col"
-        : "flex-col sm:flex-row sm:items-start sm:justify-between",
-    )}
-  >
-    <div className="flex-1 min-w-0">
-      <div className="flex items-baseline gap-1.5 flex-wrap">
-        <label htmlFor={htmlFor} className="param-label cursor-pointer">
-          {label}
-        </label>
-        {source && <SourceChip source={source} />}
-        {since && (
-          <span
-            className="text-[10px] text-zinc-600 font-mono"
-            title={`Introduced in ${since}`}
-          >
-            {since}
-          </span>
-        )}
-      </div>
-      {description && <p className="param-desc">{description}</p>}
-    </div>
+  spKey,
+}) => {
+  const help = spKey ? FIELD_HELP[spKey] : undefined;
+
+  return (
     <div
       className={clsx(
-        "flex-shrink-0",
-        wide ? "w-full" : "w-full sm:w-auto sm:max-w-xs",
+        "flex gap-4",
+        wide
+          ? "flex-col"
+          : "flex-col sm:flex-row sm:items-start sm:justify-between",
       )}
     >
-      {children}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <label htmlFor={htmlFor} className="param-label cursor-pointer">
+            {label}
+          </label>
+          {source && <SourceChip source={source} />}
+          {since && (
+            <span
+              className="text-[10px] text-zinc-600 font-mono"
+              title={`Introduced in ${since}`}
+            >
+              {since}
+            </span>
+          )}
+          {help && (
+            <HelpTooltip
+              label={typeof label === "string" ? label : String(spKey ?? "")}
+              {...help}
+            />
+          )}
+        </div>
+        {description && <p className="param-desc">{description}</p>}
+      </div>
+      <div
+        className={clsx(
+          "flex-shrink-0",
+          wide ? "w-full" : "w-full sm:w-auto sm:max-w-xs",
+        )}
+      >
+        {children}
+      </div>
     </div>
-  </div>
-);
+  );
+};

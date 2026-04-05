@@ -24,6 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createConfig, fetchConfig, updateConfig } from "../api";
 import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { ShareModal } from "../components/config/ShareModal";
+import { SunnyLinkExportModal } from "../components/config/SunnyLinkExportModal";
 import { AdvancedSection } from "../components/config/sections/AdvancedSection";
 import { CommaAISection } from "../components/config/sections/CommaAISection";
 import { DrivingPersonalitySection } from "../components/config/sections/DrivingPersonalitySection";
@@ -37,7 +38,6 @@ import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import {
-  exportAsSunnyLink,
   exportConfigAsJson,
   ImportValidationError,
   parseImportFile,
@@ -81,6 +81,7 @@ export default function ConfiguratorPage() {
   const [saved, setSaved] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [sunnyLinkExportOpen, setSunnyLinkExportOpen] = useState(false);
 
   // Warn on browser refresh / tab close
   useEffect(() => {
@@ -280,19 +281,15 @@ export default function ConfiguratorPage() {
                   <span className="hidden md:inline">Export</span>
                 </Button>
               )}
-              {editingId && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  leftIcon={<Download className="w-3.5 h-3.5" />}
-                  onClick={() =>
-                    existingConfig && exportAsSunnyLink(existingConfig)
-                  }
-                  title="Export as SunnyLink device JSON (importable via SunnyLink app)"
-                >
-                  <span className="hidden md:inline">SunnyLink</span>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<Download className="w-3.5 h-3.5" />}
+                onClick={() => setSunnyLinkExportOpen(true)}
+                title="Export as SunnyLink device JSON (importable via SunnyLink app)"
+              >
+                <span className="hidden md:inline">SunnyLink</span>
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"
@@ -365,37 +362,37 @@ export default function ConfiguratorPage() {
             </div>
           )}
 
-          <div id="vehicle" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="vehicle" className="scroll-mt-48 lg:scroll-mt-32">
             <VehicleSection />
           </div>
           <div
             id="driving-personality"
-            className="scroll-mt-44 lg:scroll-mt-20"
+            className="scroll-mt-48 lg:scroll-mt-32"
           >
             <DrivingPersonalitySection />
           </div>
-          <div id="lateral" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="lateral" className="scroll-mt-48 lg:scroll-mt-32">
             <LateralControlSection />
           </div>
-          <div id="longitudinal" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="longitudinal" className="scroll-mt-48 lg:scroll-mt-32">
             <LongitudinalSection />
           </div>
-          <div id="speed-control" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="speed-control" className="scroll-mt-48 lg:scroll-mt-32">
             <SpeedControlSection />
           </div>
-          <div id="lane-change" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="lane-change" className="scroll-mt-48 lg:scroll-mt-32">
             <LaneChangeSection />
           </div>
-          <div id="navigation" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="navigation" className="scroll-mt-48 lg:scroll-mt-32">
             <NavigationSection />
           </div>
-          <div id="interface" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="interface" className="scroll-mt-48 lg:scroll-mt-32">
             <InterfaceSection />
           </div>
-          <div id="comma-ai" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="comma-ai" className="scroll-mt-48 lg:scroll-mt-32">
             <CommaAISection />
           </div>
-          <div id="advanced" className="scroll-mt-44 lg:scroll-mt-20">
+          <div id="advanced" className="scroll-mt-48 lg:scroll-mt-32">
             <AdvancedSection />
           </div>
         </div>
@@ -407,6 +404,15 @@ export default function ConfiguratorPage() {
           onClose={() => setShareOpen(false)}
           configId={editingId}
           configName={editingName}
+        />
+      )}
+
+      {/* SunnyLink export review modal */}
+      {sunnyLinkExportOpen && (
+        <SunnyLinkExportModal
+          config={editingConfig}
+          name={editingName}
+          onClose={() => setSunnyLinkExportOpen(false)}
         />
       )}
 
