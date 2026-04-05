@@ -31,15 +31,15 @@ export interface DiffEntry {
 const SECTION_LABELS: Record<string, string> = {
   metadata: "Metadata",
   vehicle: "Vehicle",
-  drivingPersonality: "Driving Personality",
-  lateral: "Lateral Control",
-  longitudinal: "Longitudinal Control",
-  speedControl: "Speed Control",
-  laneChange: "Lane Change",
-  navigation: "Navigation",
-  interface: "Interface & Display",
-  commaAI: "Comma AI Core",
-  advanced: "Advanced",
+  drivingPersonality: "Toggles",
+  lateral: "Steering",
+  longitudinal: "Cruise",
+  speedControl: "Cruise — Speed Limit",
+  laneChange: "Steering — Lane Change",
+  navigation: "Maps",
+  interface: "Visuals",
+  commaAI: "Device",
+  advanced: "Developer",
 };
 
 /** Build a quick lookup: "section.field" → registry label */

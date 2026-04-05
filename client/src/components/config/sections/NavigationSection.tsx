@@ -12,15 +12,13 @@ export const NavigationSection: React.FC = () => {
 
   return (
     <ConfigSection
-      id="navigation"
+      id="maps"
       icon={Map}
-      title="Navigation & Maps"
-      subtitle="OSM map data for speed limits and road information"
+      title="Maps"
+      subtitle="OSM local maps for speed limits and road information"
     >
       <ParamRow
         label="OSM Integration"
-        source="sunnypilot"
-        since="2024"
         spKey="OsmLocal"
         description="OsmLocal — download and use OpenStreetMap data for speed limits, road classifications, and curve speed control."
       >

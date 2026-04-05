@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
   AlertCircle,
-  ArrowLeftRight,
   ArrowUpDown,
   Car,
   CheckCircle2,
@@ -15,7 +14,6 @@ import {
   Monitor,
   Save,
   Share2,
-  TrendingUp,
   Upload,
   Wrench,
 } from "lucide-react";
@@ -29,11 +27,9 @@ import { AdvancedSection } from "../components/config/sections/AdvancedSection";
 import { CommaAISection } from "../components/config/sections/CommaAISection";
 import { DrivingPersonalitySection } from "../components/config/sections/DrivingPersonalitySection";
 import { InterfaceSection } from "../components/config/sections/InterfaceSection";
-import { LaneChangeSection } from "../components/config/sections/LaneChangeSection";
 import { LateralControlSection } from "../components/config/sections/LateralControlSection";
 import { LongitudinalSection } from "../components/config/sections/LongitudinalSection";
 import { NavigationSection } from "../components/config/sections/NavigationSection";
-import { SpeedControlSection } from "../components/config/sections/SpeedControlSection";
 import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -45,16 +41,14 @@ import {
 import { useConfigStore } from "../store/configStore";
 
 const SECTIONS = [
-  { id: "vehicle", label: "Vehicle", icon: Car },
-  { id: "driving-personality", label: "Driving", icon: Gauge },
-  { id: "lateral", label: "Lateral", icon: GitBranch },
-  { id: "longitudinal", label: "Longitudinal", icon: ArrowUpDown },
-  { id: "speed-control", label: "Speed", icon: TrendingUp },
-  { id: "lane-change", label: "Lane Change", icon: ArrowLeftRight },
-  { id: "navigation", label: "Navigation", icon: Map },
-  { id: "interface", label: "Interface", icon: Monitor },
-  { id: "comma-ai", label: "Comma AI", icon: Cpu },
-  { id: "advanced", label: "Advanced", icon: Wrench },
+  { id: "vehicle",    label: "Vehicle",   icon: Car },
+  { id: "toggles",    label: "Toggles",   icon: Gauge },
+  { id: "steering",   label: "Steering",  icon: GitBranch },
+  { id: "cruise",     label: "Cruise",    icon: ArrowUpDown },
+  { id: "maps",       label: "Maps",      icon: Map },
+  { id: "visuals",    label: "Visuals",   icon: Monitor },
+  { id: "device",     label: "Device",    icon: Cpu },
+  { id: "developer",  label: "Developer", icon: Wrench },
 ];
 
 export default function ConfiguratorPage() {
@@ -365,34 +359,25 @@ export default function ConfiguratorPage() {
           <div id="vehicle" className="scroll-mt-48 lg:scroll-mt-32">
             <VehicleSection />
           </div>
-          <div
-            id="driving-personality"
-            className="scroll-mt-48 lg:scroll-mt-32"
-          >
+          <div id="toggles" className="scroll-mt-48 lg:scroll-mt-32">
             <DrivingPersonalitySection />
           </div>
-          <div id="lateral" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="steering" className="scroll-mt-48 lg:scroll-mt-32">
             <LateralControlSection />
           </div>
-          <div id="longitudinal" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="cruise" className="scroll-mt-48 lg:scroll-mt-32">
             <LongitudinalSection />
           </div>
-          <div id="speed-control" className="scroll-mt-48 lg:scroll-mt-32">
-            <SpeedControlSection />
-          </div>
-          <div id="lane-change" className="scroll-mt-48 lg:scroll-mt-32">
-            <LaneChangeSection />
-          </div>
-          <div id="navigation" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="maps" className="scroll-mt-48 lg:scroll-mt-32">
             <NavigationSection />
           </div>
-          <div id="interface" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="visuals" className="scroll-mt-48 lg:scroll-mt-32">
             <InterfaceSection />
           </div>
-          <div id="comma-ai" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="device" className="scroll-mt-48 lg:scroll-mt-32">
             <CommaAISection />
           </div>
-          <div id="advanced" className="scroll-mt-48 lg:scroll-mt-32">
+          <div id="developer" className="scroll-mt-48 lg:scroll-mt-32">
             <AdvancedSection />
           </div>
         </div>

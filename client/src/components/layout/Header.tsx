@@ -15,6 +15,7 @@ import {
   Info,
   KeyRound,
   LayoutList,
+  LogIn,
   Menu,
   RotateCcw,
   Star,
@@ -29,22 +30,32 @@ import {
   fetchUnreadCount,
   markNotificationsRead,
 } from "../../api";
+import { DOCS_AUDIT_WORKFLOW_URL, DOCS_SYNC_DATE } from "../../lib/docsSync";
+import { APP_VERSION } from "../../lib/version";
 import { useAuthStore } from "../../store/authStore";
 import type { NotificationRecord } from "../../types/config";
 import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 import { Modal } from "../ui/Modal";
 
 export const Header: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { user, token, rerolling, rerollToken } = useAuthStore();
+  const { user, token, rerolling, importing, rerollToken, importToken } = useAuthStore();
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rollConfirm, setRollConfirm] = useState(false);
+  const [importMode, setImportMode] = useState(false);
+  const [importValue, setImportValue] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Changelog glow: show pulse dot when user hasn't seen the current version
+  const [hasNewVersion, setHasNewVersion] = useState(
+    () => localStorage.getItem("sunnyTune_lastSeenVersion") !== APP_VERSION,
+  );
 
   // Poll unread count every 60 s — skip entirely when the user has no token
   const { data: unreadCount = 0 } = useQuery({
@@ -125,6 +136,15 @@ export const Header: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleImport = async () => {
+    await importToken(importValue);
+    const err = useAuthStore.getState().error;
+    if (!err) {
+      setImportMode(false);
+      setImportValue("");
+    }
+  };
+
   const handleReroll = async () => {
     await rerollToken();
     setRollConfirm(false);
@@ -138,14 +158,13 @@ export const Header: React.FC = () => {
     { to: "/configs", label: "My Configs", icon: LayoutList },
     { to: "/dashboard", label: "Dashboard", icon: BarChart2 },
     { to: "/changelog", label: "Changelog", icon: Tag },
-    { to: "/docs", label: "Docs", icon: Book },
-    { to: "/about", label: "About", icon: Info },
+    { to: "/docs", label: "SunnyTune Docs", icon: Book },
   ];
 
   return (
     <>
       <header className="sticky top-0 z-30 bg-zinc-950 border-b border-zinc-800">
-        <div className="w-full max-w-7xl mx-auto px-4 h-[57px] relative flex items-center">
+        <div className="w-full max-w-[1600px] mx-auto px-4 h-[57px] relative flex items-center">
           {/* Logo — left-anchored */}
           <div className="flex items-center">
             <Link
@@ -167,6 +186,12 @@ export const Header: React.FC = () => {
               <Link
                 key={to}
                 to={to}
+                onClick={() => {
+                  if (to === "/changelog" && hasNewVersion) {
+                    localStorage.setItem("sunnyTune_lastSeenVersion", APP_VERSION);
+                    setHasNewVersion(false);
+                  }
+                }}
                 className={clsx(
                   "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
                   isActive(to)
@@ -176,16 +201,40 @@ export const Header: React.FC = () => {
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
+                {to === "/changelog" && hasNewVersion && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                )}
               </Link>
             ))}
             <a
-              href="https://sunnylink.wiki/"
+              href="https://docs.sunnypilot.ai/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              Wiki
+              SunnyPilot Docs
+            </a>
+            <Link
+              to="/about"
+              className={clsx(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
+                isActive("/about")
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900",
+              )}
+            >
+              <Info className="w-3.5 h-3.5" />
+              About
+            </Link>
+            <a
+              href={DOCS_AUDIT_WORKFLOW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`SP Docs last synced: ${DOCS_SYNC_DATE}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] text-amber-600/70 hover:text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 transition-colors border border-amber-700/30 whitespace-nowrap"
+            >
+              SP Docs Sync: {DOCS_SYNC_DATE}
             </a>
           </nav>
 
@@ -311,7 +360,13 @@ export const Header: React.FC = () => {
               <Link
                 key={to}
                 to={to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (to === "/changelog" && hasNewVersion) {
+                    localStorage.setItem("sunnyTune_lastSeenVersion", APP_VERSION);
+                    setHasNewVersion(false);
+                  }
+                }}
                 className={clsx(
                   "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive(to)
@@ -321,18 +376,34 @@ export const Header: React.FC = () => {
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 {label}
+                {to === "/changelog" && hasNewVersion && (
+                  <span className="ml-auto w-2 h-2 rounded-full bg-blue-400 animate-pulse flex-shrink-0" />
+                )}
               </Link>
             ))}
             <a
-              href="https://sunnylink.wiki/"
+              href="https://docs.sunnypilot.ai/"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
             >
               <ExternalLink className="w-4 h-4 flex-shrink-0" />
-              SunnyLink Wiki
+              SunnyPilot Docs
             </a>
+            <Link
+              to="/about"
+              onClick={() => setMobileMenuOpen(false)}
+              className={clsx(
+                "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                isActive("/about")
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900",
+              )}
+            >
+              <Info className="w-4 h-4 flex-shrink-0" />
+              About
+            </Link>
 
             {/* Token row in mobile menu */}
             <div className="pt-2 border-t border-zinc-800 mt-2">
@@ -398,6 +469,62 @@ export const Header: React.FC = () => {
               <p>
                 Member since: {new Date(user.createdAt).toLocaleDateString()}
               </p>
+            </div>
+          )}
+
+          {/* Import existing token from another device */}
+          {!rollConfirm && (
+            <div className="border-t border-zinc-800 pt-4 space-y-2">
+              {!importMode ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={<LogIn className="w-3.5 h-3.5" />}
+                  onClick={() => setImportMode(true)}
+                  className="w-full text-zinc-500"
+                >
+                  Use token from another device…
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">
+                    Paste your token from another device:
+                  </p>
+                  <Input
+                    value={importValue}
+                    onChange={(e) => setImportValue(e.target.value)}
+                    placeholder="sp_…"
+                    className="font-mono text-xs"
+                  />
+                  {useAuthStore.getState().error && (
+                    <p className="text-xs text-red-400">
+                      {useAuthStore.getState().error}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      loading={importing}
+                      disabled={!importValue.trim()}
+                      onClick={handleImport}
+                    >
+                      Confirm
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={importing}
+                      onClick={() => {
+                        setImportMode(false);
+                        setImportValue("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -1,4 +1,6 @@
 import { Tag } from "lucide-react";
+import { useEffect } from "react";
+import { APP_VERSION } from "../lib/version";
 
 interface Release {
   version: string;
@@ -9,13 +11,44 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.1.0",
+    date: "2026-04-06",
+    tags: ["feature", "ux", "fix"],
+    changes: [
+      {
+        type: "added",
+        text: "Subsection headers inside every config section — both in the config editor and the shared config viewer, making it easier to navigate large parameter sets at a glance",
+      },
+      {
+        type: "added",
+        text: "Config comparison feature — compare any public shared config (or your own saved configs) against the currently viewed config, with a per-section diff showing old and new values",
+      },
+      {
+        type: "added",
+        text: "Token import — in the Access Token modal, paste a token from another device to take over your existing account without regenerating a new token",
+      },
+      {
+        type: "added",
+        text: "Changelog glow pulse — the Changelog nav item shows a blue pulsing dot when a new app version has been released and the user hasn't visited the page yet",
+      },
+      {
+        type: "added",
+        text: "SP Docs Sync badge — a small badge in the header nav links to the GitHub Actions docs-audit workflow, showing the last date the sunnypilot docs were synced with the tooltip database",
+      },
+      {
+        type: "changed",
+        text: "All help-tooltip doc links now point to the sunnypilot community documentation hub (community.sunnypilot.ai) instead of individual docs.sunnypilot.ai anchors",
+      },
+    ],
+  },
+  {
     version: "2.0.2",
     date: "2026-04-05",
     tags: ["feature", "fix", "ux"],
     changes: [
       {
         type: "added",
-        text: "Context-sensitive help tooltips on every config parameter — hover the ⓘ icon to see a description, recommended value, tips, and tradeoffs sourced from the SunnyLink wiki",
+        text: "Context-sensitive help tooltips on every config parameter — hover the ⓘ icon to see a description, recommended value, tips, and tradeoffs sourced from the official sunnypilot docs",
       },
       {
         type: "added",
@@ -502,6 +535,11 @@ const TYPE_LABELS: Record<string, { label: string; className: string }> = {
 };
 
 export default function ChangelogPage() {
+  // Mark current version as seen so the header glow dot goes away
+  useEffect(() => {
+    localStorage.setItem("sunnyTune_lastSeenVersion", APP_VERSION);
+  }, []);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-10 space-y-10">
       <div>

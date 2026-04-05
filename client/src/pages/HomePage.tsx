@@ -1,10 +1,10 @@
 import {
-  ArrowRight,
-  Compass,
-  GitCompare,
-  Plus,
-  Share2,
-  Sliders,
+    ArrowRight,
+    Compass,
+    GitCompare,
+    Plus,
+    Share2,
+    Sliders,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
@@ -13,7 +13,7 @@ const FEATURES = [
   {
     icon: Sliders,
     title: "200+ Parameters",
-    desc: "Lateral (torque, PID, INDI, LQR), longitudinal, speed control (SLC, VTSC, MTSC), lane change, navigation, interface, and all Comma AI core params — organised by section with source chips and since-year labels.",
+    desc: "Steering, Cruise, Speed Limit (SLC, SCC-V, SCC-M), Steering — Lane Change, Maps, Visuals, and Device & Toggles (MADS, recording, connectivity) — all matching the official SunnyLink section layout.",
   },
   {
     icon: Share2,

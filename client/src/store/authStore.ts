@@ -9,10 +9,12 @@ interface AuthState {
   initialized: boolean;
   loading: boolean;
   rerolling: boolean;
+  importing: boolean;
   error: string | null;
   init: () => Promise<void>;
   logout: () => void;
   rerollToken: () => Promise<void>;
+  importToken: (pastedToken: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -21,6 +23,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialized: false,
   loading: false,
   rerolling: false,
+  importing: false,
   error: null,
 
   init: async () => {
@@ -83,6 +86,29 @@ export const useAuthStore = create<AuthState>((set) => ({
         err instanceof Error ? err.message : "Failed to regenerate token";
       log.error("Token revoke failed", { err: msg });
       set({ error: msg, rerolling: false });
+    }
+  },
+
+  importToken: async (pastedToken: string) => {
+    const trimmed = pastedToken.trim();
+    if (!trimmed) return;
+    set({ importing: true, error: null });
+    try {
+      // Temporarily set the token so fetchMe uses it
+      localStorage.setItem("sp_user_token", trimmed);
+      const user = await fetchMe();
+      set({ token: trimmed, user, importing: false });
+      log.info("Token imported from paste");
+    } catch (err) {
+      // Revert — the pasted token was invalid
+      const msg =
+        err instanceof Error ? err.message : "Token not recognised by server";
+      log.warn("Token import failed", { err: msg });
+      // Restore the old token if there was one
+      const old = localStorage.getItem("sp_user_token");
+      if (old !== trimmed) localStorage.setItem("sp_user_token", old ?? "");
+      else localStorage.removeItem("sp_user_token");
+      set({ importing: false, error: `Invalid token: ${msg}` });
     }
   },
 }));

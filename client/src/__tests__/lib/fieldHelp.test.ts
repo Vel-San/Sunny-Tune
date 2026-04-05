@@ -5,7 +5,7 @@
  * - FIELD_HELP is a non-empty record
  * - All entries have at least one populated field (summary, tips, or tradeoffs)
  * - Known critical SP keys are present (the ones shown in the configurator)
- * - FieldHelp entries with wikiUrl use valid https URLs
+ * - FieldHelp entries with docsUrl use valid https URLs
  * - No entry has an empty tips or tradeoffs array (should be undefined or non-empty)
  * - HelpTooltip-relevant keys align with keys used in ConfigSection spKey props
  */
@@ -38,7 +38,7 @@ describe("FIELD_HELP — basic structure", () => {
         (help.tradeoffs && help.tradeoffs.length > 0) ||
         help.recommended ||
         help.defaultNote ||
-        help.wikiUrl;
+        help.docsUrl;
       expect(hasContent, `Entry for "${key}" has no content`).toBeTruthy();
     }
   });
@@ -70,26 +70,26 @@ describe("FIELD_HELP — array fields are never empty", () => {
   });
 });
 
-// ─── Wiki URLs ────────────────────────────────────────────────────────────────
+// ─── Docs URLs ────────────────────────────────────────────────────────────────
 
-describe("FIELD_HELP — wikiUrl values", () => {
-  it("all wikiUrl values start with https://", () => {
+describe("FIELD_HELP — docsUrl values", () => {
+  it("all docsUrl values start with https://", () => {
     for (const [key, help] of Object.entries(FIELD_HELP)) {
-      if (help.wikiUrl) {
+      if (help.docsUrl) {
         expect(
-          help.wikiUrl.startsWith("https://"),
-          `Entry "${key}".wikiUrl does not start with https://`,
+          help.docsUrl.startsWith("https://"),
+          `Entry "${key}".docsUrl does not start with https://`,
         ).toBe(true);
       }
     }
   });
 
-  it("wikiUrl values do not contain whitespace", () => {
+  it("docsUrl values do not contain whitespace", () => {
     for (const [key, help] of Object.entries(FIELD_HELP)) {
-      if (help.wikiUrl) {
+      if (help.docsUrl) {
         expect(
-          /\s/.test(help.wikiUrl),
-          `Entry "${key}".wikiUrl contains whitespace`,
+          /\s/.test(help.docsUrl),
+          `Entry "${key}".docsUrl contains whitespace`,
         ).toBe(false);
       }
     }
@@ -178,7 +178,7 @@ describe("FIELD_HELP — FieldHelp interface conformance", () => {
       "summary",
       "tips",
       "tradeoffs",
-      "wikiUrl",
+      "docsUrl",
       "recommended",
       "defaultNote",
     ]);

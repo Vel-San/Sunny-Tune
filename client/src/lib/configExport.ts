@@ -231,7 +231,7 @@ function slBranch(val: unknown): import("../types/config").SPBranch {
 function slOffsetType(offsetType: unknown, useMetric: boolean): SLCOffsetType {
   const t = slInt(offsetType, -1);
   if (t === 0) return "percentage";
-  if (t === 1) return useMetric ? "fixed_kph" : "fixed_mph";
+  if (t === 1) return "fixed";
   return "none";
 }
 
@@ -407,9 +407,12 @@ export function parseSunnyLinkExportObject(
   );
 
   // ── speedControl ─────────────────────────────────────────────────────────
-  const slcMode = slInt(s["SpeedLimitMode"], 0);
-  cfg.speedControl.speedLimitControl.enabled = slcMode > 0;
-  cfg.speedControl.speedLimitControl.policy = slInt(s["SpeedLimitPolicy"], 0);
+  const slcMode = Math.max(0, Math.min(3, slInt(s["SpeedLimitMode"], 0))) as 0 | 1 | 2 | 3;
+  cfg.speedControl.speedLimitControl.mode = slcMode;
+  cfg.speedControl.speedLimitControl.policy = slInt(
+    s["SpeedLimitSource"] ?? s["SpeedLimitPolicy"],
+    0,
+  );
   cfg.speedControl.speedLimitControl.offsetType = slOffsetType(
     s["SpeedLimitOffsetType"],
     cfg.interface.useMetric,
@@ -420,6 +423,10 @@ export function parseSunnyLinkExportObject(
   );
   cfg.speedControl.visionEnabled = slBool(s["SmartCruiseControlVision"], false);
   cfg.speedControl.mapEnabled = slBool(s["SmartCruiseControlMap"], false);
+  cfg.speedControl.icbmEnabled = slBool(
+    s["IntelligentCruiseButtonManagement"],
+    false,
+  );
 
   // ── navigation ───────────────────────────────────────────────────────────
   cfg.navigation.osmEnabled = slBool(s["OsmLocal"], false);
@@ -438,7 +445,12 @@ export function parseSunnyLinkExportObject(
   cfg.interface.roadNameDisplay = slBool(s["RoadNameToggle"], false);
   cfg.interface.quietMode = slBool(s["QuietMode"], false);
   cfg.interface.hideVegoUI = slBool(s["HideVEgoUI"], false);
+  cfg.interface.trueVegoUI = slBool(s["TrueVEgoUI"], false);
   cfg.interface.torqueBar = slBool(s["TorqueBar"], false);
+  cfg.interface.blindSpotHUD = slBool(s["BlindSpotDetection"], false);
+  cfg.interface.steeringArc = slBool(s["SteeringArc"], false);
+  cfg.interface.chevronInfo = slBool(s["ChevronInfo"], false);
+  cfg.interface.rainbowMode = slBool(s["RainbowMode"], false);
 
   // ── commaAI ──────────────────────────────────────────────────────────────
   cfg.commaAI.recordDrives = slBool(s["RecordFront"], true);
@@ -537,8 +549,7 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
   const offsetTypeMap: Record<SLCOffsetType, number> = {
     none: -1,
     percentage: 0,
-    fixed_mph: 1,
-    fixed_kph: 1,
+    fixed: 1,
   };
 
   const settings: SunnyLinkSettings = {
@@ -585,13 +596,15 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     BlinkerLateralReengageDelay: String(c.laneChange.blinkerReengageDelay),
 
     // speed control
-    SpeedLimitMode: c.speedControl.speedLimitControl.enabled ? 1 : 0,
+    SpeedLimitMode: c.speedControl.speedLimitControl.mode,
+    SpeedLimitSource: c.speedControl.speedLimitControl.policy,
     SpeedLimitPolicy: c.speedControl.speedLimitControl.policy,
     SpeedLimitOffsetType:
       offsetTypeMap[c.speedControl.speedLimitControl.offsetType] ?? -1,
     SpeedLimitValueOffset: c.speedControl.speedLimitControl.offsetValue,
     SmartCruiseControlVision: c.speedControl.visionEnabled,
     SmartCruiseControlMap: c.speedControl.mapEnabled,
+    IntelligentCruiseButtonManagement: c.speedControl.icbmEnabled,
 
     // navigation
     OsmLocal: c.navigation.osmEnabled ? "True" : "False",
@@ -610,7 +623,12 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     RoadNameToggle: c.interface.roadNameDisplay ? "True" : "False",
     QuietMode: c.interface.quietMode ? "True" : "False",
     HideVEgoUI: c.interface.hideVegoUI ? "True" : "False",
+    TrueVEgoUI: c.interface.trueVegoUI ? "True" : "False",
     TorqueBar: c.interface.torqueBar ? "True" : "False",
+    BlindSpotDetection: c.interface.blindSpotHUD ? "True" : "False",
+    SteeringArc: c.interface.steeringArc ? "True" : "False",
+    ChevronInfo: c.interface.chevronInfo ? "True" : "False",
+    RainbowMode: c.interface.rainbowMode ? "True" : "False",
 
     // commaAI
     RecordFront: c.commaAI.recordDrives ? "True" : "False",

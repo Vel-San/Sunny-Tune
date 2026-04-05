@@ -3,7 +3,7 @@
  * (desktop) or tap (mobile).
  *
  * Shows field description, tips, tradeoffs, default value, and an optional
- * link to the SunnyLink wiki entry.
+ * link to the official sunnypilot docs entry.
  *
  * The panel is rendered via a React Portal at document.body so it is never
  * clipped by any ancestor's overflow:hidden (e.g. the section collapse
@@ -34,7 +34,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   tradeoffs,
   recommended,
   defaultNote,
-  wikiUrl,
+  docsUrl,
 }) => {
   const [open, setOpen] = useState(false);
   /** When true the panel was opened by a click and hover-out won't close it. */
@@ -101,7 +101,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
     tradeoffs?.length ||
     defaultNote ||
     recommended ||
-    wikiUrl;
+    docsUrl;
   if (!hasContent) return null;
 
   const panel =
@@ -206,18 +206,18 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
               )}
             </div>
 
-            {/* Wiki link footer */}
-            {wikiUrl && (
+            {/* Official docs link footer */}
+            {docsUrl && (
               <div className="px-3 py-2 border-t border-zinc-800">
                 <a
-                  href={wikiUrl}
+                  href={docsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
-                  SunnyLink Wiki
+                  sunnypilot Docs
                 </a>
               </div>
             )}

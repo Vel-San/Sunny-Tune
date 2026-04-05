@@ -4,6 +4,22 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.1.0] — 2026-04-06
+
+### Added
+
+- Subsection headers inside every config section — both in the config editor and the shared config viewer, making it easier to navigate large parameter sets at a glance
+- Config comparison feature — compare any public shared config (or your own saved configs) against the currently viewed config, with a per-section diff showing old and new values side-by-side
+- Token import — in the Access Token modal, paste a token from another device to take over your existing account without regenerating a new token
+- Changelog glow pulse — the Changelog nav item shows a blue pulsing dot when a new app version has been released and the user hasn't visited the page yet
+- SP Docs Sync badge — a compact badge in the header links to the GitHub Actions docs-audit workflow, showing when the sunnypilot docs were last synced with the tooltip database
+
+### Changed
+
+- All help-tooltip doc links now point to the sunnypilot community documentation hub (`community.sunnypilot.ai/c/documentation/114`) instead of individual docs anchors
+
+---
+
 ## [2.0.2] — 2026-04-05
 
 ### Added

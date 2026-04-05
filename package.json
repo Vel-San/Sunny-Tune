@@ -16,6 +16,7 @@
     "test": "npm run test --workspace=server && npm run test --workspace=client",
     "test:server": "npm run test --workspace=server",
     "test:client": "npm run test --workspace=client",
+    "docs:audit": "npx tsx scripts/docsAudit.ts",
     "docker:dev:build": "docker compose -p sp-dev -f docker-compose.dev.yml build",
     "docker:dev:build:clean": "docker compose -p sp-dev -f docker-compose.dev.yml build --no-cache",
     "docker:dev:up": "docker compose -p sp-dev -f docker-compose.dev.yml up",

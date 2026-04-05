@@ -13,7 +13,7 @@ export interface ValidationIssue {
   severity: ValidationSeverity;
   field: string;
   message: string;
-  wikiUrl?: string;
+  docsUrl?: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "DynamicExperimentalControl",
       message:
         "Dynamic E2E Switch is ON but Experimental Mode (E2E) is OFF — Dynamic E2E has no effect without it.",
-      wikiUrl: "https://sunnylink.wiki/#DynamicExperimentalControl",
+      docsUrl: "https://docs.sunnypilot.ai/features/cruise/dynamic-experimental-control/",
     });
   }
 
@@ -43,7 +43,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "AlphaLongitudinalEnabled",
       message:
         "⚠️ Alpha Longitudinal is ON — this disables AEB (Automatic Emergency Braking). Confirm your vehicle supports this safely.",
-      wikiUrl: "https://sunnylink.wiki/#AlphaLongitudinal",
+      docsUrl: "https://docs.sunnypilot.ai/features/cruise/alpha-longitudinal/",
     });
   }
 
@@ -54,7 +54,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "NeuralNetworkLateralControl",
       message:
         "Neural Network Lateral is experimental and generally not recommended for modern sunnypilot models. Test carefully.",
-      wikiUrl: "https://sunnylink.wiki/#NeuralNetworkLateralControl",
+      docsUrl: "https://docs.sunnypilot.ai/settings/steering/",
     });
   }
 
@@ -65,7 +65,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "TorqueParamsOverrideEnabled",
       message:
         "Custom Torque Override is ON — verify that friction and latAccelFactor values are correct for your vehicle.",
-      wikiUrl: "https://sunnylink.wiki/#EnableCustomTorqueTuning",
+      docsUrl: "https://docs.sunnypilot.ai/settings/steering/torque/",
     });
   }
 
@@ -80,7 +80,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "Mads",
       message:
         "MADS is OFF but MADS sub-settings (Main Cruise / Steering Mode / Unified Engagement) are configured — they will have no effect.",
-      wikiUrl: "https://sunnylink.wiki/#MadsEnabled",
+      docsUrl: "https://docs.sunnypilot.ai/settings/steering/mads/",
     });
   }
 
@@ -90,7 +90,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       severity: "warning",
       field: "CameraOffset",
       message: `Camera offset (${c.lateral.cameraOffset} m) is near its maximum — this may cause persistent lane departure warnings.`,
-      wikiUrl: "https://sunnylink.wiki/#AdjustCameraOffset",
+      docsUrl: "https://docs.sunnypilot.ai/settings/models/",
     });
   }
 
@@ -105,7 +105,7 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       severity: "warning",
       field: "HyundaiLongitudinalTuning",
       message: `Hyundai Longitudinal Tuning is set to ${c.longitudinal.hyundaiLongTune} but vehicle make is "${c.vehicle.make}". This setting only affects Hyundai/Kia/Genesis vehicles.`,
-      wikiUrl: "https://sunnylink.wiki/#HyundaiLongitudinalTuning",
+      docsUrl: "https://docs.sunnypilot.ai/settings/vehicle/",
     });
   }
 
@@ -116,13 +116,13 @@ export function validateForSunnyLinkExport(c: SPConfig): ValidationIssue[] {
       field: "PlanplusControl",
       message:
         "Planplus Longitudinal is experimental — test carefully before using in heavy traffic.",
-      wikiUrl: "https://sunnylink.wiki/#PlanPlusControls",
+      docsUrl: "https://docs.sunnypilot.ai/settings/cruise/",
     });
   }
 
   // Speed Limit Control with no offset type
   if (
-    c.speedControl.speedLimitControl.enabled &&
+    c.speedControl.speedLimitControl.mode > 0 &&
     c.speedControl.speedLimitControl.offsetType === "none"
   ) {
     issues.push({

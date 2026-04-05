@@ -1,49 +1,48 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-  ArrowLeft,
-  ArrowLeftRight,
-  ArrowUpDown,
-  BarChart3,
-  Calendar,
-  Car,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Copy,
-  Cpu,
-  Download,
-  ExternalLink,
-  Eye,
-  Gauge,
-  GitBranch,
-  GitCompare,
-  GitFork,
-  Heart,
-  Loader2,
-  Lock,
-  Map,
-  Monitor,
-  Share2,
-  Star,
-  Tag,
-  TrendingUp,
-  Wrench,
+    ArrowLeft,
+    ArrowUpDown,
+    BarChart3,
+    Calendar,
+    Car,
+    ChevronDown,
+    ChevronUp,
+    Clock,
+    Copy,
+    Cpu,
+    Download,
+    ExternalLink,
+    Eye,
+    Gauge,
+    GitBranch,
+    GitCompare,
+    GitFork,
+    Heart,
+    Loader2,
+    Lock,
+    Map,
+    Monitor,
+    Share2,
+    Star,
+    Tag,
+    Wrench,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  addFavorite,
-  cloneConfig,
-  deleteRating,
-  fetchFavoriteStatus,
-  fetchMyRating,
-  fetchRatingSummary,
-  fetchSharedConfig,
-  rateConfig,
-  removeFavorite,
+    addFavorite,
+    cloneConfig,
+    deleteRating,
+    fetchFavoriteStatus,
+    fetchMyRating,
+    fetchRatingSummary,
+    fetchSharedConfig,
+    rateConfig,
+    removeFavorite,
 } from "../api";
 import { CommentSection } from "../components/config/CommentSection";
+import { CompareModal } from "../components/config/CompareModal";
 import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
 import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { SunnyLinkExportModal } from "../components/config/SunnyLinkExportModal";
@@ -56,9 +55,9 @@ import { exportConfigAsJson } from "../lib/configExport";
 import { FIELD_HELP } from "../lib/fieldHelp";
 import { useAuthStore } from "../store/authStore";
 import type {
-  ConfigRecord,
-  RatingRecord,
-  RatingSummary,
+    ConfigRecord,
+    RatingRecord,
+    RatingSummary,
 } from "../types/config";
 import { CATEGORIES } from "../types/config";
 
@@ -84,14 +83,14 @@ const ROW: React.FC<{
 }> = ({ label, value, mono, spKey }) => {
   const help = spKey ? FIELD_HELP[spKey] : undefined;
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-0.5 sm:gap-4 py-2 border-b border-zinc-800/60 last:border-0">
-      <span className="text-xs text-zinc-500 sm:flex-shrink-0 sm:w-44 flex items-center gap-1">
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-0.5 sm:gap-4 py-3 border-b border-zinc-700/70 last:border-0">
+      <span className="text-sm text-zinc-400 sm:flex-shrink-0 sm:w-52 flex items-center gap-1">
         {label}
         {help && <HelpTooltip label={label} {...help} />}
       </span>
       <span
         className={clsx(
-          "text-sm text-zinc-200 sm:text-right",
+          "text-base text-zinc-200 sm:text-right",
           mono && "font-mono",
         )}
       >
@@ -132,6 +131,21 @@ const SectionBlock: React.FC<{
     </div>
   );
 };
+
+/** Small subsection header inside a SectionBlock */
+const SubH: React.FC<{ children: React.ReactNode; first?: boolean }> = ({
+  children,
+  first = false,
+}) => (
+  <p
+    className={clsx(
+      "text-xs font-bold uppercase tracking-widest text-zinc-400 pb-1",
+      first ? "pt-4" : "border-t-2 border-zinc-700/60 pt-4 mt-3",
+    )}
+  >
+    {children}
+  </p>
+);
 
 // ─── Rating breakdown bar ─────────────────────────────────────────────────────
 
@@ -237,6 +251,7 @@ export default function SharedConfigPage() {
 
   // ── Diff viewer ────────────────────────────────────────────────────────────
   const [diffOpen, setDiffOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sunnyLinkExportOpen, setSunnyLinkExportOpen] = useState(false);
   const canDiff = !!config?.clonedFrom?.shareToken;
@@ -409,6 +424,15 @@ export default function SharedConfigPage() {
           <Button
             variant="ghost"
             size="sm"
+            leftIcon={<GitCompare className="w-3.5 h-3.5" />}
+            onClick={() => setCompareOpen(true)}
+            title="Compare this config against another shared or your own config"
+          >
+            Compare
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             leftIcon={<Download className="w-3.5 h-3.5" />}
             onClick={() => exportConfigAsJson(config)}
             title="Export config as SunnyTune JSON"
@@ -474,13 +498,15 @@ export default function SharedConfigPage() {
             <BarChart3 className="w-3.5 h-3.5" /> Configuration Details
           </h2>
 
-          <SectionBlock icon={Car} title="Vehicle & Version" defaultOpen>
+          <SectionBlock icon={Car} title="Vehicle" defaultOpen>
+            <SubH first>Vehicle Info</SubH>
             <ROW
               label="Make"
               value={MAKE_LABELS[c.vehicle.make] ?? c.vehicle.make}
             />
             <ROW label="Model" value={c.vehicle.model || "—"} />
             <ROW label="Year" value={c.vehicle.year} mono />
+            <SubH>Hardware &amp; Software</SubH>
             {c.metadata.hardware && (
               <ROW
                 label="Comma AI HW"
@@ -500,20 +526,130 @@ export default function SharedConfigPage() {
             )}
           </SectionBlock>
 
-          <SectionBlock icon={Gauge} title="Driving Personality" defaultOpen>
+          <SectionBlock icon={Gauge} title="Toggles" defaultOpen>
+            <SubH first>Driving Personality</SubH>
             <ROW
               label="Longitudinal Personality"
               spKey="DrivingPersonality"
               value={c.drivingPersonality.longitudinalPersonality}
               mono
             />
+            <SubH>Experimental Mode</SubH>
+            <ROW
+              label="E2E Mode"
+              spKey="ExperimentalMode"
+              value={
+                c.longitudinal.e2eEnabled ? (
+                  <Badge variant="warning">Enabled</Badge>
+                ) : (
+                  "Disabled"
+                )
+              }
+            />
+            <SubH>Safety</SubH>
+            <ROW
+              label="Always-on DM"
+              spKey="AlwaysOnDM"
+              value={c.interface.alwaysOnDM ? "On" : "Off"}
+            />
+            <ROW
+              label="Disengage on Accel"
+              spKey="DisengageOnAccelerator"
+              value={c.commaAI.disengageOnAccelerator ? "On" : "Off"}
+            />
+            <ROW
+              label="LDW"
+              spKey="IsLdwEnabled"
+              value={c.commaAI.ldwEnabled ? "On" : "Off"}
+            />
+            <SubH>Recording &amp; Uploads</SubH>
+            <ROW
+              label="Record Drives"
+              spKey="RecordFront"
+              value={c.commaAI.recordDrives ? "On" : "Off"}
+            />
+            <ROW
+              label="Upload on WiFi Only"
+              spKey="GsmMetered"
+              value={c.commaAI.uploadOnlyOnWifi ? "On" : "Off"}
+            />
+            <ROW
+              label="Record Audio Feedback"
+              spKey="RecordAudioFeedback"
+              value={c.commaAI.recordAudioFeedback ? "On" : "Off"}
+            />
           </SectionBlock>
 
-          <SectionBlock icon={GitBranch} title="Lateral Control">
+          <SectionBlock icon={GitBranch} title="Steering">
+            <SubH first>M.A.D.S.</SubH>
+            <ROW
+              label="MADS"
+              spKey="Mads"
+              value={c.commaAI.mads ? "On" : "Off"}
+            />
+            <ROW
+              label="MADS Main Cruise"
+              spKey="MadsMainCruiseAllowed"
+              value={c.commaAI.madsMainCruise ? "On" : "Off"}
+            />
+            <ROW
+              label="MADS Steering Mode"
+              spKey="MadsSteeringMode"
+              value={
+                (["Remain Active", "Pause", "Disengage"] as const)[
+                  c.commaAI.madsSteeringMode
+                ] ?? String(c.commaAI.madsSteeringMode)
+              }
+            />
+            <ROW
+              label="MADS Unified Engage"
+              spKey="MadsUnifiedEngagementMode"
+              value={c.commaAI.madsUnifiedEngagement ? "On" : "Off"}
+            />
+            <SubH>Lateral Assist</SubH>
+            <ROW
+              label="Enforce Torque"
+              spKey="EnforceTorqueControl"
+              value={c.lateral.enforceTorqueControl ? "On" : "Off"}
+            />
+            <ROW
+              label="NN Model"
+              spKey="NeuralNetworkLateralControl"
+              value={c.lateral.useNNModel ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Blinker Pause Lateral"
+              spKey="BlinkerPauseLateralControl"
+              value={c.laneChange.blinkerPauseLateral ? "On" : "Off"}
+            />
+            <ROW
+              label="Min Speed (Blinker Pause)"
+              spKey="BlinkerMinLateralControlSpeed"
+              value={`${c.laneChange.minimumSpeed} kph`}
+              mono
+            />
+            <ROW
+              label="Blinker Re-engage Delay"
+              spKey="BlinkerLateralReengageDelay"
+              value={`${c.laneChange.blinkerReengageDelay}s`}
+            />
+            <SubH>Torque</SubH>
             <ROW
               label="Camera Offset"
               spKey="CameraOffset"
               value={c.lateral.cameraOffset}
+              mono
+            />
+            <ROW
+              label="Torque Tune"
+              spKey="TorqueControlTune"
+              value={
+                c.lateral.torqueControlTune === 0
+                  ? "0 — Comma stock"
+                  : c.lateral.torqueControlTune === 1
+                    ? "1 — SP"
+                    : "2 — SP+"
+              }
               mono
             />
             <ROW
@@ -522,31 +658,11 @@ export default function SharedConfigPage() {
               value={c.lateral.liveTorque ? "Enabled" : "Disabled"}
             />
             <ROW
-              label="Live Torque Relaxed"
-              spKey="LiveTorqueParamsRelaxedToggle"
-              value={c.lateral.liveTorqueRelaxed ? "On" : "Off"}
-            />
-            <ROW
-              label="Torque Control Tune"
-              spKey="TorqueControlTune"
-              value={c.lateral.torqueControlTune ? "On" : "Off"}
-            />
-            <ROW
-              label="NN Model"
-              spKey="NeuralNetworkLateralControl"
-              value={c.lateral.useNNModel ? "Enabled" : "Disabled"}
-            />
-            <ROW
-              label="Enforce Torque"
-              spKey="EnforceTorqueControl"
-              value={c.lateral.enforceTorqueControl ? "On" : "Off"}
-            />
-            <ROW
               label="LAGD"
               spKey="LagdToggle"
               value={
                 c.lateral.lagdEnabled
-                  ? `On (${c.lateral.lagdDelay}s delay)`
+                  ? `On (${c.lateral.lagdDelay}s)`
                   : "Off"
               }
             />
@@ -566,37 +682,52 @@ export default function SharedConfigPage() {
                 />
               </>
             )}
+            <SubH>Lane Change</SubH>
+            <ROW
+              label="Auto Lane Change"
+              value={c.laneChange.enabled ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Lane Change Timer"
+              spKey="AutoLaneChangeTimer"
+              value={
+                c.laneChange.autoTimer === -1
+                  ? "Off"
+                  : c.laneChange.autoTimer === 0
+                    ? "Nudge required"
+                    : c.laneChange.autoTimer === 1
+                      ? "Nudgeless"
+                      : c.laneChange.autoTimer === 2
+                        ? "0.5s"
+                        : c.laneChange.autoTimer === 3
+                          ? "1.0s"
+                          : c.laneChange.autoTimer === 4
+                            ? "2.0s"
+                            : "3.0s"
+              }
+              mono
+            />
+            <ROW
+              label="BSM Integration"
+              spKey="BlindSpot"
+              value={c.laneChange.bsmMonitoring ? "On" : "Off"}
+            />
           </SectionBlock>
 
           <SectionBlock
             icon={ArrowUpDown}
-            title="Longitudinal Control"
+            title="Cruise"
             badge={
               <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 select-none">
                 SP
               </span>
             }
           >
-            <ROW
-              label="E2E Mode"
-              spKey="ExperimentalMode"
-              value={
-                c.longitudinal.e2eEnabled ? (
-                  <Badge variant="warning">Enabled</Badge>
-                ) : (
-                  "Disabled"
-                )
-              }
-            />
+            <SubH first>Longitudinal Control</SubH>
             <ROW
               label="Dynamic E2E"
               spKey="DynamicExperimentalControl"
               value={c.longitudinal.dynamicE2E ? "On" : "Off"}
-            />
-            <ROW
-              label="Alpha Long"
-              spKey="AlphaLongitudinalEnabled"
-              value={c.longitudinal.alphaLongEnabled ? "Enabled" : "Disabled"}
             />
             <ROW
               label="Hyundai Long Tune"
@@ -619,27 +750,41 @@ export default function SharedConfigPage() {
               spKey="CustomAccIncrementsEnabled"
               value={
                 c.longitudinal.customAccEnabled
-                  ? `On (${c.longitudinal.customAccShort}/${c.longitudinal.customAccLong} m/s²)`
+                  ? `On (${c.longitudinal.customAccShort}/${c.longitudinal.customAccLong} km/h)`
                   : "Off"
               }
             />
-          </SectionBlock>
-
-          <SectionBlock icon={TrendingUp} title="Speed Control">
+            <SubH>Smart Cruise Control</SubH>
             <ROW
-              label="Speed Limit Control"
+              label="ICBM (Alpha)"
+              spKey="IntelligentCruiseButtonManagement"
+              value={c.speedControl.icbmEnabled ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Vision Turn Speed"
+              spKey="SmartCruiseControlVision"
+              value={c.speedControl.visionEnabled ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Map Turn Speed"
+              spKey="SmartCruiseControlMap"
+              value={c.speedControl.mapEnabled ? "Enabled" : "Disabled"}
+            />
+            <SubH>Speed Limit</SubH>
+            <ROW
+              label="Speed Limit Mode"
               spKey="SpeedLimitMode"
               value={
-                c.speedControl.speedLimitControl.enabled
-                  ? "Enabled"
-                  : "Disabled"
+                (["Off", "Info", "Warning", "Assist"] as const)[
+                  c.speedControl.speedLimitControl.mode
+                ] ?? "Off"
               }
             />
-            {c.speedControl.speedLimitControl.enabled && (
+            {c.speedControl.speedLimitControl.mode > 0 && (
               <>
                 <ROW
                   label="SLC Policy"
-                  spKey="SpeedLimitPolicy"
+                  spKey="SpeedLimitSource"
                   value={c.speedControl.speedLimitControl.policy ?? "—"}
                   mono
                 />
@@ -651,75 +796,9 @@ export default function SharedConfigPage() {
                 />
               </>
             )}
-            <ROW
-              label="Vision Speed"
-              spKey="SmartCruiseControlVision"
-              value={c.speedControl.visionEnabled ? "Enabled" : "Disabled"}
-            />
-            <ROW
-              label="Map Speed"
-              spKey="SmartCruiseControlMap"
-              value={c.speedControl.mapEnabled ? "Enabled" : "Disabled"}
-            />
           </SectionBlock>
 
-          <SectionBlock
-            icon={ArrowLeftRight}
-            title="Lane Change"
-            badge={
-              <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 select-none">
-                SP
-              </span>
-            }
-          >
-            <ROW
-              label="Auto Lane Change"
-              value={c.laneChange.enabled ? "Enabled" : "Disabled"}
-            />
-            <ROW
-              label="Timer"
-              spKey="AutoLaneChangeTimer"
-              value={
-                c.laneChange.autoTimer === -1
-                  ? "Off"
-                  : c.laneChange.autoTimer === 0
-                    ? "Nudge required"
-                    : c.laneChange.autoTimer === 1
-                      ? "Nudgeless"
-                      : c.laneChange.autoTimer === 2
-                        ? "0.5s"
-                        : c.laneChange.autoTimer === 3
-                          ? "1.0s"
-                          : c.laneChange.autoTimer === 4
-                            ? "2.0s"
-                            : "3.0s"
-              }
-              mono
-            />
-            <ROW
-              label="Min Speed"
-              spKey="BlinkerMinLateralControlSpeed"
-              value={`${c.laneChange.minimumSpeed} mph`}
-              mono
-            />
-            <ROW
-              label="BSM Integration"
-              spKey="BlindSpot"
-              value={c.laneChange.bsmMonitoring ? "On" : "Off"}
-            />
-            <ROW
-              label="Blinker Pause Lateral"
-              spKey="BlinkerPauseLateralControl"
-              value={c.laneChange.blinkerPauseLateral ? "On" : "Off"}
-            />
-            <ROW
-              label="Blinker Re-engage Delay"
-              spKey="BlinkerLateralReengageDelay"
-              value={c.laneChange.blinkerReengageDelay ? "On" : "Off"}
-            />
-          </SectionBlock>
-
-          <SectionBlock icon={Map} title="Navigation">
+          <SectionBlock icon={Map} title="Maps">
             <ROW
               label="OSM Data"
               spKey="OsmLocal"
@@ -727,7 +806,8 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock icon={Monitor} title="Interface">
+          <SectionBlock icon={Monitor} title="Visuals">
+            <SubH first>HUD Overlays</SubH>
             <ROW
               label="Developer UI"
               spKey="DevUIInfo"
@@ -749,11 +829,6 @@ export default function SharedConfigPage() {
               value={c.interface.leadDepartAlert ? "On" : "Off"}
             />
             <ROW
-              label="Always-on DM"
-              spKey="AlwaysOnDM"
-              value={c.interface.alwaysOnDM ? "On" : "Off"}
-            />
-            <ROW
               label="Turn Signals"
               spKey="ShowTurnSignals"
               value={c.interface.showTurnSignals ? "On" : "Off"}
@@ -764,20 +839,41 @@ export default function SharedConfigPage() {
               value={c.interface.roadNameDisplay ? "On" : "Off"}
             />
             <ROW
-              label="Quiet Mode"
-              spKey="QuietMode"
-              value={c.interface.quietMode ? "On" : "Off"}
-            />
-            <ROW
-              label="Hide Vego UI"
+              label="Hide Speed"
               spKey="HideVEgoUI"
               value={c.interface.hideVegoUI ? "On" : "Off"}
+            />
+            <ROW
+              label="True Speed"
+              spKey="TrueVEgoUI"
+              value={c.interface.trueVegoUI ? "On" : "Off"}
             />
             <ROW
               label="Torque Bar"
               spKey="TorqueBar"
               value={c.interface.torqueBar ? "On" : "Off"}
             />
+            <ROW
+              label="Blind Spot Warnings"
+              spKey="BlindSpotDetection"
+              value={c.interface.blindSpotHUD ? "On" : "Off"}
+            />
+            <ROW
+              label="Steering Arc"
+              spKey="SteeringArc"
+              value={c.interface.steeringArc ? "On" : "Off"}
+            />
+            <ROW
+              label="Metrics Below Chevron"
+              spKey="ChevronInfo"
+              value={c.interface.chevronInfo ? "On" : "Off"}
+            />
+            <ROW
+              label="Tesla Rainbow Mode"
+              spKey="RainbowMode"
+              value={c.interface.rainbowMode ? "On" : "Off"}
+            />
+            <SubH>Display</SubH>
             <ROW
               label="Screen Brightness"
               value={`${c.interface.screenBrightness}%`}
@@ -792,6 +888,25 @@ export default function SharedConfigPage() {
               }
               mono
             />
+          </SectionBlock>
+
+          <SectionBlock icon={Cpu} title="Device">
+            <SubH first>Connectivity</SubH>
+            <ROW
+              label="SunnyLink Connect"
+              spKey="SunnylinkEnabled"
+              value={c.commaAI.connectEnabled ? "On" : "Off"}
+            />
+            <SubH>Device Settings</SubH>
+            <ROW
+              label="Use Metric"
+              value={c.interface.useMetric ? "On" : "Off"}
+            />
+            <ROW
+              label="Quiet Mode"
+              spKey="QuietMode"
+              value={c.interface.quietMode ? "On" : "Off"}
+            />
             <ROW
               label="Disable Onroad Uploads"
               spKey="OnroadUploads"
@@ -799,69 +914,14 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock
-            icon={Cpu}
-            title="Comma AI / SunnyLink"
-            badge={
-              <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/20 select-none">
-                OP + SP
-              </span>
-            }
-          >
+          <SectionBlock icon={Wrench} title="Developer">
+            <SubH first>Longitudinal</SubH>
             <ROW
-              label="Record Drives"
-              spKey="RecordFront"
-              value={c.commaAI.recordDrives ? "On" : "Off"}
+              label="Alpha Long"
+              spKey="AlphaLongitudinalEnabled"
+              value={c.longitudinal.alphaLongEnabled ? "Enabled" : "Disabled"}
             />
-            <ROW
-              label="Upload on WiFi Only"
-              spKey="GsmMetered"
-              value={c.commaAI.uploadOnlyOnWifi ? "On" : "Off"}
-            />
-            <ROW
-              label="Disengage on Accel"
-              spKey="DisengageOnAccelerator"
-              value={c.commaAI.disengageOnAccelerator ? "On" : "Off"}
-            />
-            <ROW
-              label="LDW"
-              spKey="IsLdwEnabled"
-              value={c.commaAI.ldwEnabled ? "On" : "Off"}
-            />
-            <ROW
-              label="SunnyLink Connect"
-              spKey="SunnylinkEnabled"
-              value={c.commaAI.connectEnabled ? "On" : "Off"}
-            />
-            <ROW
-              label="MADS"
-              spKey="Mads"
-              value={c.commaAI.mads ? "On" : "Off"}
-            />
-            <ROW
-              label="MADS Main Cruise"
-              spKey="MadsMainCruiseAllowed"
-              value={c.commaAI.madsMainCruise ? "On" : "Off"}
-            />
-            <ROW
-              label="MADS Steering Mode"
-              spKey="MadsSteeringMode"
-              value={c.commaAI.madsSteeringMode ?? "—"}
-              mono
-            />
-            <ROW
-              label="MADS Unified Engage"
-              spKey="MadsUnifiedEngagementMode"
-              value={c.commaAI.madsUnifiedEngagement ? "On" : "Off"}
-            />
-            <ROW
-              label="Record Audio Feedback"
-              spKey="RecordAudioFeedback"
-              value={c.commaAI.recordAudioFeedback ? "On" : "Off"}
-            />
-          </SectionBlock>
-
-          <SectionBlock icon={Wrench} title="Advanced">
+            <SubH>System</SubH>
             <ROW
               label="Quick Boot"
               spKey="QuickBootToggle"
@@ -957,6 +1017,13 @@ export default function SharedConfigPage() {
           onClose={() => setSunnyLinkExportOpen(false)}
         />
       )}
+
+      <CompareModal
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        baseConfig={config.config}
+        baseName={config.name}
+      />
 
       {canDiff && diffOpen && originalConfig && (
         <ConfigDiffModal

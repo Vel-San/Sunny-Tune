@@ -23,16 +23,17 @@ export const InterfaceSection: React.FC = () => {
 
   return (
     <ConfigSection
-      id="interface"
+      id="visuals"
       icon={Monitor}
-      title="Interface & Display"
-      subtitle="On-device UI overlays and screen power management"
+      title="Visuals"
+      subtitle="HUD overlays and onroad display settings"
     >
-      {/* ─── HUD overlays ─── */}
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        HUD Overlays
+      </p>
+
       <ParamRow
         label="Developer UI"
-        source="sunnypilot"
-        since="2022"
         spKey="DevUIInfo"
         description="DevUIInfo — show extended data overlay: speed, acceleration, lead car distance, and lat/long error."
       >
@@ -41,8 +42,6 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Standstill Timer"
-        source="sunnypilot"
-        since="2023"
         spKey="StandstillTimer"
         description="StandstillTimer — display the duration of the current complete stop on the HUD."
       >
@@ -54,8 +53,6 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Green Light Alert"
-        source="sunnypilot"
-        since="2023"
         spKey="GreenLightAlert"
         description="GreenLightAlert — chime and HUD notification when a traffic light ahead turns green."
       >
@@ -67,8 +64,6 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Lead Depart Alert"
-        source="sunnypilot"
-        since="2023"
         spKey="LeadDepartAlert"
         description="LeadDepartAlert — alert when the lead vehicle begins moving away while you are stationary."
       >
@@ -79,22 +74,8 @@ export const InterfaceSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Always-On Driver Monitoring"
-        source="sunnypilot"
-        since="2023"
-        spKey="AlwaysOnDM"
-        description="AlwaysOnDM — keep driver monitoring active even when ACC is disengaged."
-      >
-        <Toggle
-          checked={ui.alwaysOnDM}
-          onChange={(v) => set("alwaysOnDM", v)}
-        />
-      </ParamRow>
 
-      <ParamRow
         label="Show Turn Signals"
-        source="sunnypilot"
-        since="2023"
         spKey="ShowTurnSignals"
         description="ShowTurnSignals — display animated turn signal arrows on the onroad HUD."
       >
@@ -106,8 +87,6 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Road Name Display"
-        source="sunnypilot"
-        since="2023"
         spKey="RoadNameToggle"
         description="RoadNameToggle — show the current road name on the HUD using OSM data."
       >
@@ -118,19 +97,7 @@ export const InterfaceSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Quiet Mode"
-        source="sunnypilot"
-        since="2024"
-        spKey="QuietMode"
-        description="QuietMode — suppress non-critical audio chimes. Critical safety warnings still play."
-      >
-        <Toggle checked={ui.quietMode} onChange={(v) => set("quietMode", v)} />
-      </ParamRow>
-
-      <ParamRow
         label="Hide Speed on HUD"
-        source="sunnypilot"
-        since="2024"
         spKey="HideVEgoUI"
         description="HideVEgoUI — remove the vehicle speed (vEgo) readout from the onroad HUD."
       >
@@ -142,23 +109,59 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Torque Bar"
-        source="sunnypilot"
-        since="2024"
         spKey="TorqueBar"
         description="TorqueBar — display a visual bar showing the current lateral torque output on the HUD."
       >
         <Toggle checked={ui.torqueBar} onChange={(v) => set("torqueBar", v)} />
       </ParamRow>
 
+      <ParamRow
+        label="Show Blind Spot Warnings"
+        spKey="BlindSpotDetection"
+        description="BlindSpotDetection — display blind spot warning indicators on HUD when vehicles are detected in adjacent lanes."
+      >
+        <Toggle checked={ui.blindSpotHUD} onChange={(v) => set("blindSpotHUD", v)} />
+      </ParamRow>
+
+      <ParamRow
+        label="Steering Arc"
+        spKey="SteeringArc"
+        description="SteeringArc — show a steering arc overlay indicating the projected path based on current steering angle."
+      >
+        <Toggle checked={ui.steeringArc} onChange={(v) => set("steeringArc", v)} />
+      </ParamRow>
+
+      <ParamRow
+        label="Display True Speed"
+        spKey="TrueVEgoUI"
+        description="TrueVEgoUI — always display GPS-based true ground speed instead of odometer speed on the HUD."
+      >
+        <Toggle checked={ui.trueVegoUI} onChange={(v) => set("trueVegoUI", v)} />
+      </ParamRow>
+
+      <ParamRow
+        label="Metrics Below Chevron"
+        spKey="ChevronInfo"
+        description="ChevronInfo — display additional metrics (distance to lead, speed delta) below the lead-car chevron."
+      >
+        <Toggle checked={ui.chevronInfo} onChange={(v) => set("chevronInfo", v)} />
+      </ParamRow>
+
+      <ParamRow
+        label="Tesla Rainbow Mode"
+        spKey="RainbowMode"
+        description="RainbowMode — enable Rainbow Mode on Tesla vehicles (cosmetic steering wheel colour effect only)."
+      >
+        <Toggle checked={ui.rainbowMode} onChange={(v) => set("rainbowMode", v)} />
+      </ParamRow>
+
       <div className="divider" />
-      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-        Screen Power
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        Display
       </p>
 
       <ParamRow
         label="Screen Brightness"
-        source="openpilot"
-        since="2021"
         description="Brightness — onroad screen brightness 0–100%."
       >
         <Slider
@@ -174,8 +177,6 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Screen Off Timer"
-        source="openpilot"
-        since="2021"
         description="OnroadScreenOffTimer — dim the screen after an idle period while driving."
       >
         <Select
@@ -185,32 +186,6 @@ export const InterfaceSection: React.FC = () => {
         />
       </ParamRow>
 
-      <div className="divider" />
-      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-        Data & Units
-      </p>
-
-      <ParamRow
-        label="Use Metric Units"
-        source="openpilot"
-        since="2021"
-        description="IsMetric — display speeds in km/h and distances in km across all UI elements."
-      >
-        <Toggle checked={ui.useMetric} onChange={(v) => set("useMetric", v)} />
-      </ParamRow>
-
-      <ParamRow
-        label="Disable Onroad Uploads"
-        source="sunnypilot"
-        since="2023"
-        spKey="OnroadUploads"
-        description="OnroadUploads — prevent drive footage from uploading while the vehicle is in motion."
-      >
-        <Toggle
-          checked={ui.disableOnroadUploads}
-          onChange={(v) => set("disableOnroadUploads", v)}
-        />
-      </ParamRow>
     </ConfigSection>
   );
 };

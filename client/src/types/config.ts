@@ -26,7 +26,11 @@ export type CarMake =
   | "infiniti"
   | "other";
 
-export type SLCOffsetType = "none" | "percentage" | "fixed_mph" | "fixed_kph";
+/**
+ * SpeedLimitOffsetType — how the speed offset above the limit is calculated.
+ * none = match limit exactly, fixed = fixed value added/subtracted, percentage = % of limit.
+ */
+export type SLCOffsetType = "none" | "fixed" | "percentage";
 
 export type LongPersonality = "relaxed" | "standard" | "aggressive";
 
@@ -111,19 +115,29 @@ export interface SPConfig {
   // ── 5. Speed Control ──────────────────────────────────────────────────────
   speedControl: {
     speedLimitControl: {
-      /** Enable SP speed limit control — SpeedLimitMode > 0 */
-      enabled: boolean;
-      /** SLC policy: 0=None, 1=Nav, 2=OSM, 3=Nav+OSM, 4=Nav+OSM fallback — SpeedLimitPolicy */
+      /**
+       * SpeedLimitMode — how sunnypilot responds to detected speed limits.
+       * 0 = Off, 1 = Info (HUD display only), 2 = Warning (display + alert),
+       * 3 = Assist (auto-adjust cruise speed, with optional offset).
+       */
+      mode: 0 | 1 | 2 | 3;
+      /**
+       * SpeedLimitSource — which data source(s) provide the speed limit.
+       * 0 = Car State Only, 1 = Map Data Only, 2 = Car State Priority,
+       * 3 = Map Data Priority, 4 = Combined (higher of both).
+       */
       policy: number;
-      /** Offset type above the limit — SpeedLimitOffsetType */
+      /** SpeedLimitOffsetType — offset calculation method — SpeedLimitOffsetType */
       offsetType: SLCOffsetType;
-      /** Offset value (% or absolute) — SpeedLimitValueOffset */
+      /** SpeedLimitValueOffset — offset amount (−30 to +30) — SpeedLimitValueOffset */
       offsetValue: number;
     };
     /** Enable vision-based curve speed control — SmartCruiseControlVision */
     visionEnabled: boolean;
     /** Enable map-based curve speed control — SmartCruiseControlMap */
     mapEnabled: boolean;
+    /** Intelligent Cruise Button Management (Alpha) — IntelligentCruiseButtonManagement */
+    icbmEnabled: boolean;
   };
 
   // ── 6. Lane Change ────────────────────────────────────────────────────────
@@ -179,8 +193,18 @@ export interface SPConfig {
     quietMode: boolean;
     /** Hide vehicle speed from HUD — HideVEgoUI */
     hideVegoUI: boolean;
+    /** Show GPS-based true speed instead of odometer — TrueVEgoUI */
+    trueVegoUI: boolean;
     /** Show lateral torque bar on HUD — TorqueBar */
     torqueBar: boolean;
+    /** Show blind spot warning indicators on HUD — BlindSpotDetection */
+    blindSpotHUD: boolean;
+    /** Show steering arc overlay on HUD — SteeringArc */
+    steeringArc: boolean;
+    /** Display metrics below the lead car chevron — ChevronInfo */
+    chevronInfo: boolean;
+    /** Enable Tesla Rainbow Mode (cosmetic) — RainbowMode */
+    rainbowMode: boolean;
   };
 
   // ── 9. Comma AI Core ──────────────────────────────────────────────────────
@@ -199,7 +223,7 @@ export interface SPConfig {
     mads: boolean;
     /** Allow main cruise button to toggle MADS — MadsMainCruiseAllowed */
     madsMainCruise: boolean;
-    /** MADS steering mode: 0=blended, 1=no-blend, 2=always — MadsSteeringMode */
+    /** MADS steering mode on brake pedal: 0=Remain Active, 1=Pause, 2=Disengage — MadsSteeringMode */
     madsSteeringMode: 0 | 1 | 2;
     /** Single button engages MADS + ACC together — MadsUnifiedEngagementMode */
     madsUnifiedEngagement: boolean;
@@ -258,13 +282,14 @@ export function createDefaultConfig(): SPConfig {
     },
     speedControl: {
       speedLimitControl: {
-        enabled: false,
-        policy: 0,
+        mode: 0,
+        policy: 2,
         offsetType: "none",
         offsetValue: 0,
       },
       visionEnabled: false,
       mapEnabled: false,
+      icbmEnabled: false,
     },
     laneChange: {
       enabled: true,
@@ -291,7 +316,12 @@ export function createDefaultConfig(): SPConfig {
       roadNameDisplay: false,
       quietMode: false,
       hideVegoUI: false,
+      trueVegoUI: false,
       torqueBar: false,
+      blindSpotHUD: false,
+      steeringArc: false,
+      chevronInfo: false,
+      rainbowMode: false,
     },
     commaAI: {
       recordDrives: true,

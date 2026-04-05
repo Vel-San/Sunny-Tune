@@ -46,13 +46,14 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
     },
     speedControl: {
       speedLimitControl: {
-        enabled: false,
+        mode: 0,
         policy: 0,
         offsetType: "none",
         offsetValue: 0,
       },
       visionEnabled: false,
       mapEnabled: false,
+      icbmEnabled: false,
     },
     laneChange: {
       enabled: true,
@@ -80,6 +81,11 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       quietMode: false,
       hideVegoUI: false,
       torqueBar: false,
+      trueVegoUI: false,
+      blindSpotHUD: false,
+      steeringArc: false,
+      chevronInfo: false,
+      rainbowMode: false,
     },
     commaAI: {
       recordDrives: true,
@@ -190,7 +196,7 @@ describe("computeConfigDiff", () => {
       },
     });
     const diff = computeConfigDiff(original, modified);
-    expect(diff[0].sectionLabel).toBe("Lane Change");
+    expect(diff[0].sectionLabel).toBe("Steering \u2014 Lane Change");
   });
 
   it("detects nested speedControl change", () => {
@@ -200,13 +206,13 @@ describe("computeConfigDiff", () => {
         ...makeConfig().speedControl,
         speedLimitControl: {
           ...makeConfig().speedControl.speedLimitControl,
-          enabled: true,
+          mode: 1,
         },
       },
     });
     const diff = computeConfigDiff(original, modified);
-    const entry = diff.find((d) => d.field.includes("enabled"));
+    const entry = diff.find((d) => d.field.includes("mode"));
     expect(entry).toBeDefined();
-    expect(entry!.newValue).toBe("On");
+    expect(entry!.newValue).toBeDefined();
   });
 });

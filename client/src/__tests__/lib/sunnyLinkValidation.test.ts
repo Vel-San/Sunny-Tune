@@ -88,7 +88,7 @@ describe("rule: AlphaLongitudinalEnabled", () => {
     const issue = issues.find((i) => i.field === "AlphaLongitudinalEnabled");
     expect(issue).toBeDefined();
     expect(issue!.severity).toBe("warning");
-    expect(issue!.wikiUrl).toContain("AlphaLongitudinal");
+    expect(issue!.docsUrl).toContain("alpha-longitudinal");
   });
 
   it("does NOT warn when alphaLongEnabled=false", () => {
@@ -367,7 +367,7 @@ describe("rule: PlanplusControl", () => {
 describe("rule: SpeedLimitOffsetType", () => {
   it("returns an info issue when SLC is enabled with offsetType='none'", () => {
     const c = makeConfig((cfg) => {
-      cfg.speedControl.speedLimitControl.enabled = true;
+      cfg.speedControl.speedLimitControl.mode = 3;
       cfg.speedControl.speedLimitControl.offsetType = "none";
     });
     const issue = validateForSunnyLinkExport(c).find(
@@ -379,7 +379,7 @@ describe("rule: SpeedLimitOffsetType", () => {
 
   it("does NOT fire when SLC is disabled", () => {
     const c = makeConfig((cfg) => {
-      cfg.speedControl.speedLimitControl.enabled = false;
+      cfg.speedControl.speedLimitControl.mode = 0;
       cfg.speedControl.speedLimitControl.offsetType = "none";
     });
     expect(
@@ -391,7 +391,7 @@ describe("rule: SpeedLimitOffsetType", () => {
 
   it("does NOT fire when offsetType is not 'none'", () => {
     const c = makeConfig((cfg) => {
-      cfg.speedControl.speedLimitControl.enabled = true;
+      cfg.speedControl.speedLimitControl.mode = 3;
       cfg.speedControl.speedLimitControl.offsetType = "percentage";
     });
     expect(
@@ -471,17 +471,17 @@ describe("validateForSunnyLinkExport — multiple issues", () => {
     }
   });
 
-  it("issues with wikiUrl have valid https URLs", () => {
+  it("issues with docsUrl have valid https URLs", () => {
     const c = makeConfig((cfg) => {
       cfg.longitudinal.alphaLongEnabled = true;
       cfg.longitudinal.dynamicE2E = true;
       cfg.longitudinal.e2eEnabled = false;
     });
     const issues = validateForSunnyLinkExport(c);
-    const withUrl = issues.filter((i) => i.wikiUrl);
+    const withUrl = issues.filter((i) => i.docsUrl);
     expect(withUrl.length).toBeGreaterThan(0);
     for (const issue of withUrl) {
-      expect(issue.wikiUrl!.startsWith("https://")).toBe(true);
+      expect(issue.docsUrl!.startsWith("https://")).toBe(true);
     }
   });
 });

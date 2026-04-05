@@ -103,9 +103,13 @@ export const VehicleSection: React.FC = () => {
     <ConfigSection
       id="vehicle"
       icon={Car}
-      title="Vehicle & Version"
+      title="Vehicle"
       subtitle="Car make/model, sunnypilot version/branch, and driving model"
     >
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        Vehicle Info
+      </p>
+
       <ParamRow label="Make" description="Manufacturer of your vehicle">
         <Select
           value={v.make}
@@ -136,11 +140,14 @@ export const VehicleSection: React.FC = () => {
         />
       </ParamRow>
 
+      <div className="divider" />
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        Hardware &amp; Software
+      </p>
+
       <ParamRow
         label="Comma AI HW"
         description="Comma AI hardware device. Determines which branches are available."
-        source="sunnypilot"
-        since="2022"
       >
         <Select
           value={hw}
@@ -152,8 +159,6 @@ export const VehicleSection: React.FC = () => {
       <ParamRow
         label="SP Version"
         description="sunnypilot version installed on the device (e.g. 2026.001.000)"
-        source="sunnypilot"
-        since="2021"
       >
         <Input
           value={m.sunnypilotVersion}
@@ -166,8 +171,6 @@ export const VehicleSection: React.FC = () => {
       <ParamRow
         label="Branch"
         description="Update channel used on the device. Options depend on your hardware."
-        source="sunnypilot"
-        since="2021"
       >
         <Select
           value={m.branch}
@@ -179,8 +182,6 @@ export const VehicleSection: React.FC = () => {
       <ParamRow
         label="Driving Model"
         description="ModelManager_ActiveBundle — active driving model name. Populated automatically when importing from SunnyLink. You can also type the model name/path from your device."
-        source="sunnypilot"
-        since="2024"
       >
         <Input
           value={m.activeModel}

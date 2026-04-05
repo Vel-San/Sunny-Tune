@@ -4,23 +4,23 @@
  * Shows:
  * 1. A validation summary (issues that need attention)
  * 2. A complete table of all parameters being exported, grouped by section
- * 3. Links to the SunnyLink wiki for reference
+ * 3. Links to the official sunnypilot docs for reference
  * 4. A "Confirm & Download" button
  */
 
 import {
-  AlertTriangle,
-  CheckCircle,
-  Download,
-  ExternalLink,
-  Info,
-  X,
+    AlertTriangle,
+    CheckCircle,
+    Download,
+    ExternalLink,
+    Info,
+    X,
 } from "lucide-react";
 import React, { useMemo } from "react";
 import { exportAsSunnyLink } from "../../lib/configExport";
 import {
-  validateForSunnyLinkExport,
-  type ValidationSeverity,
+    validateForSunnyLinkExport,
+    type ValidationSeverity,
 } from "../../lib/sunnyLinkValidation";
 import type { SPConfig } from "../../types/config";
 import { Button } from "../ui/Button";
@@ -78,42 +78,112 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
     1: "Dynamic",
     2: "Predictive",
   };
-  const madsMode: Record<number, string> = { 0: "Default", 1: "Remain Active" };
+  const madsMode: Record<number, string> = { 0: "Remain Active", 1: "Pause", 2: "Disengage" };
 
   return [
     {
-      section: "Driving Personality",
+      section: "Toggles",
       params: [
         {
           key: "LongitudinalPersonality",
           label: "Personality",
-          value:
-            lpLabel[dp.longitudinalPersonality] ?? dp.longitudinalPersonality,
+          value: lpLabel[dp.longitudinalPersonality] ?? dp.longitudinalPersonality,
+        },
+        {
+          key: "ExperimentalMode",
+          label: "E2E / Experimental Mode",
+          value: formatValue(lon.e2eEnabled),
+        },
+        {
+          key: "AlwaysOnDM",
+          label: "Always-On Driver Monitoring",
+          value: formatValue(ifc.alwaysOnDM),
+        },
+        {
+          key: "DisengageOnAccelerator",
+          label: "Disengage on Accelerator",
+          value: formatValue(ai.disengageOnAccelerator),
+        },
+        {
+          key: "IsLdwEnabled",
+          label: "Lane Departure Warning",
+          value: formatValue(ai.ldwEnabled),
+        },
+        {
+          key: "RecordFront",
+          label: "Record Drives",
+          value: formatValue(ai.recordDrives),
+        },
+        {
+          key: "GsmMetered",
+          label: "Upload Only on Wi-Fi",
+          value: formatValue(ai.uploadOnlyOnWifi),
+        },
+        {
+          key: "RecordAudioFeedback",
+          label: "Record Audio",
+          value: formatValue(ai.recordAudioFeedback),
         },
       ],
     },
     {
-      section: "Lateral Control",
+      section: "Steering",
       params: [
+        { key: "Mads", label: "MADS Enabled", value: formatValue(ai.mads) },
+        {
+          key: "MadsMainCruiseAllowed",
+          label: "MADS Main Cruise",
+          value: formatValue(ai.madsMainCruise),
+        },
+        {
+          key: "MadsSteeringMode",
+          label: "MADS Steering Mode",
+          value: madsMode[ai.madsSteeringMode] ?? String(ai.madsSteeringMode),
+        },
+        {
+          key: "MadsUnifiedEngagementMode",
+          label: "MADS Unified Engagement",
+          value: formatValue(ai.madsUnifiedEngagement),
+        },
+        {
+          key: "EnforceTorqueControl",
+          label: "Enforce Torque Control",
+          value: formatValue(lat.enforceTorqueControl),
+        },
+        {
+          key: "NeuralNetworkLateralControl",
+          label: "NN Lateral Model",
+          value: formatValue(lat.useNNModel),
+        },
+        {
+          key: "BlinkerPauseLateralControl",
+          label: "Pause Lateral on Blinker",
+          value: formatValue(lc.blinkerPauseLateral),
+        },
+        {
+          key: "BlinkerMinLateralControlSpeed",
+          label: "Min Speed for Blinker Pause",
+          value: `${lc.minimumSpeed} km/h`,
+        },
+        {
+          key: "BlinkerLateralReengageDelay",
+          label: "Lateral Re-engage Delay",
+          value: `${lc.blinkerReengageDelay} s`,
+        },
         {
           key: "CameraOffset",
           label: "Camera Offset",
           value: `${lat.cameraOffset} m`,
         },
         {
-          key: "LiveTorqueParamsToggle",
-          label: "Live Torque Params",
-          value: formatValue(lat.liveTorque),
-        },
-        {
-          key: "LiveTorqueParamsRelaxedToggle",
-          label: "Live Torque Relaxed",
-          value: formatValue(lat.liveTorqueRelaxed),
-        },
-        {
           key: "TorqueControlTune",
           label: "Torque Control Tune",
           value: String(lat.torqueControlTune),
+        },
+        {
+          key: "LiveTorqueParamsToggle",
+          label: "Live Torque Params",
+          value: formatValue(lat.liveTorque),
         },
         {
           key: "LagdToggle",
@@ -124,16 +194,6 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
           key: "LagdToggleDelay",
           label: "LAGD Delay Offset",
           value: `${lat.lagdDelay} s`,
-        },
-        {
-          key: "NeuralNetworkLateralControl",
-          label: "NN Lateral Model",
-          value: formatValue(lat.useNNModel),
-        },
-        {
-          key: "EnforceTorqueControl",
-          label: "Enforce Torque Control",
-          value: formatValue(lat.enforceTorqueControl),
         },
         {
           key: "TorqueParamsOverrideEnabled",
@@ -154,31 +214,30 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
               },
             ]
           : []),
+        {
+          key: "AutoLaneChangeTimer",
+          label: "Auto Lane Change Timer",
+          value: alctLabel[String(lc.autoTimer) as unknown as number] ?? String(lc.autoTimer),
+        },
+        {
+          key: "BlindSpot",
+          label: "Blind Spot Monitoring",
+          value: formatValue(lc.bsmMonitoring),
+        },
       ],
     },
     {
-      section: "Longitudinal Control",
+      section: "Cruise",
       params: [
-        {
-          key: "ExperimentalMode",
-          label: "E2E / Experimental Mode",
-          value: formatValue(lon.e2eEnabled),
-        },
         {
           key: "DynamicExperimentalControl",
           label: "Dynamic E2E Switch",
           value: formatValue(lon.dynamicE2E),
         },
         {
-          key: "AlphaLongitudinalEnabled",
-          label: "Alpha Longitudinal",
-          value: formatValue(lon.alphaLongEnabled),
-        },
-        {
           key: "HyundaiLongitudinalTuning",
           label: "Hyundai Tuning",
-          value:
-            hyundaiLabel[lon.hyundaiLongTune] ?? String(lon.hyundaiLongTune),
+          value: hyundaiLabel[lon.hyundaiLongTune] ?? String(lon.hyundaiLongTune),
         },
         {
           key: "PlanplusControl",
@@ -204,59 +263,10 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
               },
             ]
           : []),
-      ],
-    },
-    {
-      section: "Lane Change",
-      params: [
         {
-          key: "AutoLaneChangeTimer",
-          label: "Auto Lane Change Timer",
-          value:
-            alctLabel[String(lc.autoTimer) as unknown as number] ??
-            String(lc.autoTimer),
-        },
-        {
-          key: "BlindSpot",
-          label: "Blind Spot Monitoring",
-          value: formatValue(lc.bsmMonitoring),
-        },
-        {
-          key: "BlinkerMinLateralControlSpeed",
-          label: "Min Speed for Steering",
-          value: `${lc.minimumSpeed} km/h`,
-        },
-        {
-          key: "BlinkerPauseLateralControl",
-          label: "Pause Lateral on Blinker",
-          value: formatValue(lc.blinkerPauseLateral),
-        },
-        {
-          key: "BlinkerLateralReengageDelay",
-          label: "Lateral Re-engage Delay",
-          value: `${lc.blinkerReengageDelay} s`,
-        },
-      ],
-    },
-    {
-      section: "Speed Control",
-      params: [
-        {
-          key: "SpeedLimitMode",
-          label: "Speed Limit Control",
-          value: sc.speedLimitControl.enabled
-            ? `✓ ON (policy ${sc.speedLimitControl.policy})`
-            : "✗ OFF",
-        },
-        {
-          key: "SpeedLimitOffsetType",
-          label: "Offset Type",
-          value: sc.speedLimitControl.offsetType,
-        },
-        {
-          key: "SpeedLimitValueOffset",
-          label: "Offset Value",
-          value: String(sc.speedLimitControl.offsetValue),
+          key: "IntelligentCruiseButtonManagement",
+          label: "ICBM (Alpha)",
+          value: formatValue(sc.icbmEnabled),
         },
         {
           key: "SmartCruiseControlVision",
@@ -268,10 +278,33 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
           label: "Map Turn Speed",
           value: formatValue(sc.mapEnabled),
         },
+        {
+          key: "SpeedLimitMode",
+          label: "Speed Limit Control",
+          value:
+            sc.speedLimitControl.mode > 0
+              ? `✓ ON — ${(["Off", "Info", "Warning", "Assist"] as const)[sc.speedLimitControl.mode]} (policy ${sc.speedLimitControl.policy})`
+              : "✗ OFF",
+        },
+        {
+          key: "SpeedLimitSource",
+          label: "SLC Policy",
+          value: String(sc.speedLimitControl.policy ?? ""),
+        },
+        {
+          key: "SpeedLimitOffsetType",
+          label: "SLC Offset Type",
+          value: sc.speedLimitControl.offsetType,
+        },
+        {
+          key: "SpeedLimitValueOffset",
+          label: "SLC Offset Value",
+          value: String(sc.speedLimitControl.offsetValue),
+        },
       ],
     },
     {
-      section: "Navigation",
+      section: "Maps",
       params: [
         {
           key: "OsmLocal",
@@ -281,12 +314,12 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
       ],
     },
     {
-      section: "Interface",
+      section: "Visuals",
       params: [
         {
-          key: "IsMetric",
-          label: "Metric Units",
-          value: formatValue(ifc.useMetric),
+          key: "DevUIInfo",
+          label: "Developer UI",
+          value: formatValue(ifc.devUI),
         },
         {
           key: "StandstillTimer",
@@ -304,11 +337,6 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
           value: formatValue(ifc.leadDepartAlert),
         },
         {
-          key: "AlwaysOnDM",
-          label: "Always-On Driver Monitoring",
-          value: formatValue(ifc.alwaysOnDM),
-        },
-        {
           key: "ShowTurnSignals",
           label: "Show Turn Signals",
           value: formatValue(ifc.showTurnSignals),
@@ -319,14 +347,14 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
           value: formatValue(ifc.roadNameDisplay),
         },
         {
-          key: "QuietMode",
-          label: "Quiet Mode",
-          value: formatValue(ifc.quietMode),
-        },
-        {
           key: "HideVEgoUI",
           label: "Hide Speed on HUD",
           value: formatValue(ifc.hideVegoUI),
+        },
+        {
+          key: "TrueVEgoUI",
+          label: "True Speed Display",
+          value: formatValue(ifc.trueVegoUI),
         },
         {
           key: "TorqueBar",
@@ -334,71 +362,60 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
           value: formatValue(ifc.torqueBar),
         },
         {
-          key: "DevUIInfo",
-          label: "Developer UI",
-          value: formatValue(ifc.devUI),
+          key: "BlindSpotDetection",
+          label: "Blind Spot HUD Warnings",
+          value: formatValue(ifc.blindSpotHUD),
         },
         {
-          key: "OnroadUploads",
-          label: "Onroad Uploads",
-          value: ifc.disableOnroadUploads ? "✗ OFF (disabled)" : "✓ ON",
+          key: "SteeringArc",
+          label: "Steering Arc",
+          value: formatValue(ifc.steeringArc),
+        },
+        {
+          key: "ChevronInfo",
+          label: "Metrics Below Chevron",
+          value: formatValue(ifc.chevronInfo),
+        },
+        {
+          key: "RainbowMode",
+          label: "Tesla Rainbow Mode",
+          value: formatValue(ifc.rainbowMode),
         },
       ],
     },
     {
-      section: "Comma AI / MADS",
+      section: "Device",
       params: [
-        {
-          key: "RecordFront",
-          label: "Record Drives",
-          value: formatValue(ai.recordDrives),
-        },
-        {
-          key: "GsmMetered",
-          label: "Upload Only on Wi-Fi",
-          value: formatValue(ai.uploadOnlyOnWifi),
-        },
-        {
-          key: "DisengageOnAccelerator",
-          label: "Disengage on Accelerator",
-          value: formatValue(ai.disengageOnAccelerator),
-        },
-        {
-          key: "IsLdwEnabled",
-          label: "Lane Departure Warning",
-          value: formatValue(ai.ldwEnabled),
-        },
         {
           key: "SunnylinkEnabled",
           label: "SunnyLink Connect",
           value: formatValue(ai.connectEnabled),
         },
-        { key: "Mads", label: "MADS Enabled", value: formatValue(ai.mads) },
         {
-          key: "MadsMainCruiseAllowed",
-          label: "MADS Main Cruise",
-          value: formatValue(ai.madsMainCruise),
+          key: "IsMetric",
+          label: "Metric Units",
+          value: formatValue(ifc.useMetric),
         },
         {
-          key: "MadsSteeringMode",
-          label: "MADS Steering Mode",
-          value: madsMode[ai.madsSteeringMode] ?? String(ai.madsSteeringMode),
+          key: "QuietMode",
+          label: "Quiet Mode",
+          value: formatValue(ifc.quietMode),
         },
         {
-          key: "MadsUnifiedEngagementMode",
-          label: "MADS Unified Engagement",
-          value: formatValue(ai.madsUnifiedEngagement),
-        },
-        {
-          key: "RecordAudioFeedback",
-          label: "Record Audio",
-          value: formatValue(ai.recordAudioFeedback),
+          key: "OnroadUploads",
+          label: "Disable Onroad Uploads",
+          value: ifc.disableOnroadUploads ? "✗ OFF (disabled)" : "✓ ON",
         },
       ],
     },
     {
-      section: "Advanced",
+      section: "Developer",
       params: [
+        {
+          key: "AlphaLongitudinalEnabled",
+          label: "Alpha Longitudinal",
+          value: formatValue(lon.alphaLongEnabled),
+        },
         {
           key: "QuickBootToggle",
           label: "Quick Boot",
@@ -497,9 +514,9 @@ export const SunnyLinkExportModal: React.FC<SunnyLinkExportModalProps> = ({
                     {issue.field}
                   </span>
                   {issue.message}
-                  {issue.wikiUrl && (
+                  {issue.docsUrl && (
                     <a
-                      href={issue.wikiUrl}
+                      href={issue.docsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-0.5 ml-2 opacity-70 hover:opacity-100"
@@ -553,12 +570,12 @@ export const SunnyLinkExportModal: React.FC<SunnyLinkExportModalProps> = ({
           This file can be imported into your device via the SunnyLink app
           (Settings → Restore → Import from file). Cross-reference with the{" "}
           <a
-            href="https://sunnylink.wiki/"
+            href="https://docs.sunnypilot.ai/settings/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
           >
-            SunnyLink Wiki
+            sunnypilot Docs
           </a>{" "}
           if unsure about any value.
         </p>
@@ -566,13 +583,13 @@ export const SunnyLinkExportModal: React.FC<SunnyLinkExportModalProps> = ({
         {/* Footer actions */}
         <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
           <a
-            href="https://sunnylink.wiki/"
+            href="https://docs.sunnypilot.ai/settings/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-blue-400 transition-colors"
           >
             <ExternalLink className="w-3 h-3" />
-            SunnyLink Wiki
+            sunnypilot Docs
           </a>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>

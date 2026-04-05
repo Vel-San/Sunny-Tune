@@ -128,7 +128,7 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>Key features</H3>
           <UL
             items={[
-              "Full 10-section config editor covering Vehicle & Version, Driving Personality, Lateral Control, Longitudinal Control, Speed Control, Lane Change, Navigation, Interface, Comma AI, and Advanced settings",
+              "Full 10-section config editor covering Vehicle, Toggles, Steering, Cruise, Cruise — Speed Limit, Steering — Lane Change, Maps, Visuals, Device & Toggles, and Developer settings",
               "One-click sharing with a public URL and QR code",
               "Browse the Explore page to find configs from other drivers sorted by rating, views, clones, or trending this week",
               "Version history — every save creates a snapshot you can browse, diff, and restore",
@@ -177,53 +177,53 @@ const CONTENT: Record<string, DocBlock[]> = {
           <UL
             items={[
               <>
-                <strong className="text-zinc-200">Vehicle &amp; Version</strong>{" "}
+                <strong className="text-zinc-200">Vehicle</strong>{" "}
                 — Make, model, year, SP version, branch (stable-sp / dev-sp /
                 staging-sp / nightly), and active driving model
                 (ModelManager_ActiveBundle)
               </>,
               <>
-                <strong className="text-zinc-200">Driving Personality</strong> —
-                Longitudinal personality (relaxed / standard / sport / traffic)
+                <strong className="text-zinc-200">Toggles</strong> —
+                Driving personality (relaxed / standard / sport / traffic)
               </>,
               <>
-                <strong className="text-zinc-200">Lateral Control</strong> —
+                <strong className="text-zinc-200">Steering</strong> —
                 Torque controller tuning (camera offset, live torque, torque
-                friction, deadzone, lateral accel, friction override),
-                lane-centering strength, path offset
+                friction, lateral accel, friction override), NNLC, LAGD, and
+                enforce torque control
               </>,
               <>
-                <strong className="text-zinc-200">Longitudinal Control</strong>{" "}
-                — E2E long toggle, dynamic follow distance, following distance
-                override, lead filtering
+                <strong className="text-zinc-200">Cruise</strong>{" "}
+                — E2E long toggle, dynamic experimental control, Alpha
+                Longitudinal, Hyundai tuning, Plan+, and custom ACC increments
               </>,
               <>
-                <strong className="text-zinc-200">Speed Control</strong> — Speed
-                Limit Control (SLC) policy and offset, curve speed reduction
+                <strong className="text-zinc-200">Cruise — Speed Limit</strong> — Speed
+                Limit Control (SLC) mode, policy, and offset; ICBM; curve speed
+                reduction (SCC-V / SCC-M)
               </>,
               <>
-                <strong className="text-zinc-200">Lane Change</strong> —
-                Auto-lane-change timer, blinker-required threshold, BSM pause,
-                lane-change direction preference
+                <strong className="text-zinc-200">Steering — Lane Change</strong> —
+                Auto-lane-change timer, blinker-required threshold, BSM pause
               </>,
               <>
-                <strong className="text-zinc-200">Navigation</strong> — OSM
-                speed-limit data toggle
+                <strong className="text-zinc-200">Maps</strong> — OSM
+                local maps speed-limit data toggle
               </>,
               <>
-                <strong className="text-zinc-200">Interface</strong> — Dev
-                overlays, screen brightness, metric units, sidebar visibility,
-                sound settings
+                <strong className="text-zinc-200">Visuals</strong> — HUD
+                overlays (blind spot warnings, steering arc, true speed,
+                chevron info), screen brightness, metric units, quiet mode
               </>,
               <>
-                <strong className="text-zinc-200">Comma AI</strong> — MADS
-                (multi-model assisted driving), drive recording, disengage
+                <strong className="text-zinc-200">Device &amp; Toggles</strong> — MADS
+                (steering mode, unified engagement), drive recording, disengage
                 behaviour, SunnyLink Connect integration
               </>,
               <>
-                <strong className="text-zinc-200">Advanced</strong> — Quick-boot
+                <strong className="text-zinc-200">Developer</strong> — Quick-boot
                 toggle
-              </>,
+              </>,,
             ]}
           />
           <H3>Unsaved-change guard</H3>
@@ -254,16 +254,6 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             <strong className="text-zinc-200">Export</strong> downloads the
             current config as a <Code>.json</Code> file.
-          </P>
-          <H3>Deep links</H3>
-          <P>
-            Append a section hash to the editor URL to jump directly to that
-            section, e.g. <Code>/configure/&lt;id&gt;#lateral</Code>. Valid
-            hashes: <Code>vehicle</Code>, <Code>driving-personality</Code>,{" "}
-            <Code>lateral</Code>, <Code>longitudinal</Code>,{" "}
-            <Code>speed-control</Code>, <Code>lane-change</Code>,{" "}
-            <Code>navigation</Code>, <Code>interface</Code>,{" "}
-            <Code>comma-ai</Code>, <Code>advanced</Code>.
           </P>
         </>
       ),

@@ -1,6 +1,6 @@
 /**
- * Rich per-field help data sourced from the SunnyLink Wiki
- * (https://sunnylink.wiki/) and official sunnypilot documentation.
+ * Rich per-field help data sourced from the official sunnypilot user-docs
+ * (https://github.com/sunnypilot/user-docs → https://docs.sunnypilot.ai).
  *
  * Keyed by the exact openpilot/sunnypilot parameter name (`spKey`).
  * Consumed by the HelpTooltip component in the configurator.
@@ -13,8 +13,8 @@ export interface FieldHelp {
   tips?: string[];
   /** Known pitfalls, tradeoffs or warnings. */
   tradeoffs?: string[];
-  /** Direct anchor link to the SunnyLink Wiki entry. */
-  wikiUrl?: string;
+  /** Link to the official sunnypilot docs entry (https://docs.sunnypilot.ai/...). */
+  docsUrl?: string;
   /** Recommended setting according to the wiki / community consensus. */
   recommended?: string;
   /** Default value description. */
@@ -37,7 +37,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Incorrect values make the model's path planning inaccurate at all times.",
     ],
     defaultNote: "0.00 m",
-    wikiUrl: "https://sunnylink.wiki/#AdjustCameraOffset",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   LiveTorqueParamsToggle: {
@@ -53,7 +53,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "ON",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   LiveTorqueParamsRelaxedToggle: {
@@ -67,7 +67,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Slower adaptation means it takes longer to calibrate after a vehicle suspension change.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   TorqueControlTune: {
@@ -82,7 +82,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Default value depends on the sunnypilot version installed.",
     ],
     defaultNote: "1 (SP)",
-    wikiUrl: "https://sunnylink.wiki/#TorqueControlTuneVersion",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   LagdToggle: {
@@ -96,7 +96,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "If steering oscillates, try disabling LAGD and setting a fixed delay instead.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/#LiveLearningSteerDelay",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   LagdToggleDelay: {
@@ -110,7 +110,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Wrong values cause late steering corrections that feel 'drunk'.",
     ],
     defaultNote: "0.20 s",
-    wikiUrl: "https://sunnylink.wiki/#ManualSoftwareDelay",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   NeuralNetworkLateralControl: {
@@ -127,7 +127,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "OFF",
     recommended: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#NeuralNetworkLateralControl",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   EnforceTorqueControl: {
@@ -141,7 +141,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Can conflict with NNLC if both are enabled — only use one at a time.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#EnforceTorqueControl",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   TorqueParamsOverrideEnabled: {
@@ -156,7 +156,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Requires deep understanding of your vehicle's steering characteristics.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#EnableCustomTorqueTuning",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   ManualTuneFriction: {
@@ -170,7 +170,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Too low → insufficient torque to hold the lane.",
     ],
     defaultNote: "0.10",
-    wikiUrl: "https://sunnylink.wiki/#ManualTuneFriction",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Longitudinal ──────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Requires sunnypilot longitudinal control — not available on stock ACC vehicles.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#ExperimentalMode",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   DynamicExperimentalControl: {
@@ -205,7 +205,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "OFF",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#DynamicExperimentalControl",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   AlphaLongitudinalEnabled: {
@@ -221,7 +221,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Hidden on official release branches — only for dev/staging.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#AlphaLongitudinal",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   HyundaiLongitudinalTuning: {
@@ -238,7 +238,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "No effect on non-Hyundai/Kia/Genesis vehicles.",
     ],
     defaultNote: "Off (0)",
-    wikiUrl: "https://sunnylink.wiki/#HyundaiLongitudinalTuning",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   PlanplusControl: {
@@ -253,7 +253,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Experimental — test carefully before using in heavy traffic.",
     ],
     defaultNote: "OFF (0)",
-    wikiUrl: "https://sunnylink.wiki/#PlanPlusControls",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   CustomAccIncrementsEnabled: {
@@ -265,7 +265,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     tradeoffs: ["Wrong values may make speed setting frustrating in traffic."],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#CustomAccIncrements",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   CustomAccShortPressIncrement: {
@@ -275,14 +275,14 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Too small a value requires many button presses to make large speed changes.",
     ],
     defaultNote: "1 km/h",
-    wikiUrl: "https://sunnylink.wiki/#CustomAccShortPressIncrement",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   CustomAccLongPressIncrement: {
     summary: "Speed change when the cruise ＋/－ button is held.",
     tips: ["Set to 5–10 km/h for fast speed adjustments on highways."],
     defaultNote: "5 km/h",
-    wikiUrl: "https://sunnylink.wiki/#CustomAccLongPressIncrement",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Driving Personality ──────────────────────────────────────────────────
@@ -301,7 +301,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "Standard",
     recommended: "Standard",
-    wikiUrl: "https://sunnylink.wiki/#DrivingPersonality",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Lane Change ──────────────────────────────────────────────────────────
@@ -319,7 +319,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Nudge: Requires slight wheel input — good balance of safety and convenience.",
     ],
     defaultNote: "Nudge (0)",
-    wikiUrl: "https://sunnylink.wiki/#AutoLaneChangeByBlinker",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   BlindSpot: {
@@ -335,7 +335,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "OFF",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#AutoLaneChangeDelayWithBlindSpot",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   BlinkerMinLateralControlSpeed: {
@@ -349,7 +349,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Too high a value blocks steering at speeds where it's still useful.",
     ],
     defaultNote: "0 mph (steering always allowed with blinker)",
-    wikiUrl: "https://sunnylink.wiki/#BlinkerMinLateralControlSpeed",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   BlinkerPauseLateralControl: {
@@ -364,7 +364,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "No lane keeping during intentional lane changes.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#BlinkerPauseLateralControl",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   BlinkerLateralReengageDelay: {
@@ -378,10 +378,20 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Too long a delay means you're steering manually for longer after a lane change.",
     ],
     defaultNote: "0 s",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Speed Control ────────────────────────────────────────────────────────
+
+  IntelligentCruiseButtonManagement: {
+    summary: "Alpha feature that intelligently manages the cruise control button behaviour for better sunnypilot integration.",
+    tradeoffs: [
+      "Alpha quality — test carefully before relying on it.",
+      "Mutually exclusive with Alpha Longitudinal.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
 
   SmartCruiseControlVision: {
     summary:
@@ -396,7 +406,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "ON",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#SmartCruiseControlVision",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SmartCruiseControlMap: {
@@ -410,38 +420,58 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Can slow for curves that have been straightened.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#SmartCruiseControlMap",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SpeedLimitMode: {
     summary:
-      "Enables speed limit control — adjusts cruising speed to posted limits.",
+      "Controls how sunnypilot responds to detected speed limits from the car or map.",
     tips: [
-      "'Information' just displays the sign — no speed change.",
-      "'Auto' automatically adjusts — most convenient.",
-      "'User Confirm' requires you to tap the screen to accept each change.",
+      "'Off' (0) — speed limit system is entirely disabled.",
+      "'Info' (1) — shows the current speed limit on the HUD. No speed adjustment.",
+      "'Warning' (2) — shows the limit and plays an alert when you exceed it. No speed adjustment.",
+      "'Assist' (3) — automatically adjusts cruise speed to match the limit (with optional offset). Requires sunnypilot longitudinal control.",
+      "Start with 'Info' to get familiar with detected limits before enabling 'Assist'.",
     ],
     tradeoffs: [
-      "Extremely reliant on map data accuracy.",
-      "Can cause rapid braking if it reads an exit ramp speed limit while on the highway.",
-      "May trigger on conditional signs (school zones) when not active.",
+      "Extremely reliant on map data accuracy — verify source gives correct limits in your region.",
+      "'Assist' can cause sudden braking if it reads an off-ramp limit while on the highway.",
+      "May trigger on conditional signs (school zones, construction) when not active.",
+      "Not available in Assist mode on Tesla (release branches) or Rivian.",
     ],
-    defaultNote: "Information (display only)",
-    wikiUrl: "https://sunnylink.wiki/#SpeedLimitAssistMode",
+    defaultNote: "Off (0)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  SpeedLimitSource: {
+    summary:
+      "Selects which data source(s) provide the current speed limit.",
+    tips: [
+      "'Car State Priority' (2) is a good default for vehicles with built-in traffic sign recognition.",
+      "'Map Data Only' (1) or 'Map Data Priority' (3) are best when your car has no sign recognition — download OSM data first.",
+      "'Combined' (4) uses the higher of car and map values — widest coverage, may read advisory signs.",
+    ],
+    tradeoffs: [
+      "Map data can be outdated in rural or recently changed areas.",
+      "Car sign recognition may misread signs at speed or in poor lighting.",
+      "'Combined' can pick up advisory/ramp speed limits unintentionally.",
+    ],
+    defaultNote: "Car State Priority (2)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SpeedLimitPolicy: {
     summary: "Selects where speed limit data comes from.",
     tips: [
       "'Map Data Priority' is usually most accurate in the US.",
-      "'Car State' reads camera-detected signs — real-time but limited.",
+      "'Car State Only' reads camera-detected signs — real-time but limited.",
       "'Combined' uses both systems for wider coverage.",
     ],
     tradeoffs: [
-      "Map Data can be outdated in rural areas.",
+      "Map data can be outdated in rural areas.",
       "Car State only works where the camera can clearly read signs.",
     ],
-    wikiUrl: "https://sunnylink.wiki/#SpeedLimitSource",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SpeedLimitOffsetType: {
@@ -452,7 +482,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "'Percentage' scales with the limit — 10% over 65 mph = 71.5 mph.",
     ],
     defaultNote: "Fixed",
-    wikiUrl: "https://sunnylink.wiki/#SpeedLimitOffsetType",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SpeedLimitValueOffset: {
@@ -462,7 +492,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Set to 0 to strictly obey speed limits.",
     ],
     tradeoffs: ["Speeding is a legal risk — set responsibly."],
-    wikiUrl: "https://sunnylink.wiki/#SpeedLimitOffsetValue",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Interface ────────────────────────────────────────────────────────────
@@ -472,7 +502,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Displays a HUD timer showing how long the vehicle has been stopped.",
     tips: ["Useful at traffic lights to track wait times."],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#EnableStandstillTimer",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   GreenLightAlert: {
@@ -487,7 +517,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "OFF",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#GreenTrafficLightAlert",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   LeadDepartAlert: {
@@ -495,7 +525,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     tips: ["Prevents being the car holding up traffic in stop-and-go."],
     defaultNote: "OFF",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#LeadDepartureAlert",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   AlwaysOnDM: {
@@ -509,7 +539,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Privacy consideration — driver is always watched.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#AlwaysOnDriverMonitoring",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   ShowTurnSignals: {
@@ -519,7 +549,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Visual confirmation that blinker is active — useful for dashcam footage review.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#DisplayTurnSignals",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   HideVEgoUI: {
@@ -528,7 +558,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Minimize distractions — your car's own instrument cluster still shows speed.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#SpeedometerHideFromOnroadScreen",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   QuietMode: {
@@ -539,7 +569,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Safety alerts (immediate warnings, distraction prompts) always play regardless.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#QuietMode",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   DevUIInfo: {
@@ -550,7 +580,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Supported on comma 3X/3 — not available on comma 4.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#DeveloperUI",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   RoadNameToggle: {
@@ -560,7 +590,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Great for situational awareness in unfamiliar areas.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/#DisplayRoadName",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   OnroadUploads: {
@@ -568,7 +598,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Controls whether drive footage uploads while driving (ON) or waits until parked (OFF).",
     tips: ["Disable if using a metered mobile hotspot to avoid data overages."],
     defaultNote: "ON (uploads while driving)",
-    wikiUrl: "https://sunnylink.wiki/#OnroadUploads",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   TorqueBar: {
@@ -577,7 +607,47 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Useful for diagnosing steering tuning — see if torque is maxing out on curves.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  BlindSpotDetection: {
+    summary: "Shows blind spot warning icons on the HUD when vehicles are detected in the adjacent lane.",
+    tips: [
+      "Only works if your car has factory BSM hardware.",
+      "Different from the BSM lane-change guard — this is purely a HUD display overlay.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  SteeringArc: {
+    summary: "Displays a projected steering arc on the onroad HUD based on the current steering angle.",
+    tips: ["Useful for visualising the projected path during curves."],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  TrueVEgoUI: {
+    summary: "Always shows the GPS-derived ground speed on the HUD instead of the odometer-based speed.",
+    tips: ["Useful for vehicles with inaccurate speedometers."],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  ChevronInfo: {
+    summary: "Displays additional metrics (distance to lead, speed delta) below the lead-car chevron.",
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  RainbowMode: {
+    summary: "Enable Rainbow Mode on Tesla vehicles — cosmetic steering wheel colour effect on the HUD.",
+    tips: [
+      "Cosmetic only — no effect on driving behaviour.",
+      "Tesla vehicles only.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Comma AI / MADS ──────────────────────────────────────────────────────
@@ -596,7 +666,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "OFF",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#MadsEnabled",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   MadsMainCruiseAllowed: {
@@ -605,22 +675,25 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     tips: ["Keep ON when using MADS for normal operation."],
     defaultNote: "ON",
     recommended: "ON",
-    wikiUrl: "https://sunnylink.wiki/#MadsMainCruiseAllowed",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   MadsSteeringMode: {
-    summary: "Controls steering behaviour when cruise is canceled.",
+    summary:
+      "Controls what MADS lateral (steering) assistance does when you press the brake pedal.",
     tips: [
-      "'Default' — steering stops when you disengage ACC.",
-      "'Remain Active' — steering keeps working even after you brake to disengage ACC.",
-      "Use 'Remain Active' to maintain lane centering during manual speed adjustments.",
+      "'Remain Active' (0) — steering stays fully active while braking. Lets you manually slow for traffic without losing lane centering. Popular for highway driving.",
+      "'Pause' (1) — steering pauses while braking and automatically resumes when you release the brake.",
+      "'Disengage' (2) — steering fully disengages on brake input; you must re-engage MADS manually.",
+      "Set to 'Remain Active' if you frequently tap the brake in stop-and-go traffic to maintain following distance.",
     ],
     tradeoffs: [
-      "'Remain Active' may surprise new users — steering continues even without ACC.",
-      "Requires more attention to override when changing lanes intentionally.",
+      "'Remain Active' requires a mental model shift — braking does NOT disengage steering.",
+      "Can feel like the car is correcting your steering immediately after a manual brake.",
+      "Forced to 'Disengage' on Rivian and Tesla (without vehicle bus) — setting has no effect.",
     ],
-    defaultNote: "Default (0)",
-    wikiUrl: "https://sunnylink.wiki/#MadsSteeringMode",
+    defaultNote: "Remain Active (0)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   MadsUnifiedEngagementMode: {
@@ -631,7 +704,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Cannot engage steering-only without also enabling speed control.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#MadsUnifiedEngagementMode",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   IsLdwEnabled: {
@@ -643,7 +716,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     tradeoffs: ["Can be noisy on roads with poor or worn lane markings."],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#EnableLaneDepartureWarnings",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   DisengageOnAccelerator: {
@@ -658,7 +731,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "ON: Any gas pedal fully disengages the system — may feel safer to some users.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/#DisengageOnAcceleratorPedal",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   GsmMetered: {
@@ -669,7 +742,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Disable if you want drives to upload via cellular for faster sync.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/#GsmMetered",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   SunnylinkEnabled: {
@@ -677,7 +750,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Enables the SunnyLink cloud connection for remote configuration and drive sync.",
     tips: ["Required to use the SunnyLink dashboard for remote configuration."],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   RecordFront: {
@@ -688,7 +761,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Uses significant storage — older drives are auto-deleted to free space.",
     ],
     defaultNote: "ON",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   RecordAudioFeedback: {
@@ -698,7 +771,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Privacy consideration — conversations in the car are recorded.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#RecordUploadMicAudio",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Advanced ─────────────────────────────────────────────────────────────
@@ -711,7 +784,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     tradeoffs: ["Cannot be enabled on release or development branches."],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/#QuickbootMode",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   // ── Navigation ───────────────────────────────────────────────────────────
@@ -724,13 +797,13 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
       "Download the map on Wi-Fi — it can be quite large.",
     ],
     defaultNote: "OFF",
-    wikiUrl: "https://sunnylink.wiki/",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
   IsMetric: {
     summary: "Switches the entire interface from mph to km/h.",
     tips: ["Enable if you're in a country that uses the metric system."],
     defaultNote: "OFF (mph)",
-    wikiUrl: "https://sunnylink.wiki/#UseMetricSystem",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 };

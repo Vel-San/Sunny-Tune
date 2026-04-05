@@ -64,47 +64,6 @@ export const ConfigSection: React.FC<ConfigSectionProps> = ({
   );
 };
 
-/** Small inline chip that identifies a feature's origin platform. */
-const SourceChip: React.FC<{ source: "sunnypilot" | "openpilot" }> = ({
-  source,
-}) =>
-  source === "sunnypilot" ? (
-    <span
-      title="SunnyPilot exclusive — not available in stock openpilot"
-      className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 flex-shrink-0 select-none"
-    >
-      SP
-    </span>
-  ) : (
-    <span
-      title="OpenPilot / Comma AI native parameter"
-      className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/20 flex-shrink-0 select-none"
-    >
-      OP
-    </span>
-  );
-
-/**
- * One-line legend to show at the top of mixed-source sections so users
- * understand what SP / OP chips mean before they encounter them.
- */
-export const SourceLegend: React.FC = () => (
-  <p className="text-[10px] text-zinc-600 -mt-1 pb-1 flex items-center gap-3">
-    <span className="inline-flex items-center gap-1">
-      <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25">
-        SP
-      </span>
-      SunnyPilot only
-    </span>
-    <span className="inline-flex items-center gap-1">
-      <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/20">
-        OP
-      </span>
-      OpenPilot / Comma AI
-    </span>
-  </p>
-);
-
 /** Reusable param row: label + description on left, control on right */
 export const ParamRow: React.FC<{
   label: React.ReactNode;
@@ -112,10 +71,6 @@ export const ParamRow: React.FC<{
   children: React.ReactNode;
   htmlFor?: string;
   wide?: boolean;
-  /** When set, shows a small SP or OP chip next to the label. */
-  source?: "sunnypilot" | "openpilot";
-  /** Year this feature was introduced — shown as a small "Since YYYY" badge. */
-  since?: string;
   /**
    * The exact openpilot / sunnypilot parameter name.
    * When provided, a ⓘ tooltip icon is shown sourced from FIELD_HELP.
@@ -127,8 +82,6 @@ export const ParamRow: React.FC<{
   children,
   htmlFor,
   wide = false,
-  source,
-  since,
   spKey,
 }) => {
   const help = spKey ? FIELD_HELP[spKey] : undefined;
@@ -147,15 +100,6 @@ export const ParamRow: React.FC<{
           <label htmlFor={htmlFor} className="param-label cursor-pointer">
             {label}
           </label>
-          {source && <SourceChip source={source} />}
-          {since && (
-            <span
-              className="text-[10px] text-zinc-600 font-mono"
-              title={`Introduced in ${since}`}
-            >
-              {since}
-            </span>
-          )}
           {help && (
             <HelpTooltip
               label={typeof label === "string" ? label : String(spKey ?? "")}
