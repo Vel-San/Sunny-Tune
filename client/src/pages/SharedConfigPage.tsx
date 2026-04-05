@@ -83,7 +83,7 @@ const ROW: React.FC<{
 }> = ({ label, value, mono, spKey }) => {
   const help = spKey ? FIELD_HELP[spKey] : undefined;
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-0.5 sm:gap-4 py-3 border-b border-zinc-700/70 last:border-0">
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-0.5 sm:gap-4 py-2">
       <span className="text-sm text-zinc-400 sm:flex-shrink-0 sm:w-52 flex items-center gap-1">
         {label}
         {help && <HelpTooltip label={label} {...help} />}
