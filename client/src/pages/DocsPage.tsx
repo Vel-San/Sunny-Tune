@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Code2,
   GitBranch,
+  GitCompare,
   Globe,
   HelpCircle,
   KeyRound,
@@ -35,6 +36,7 @@ const SECTIONS: Section[] = [
   { id: "getting-started", label: "Getting Started", icon: BookOpen },
   { id: "editor", label: "Config Editor", icon: Wrench },
   { id: "sharing", label: "Sharing & QR", icon: Share2 },
+  { id: "compare", label: "Compare Configs", icon: GitCompare },
   { id: "explore", label: "Explore", icon: Globe },
   { id: "collections", label: "Collections", icon: Layers },
   { id: "history", label: "Version History", icon: GitBranch },
@@ -128,12 +130,16 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>Key features</H3>
           <UL
             items={[
-              "Full 10-section config editor covering Vehicle, Toggles, Steering, Cruise, Cruise — Speed Limit, Steering — Lane Change, Maps, Visuals, Device & Toggles, and Developer settings",
+              "Full 8-section config editor (Vehicle, Toggles, Steering, Cruise, Maps, Visuals, Device, Developer) — each section broken into labelled subsections for easy navigation",
+              "Context-sensitive help tooltips on every parameter — hover the ⓘ icon for a description, recommended value, tips, and tradeoffs",
               "One-click sharing with a public URL and QR code",
+              "Config comparison — diff any two public shared configs (or your own saved configs) side-by-side, grouped by section",
               "Browse the Explore page to find configs from other drivers sorted by rating, views, clones, or trending this week",
               "Version history — every save creates a snapshot you can browse, diff, and restore",
               "Collections to group related configs into named playlists",
               "Community ratings, comments, and reply threads",
+              "Changelog new-version pulse — the Changelog nav item glows blue when a new app version hasn't been viewed yet",
+              "SP Docs Sync badge — amber badge in the header nav shows when the tooltip database was last audited against the sunnypilot docs",
             ]}
           />
           <H3>Quick start</H3>
@@ -144,18 +150,22 @@ const CONTENT: Record<string, DocBlock[]> = {
                 the home page or My Configs page.
               </>,
               <>
-                Fill in your vehicle details (make, model, year) so the
-                community can find your config.
+                Fill in your vehicle details (make, model, year) so the community
+                can find your config.
               </>,
-              <>Adjust settings across the 10 sections using the sidebar.</>,
+              <>Adjust settings across the 8 sections using the sidebar. Subsection headers inside each section help you find specific parameters quickly.</>,
               <>
-                Hit <strong className="text-zinc-200">Save</strong> — your
-                config is stored privately until you choose to share.
+                Hover any <strong className="text-zinc-200">ⓘ</strong> icon to see
+                a help tooltip with description, recommended value, and tips.
+              </>,
+              <>
+                Hit <strong className="text-zinc-200">Save</strong> — your config
+                is stored privately until you choose to share.
               </>,
               <>
                 When ready, click{" "}
-                <strong className="text-zinc-200">Share</strong> to publish it
-                and generate a public URL + QR code.
+                <strong className="text-zinc-200">Share</strong> to publish it and
+                generate a public URL + QR code.
               </>,
             ]}
           />
@@ -169,63 +179,70 @@ const CONTENT: Record<string, DocBlock[]> = {
       content: (
         <>
           <P>
-            The editor is split into 10 sections, accessible via the left
-            sidebar (desktop) or by scrolling. Each section maps to a group of
-            SunnyPilot parameters.
+            The editor is split into <strong className="text-zinc-200">8 sections</strong>, accessible via the left
+            sidebar (desktop) or section pills on mobile. Each section is further divided into
+            labelled subsections so you can quickly find the parameter you're looking for.
+            Every parameter has a <strong className="text-zinc-200">ⓘ help tooltip</strong> — hover it to
+            see a description, recommended value, tips, and a link to the community docs.
           </P>
           <H3>Sections overview</H3>
           <UL
             items={[
               <>
                 <strong className="text-zinc-200">Vehicle</strong>{" "}
-                — Make, model, year, SP version, branch (stable-sp / dev-sp /
-                staging-sp / nightly), and active driving model
+                — <em>Vehicle Info</em>: make, model, year.{" "}
+                <em>Hardware &amp; Software</em>: Comma AI hardware, SP version, branch
+                (stable-sp / dev-sp / staging-sp / nightly), and active driving model
                 (ModelManager_ActiveBundle)
               </>,
               <>
                 <strong className="text-zinc-200">Toggles</strong> —
-                Driving personality (relaxed / standard / sport / traffic)
+                <em>Driving Personality</em>: relaxed / standard / sport / traffic.{" "}
+                <em>Experimental Mode</em>: E2E long, dynamic experimental control.{" "}
+                <em>Safety</em>: disengage on gas, close-to-road alert.{" "}
+                <em>Recording &amp; Uploads</em>: drive recording, driver monitoring
               </>,
               <>
                 <strong className="text-zinc-200">Steering</strong> —
-                Torque controller tuning (camera offset, live torque, torque
-                friction, lateral accel, friction override), NNLC, LAGD, and
-                enforce torque control
+                <em>M.A.D.S.</em>: steering mode, unified engagement, disengage behaviour.{" "}
+                <em>Lateral Assist</em>: camera offset, NNLC, LAGD, enforce torque control.{" "}
+                <em>Torque</em>: live torque, friction, lateral accel override.{" "}
+                <em>Lane Change</em>: auto-lane-change timer, blinker threshold, BSM pause
               </>,
               <>
-                <strong className="text-zinc-200">Cruise</strong>{" "}
-                — E2E long toggle, dynamic experimental control, Alpha
-                Longitudinal, Hyundai tuning, Plan+, and custom ACC increments
+                <strong className="text-zinc-200">Cruise</strong> —
+                <em>Longitudinal Control</em>: Alpha Longitudinal, Hyundai tuning, Plan+, ACC increments.{" "}
+                <em>Smart Cruise Control</em>: dynamic experimental control, ICBM.{" "}
+                <em>Speed Limit</em>: SLC mode, policy, and offset; curve speed reduction (SCC-V / SCC-M)
               </>,
               <>
-                <strong className="text-zinc-200">Cruise — Speed Limit</strong> — Speed
-                Limit Control (SLC) mode, policy, and offset; ICBM; curve speed
-                reduction (SCC-V / SCC-M)
+                <strong className="text-zinc-200">Maps</strong> — OSM local maps speed-limit data toggle
               </>,
               <>
-                <strong className="text-zinc-200">Steering — Lane Change</strong> —
-                Auto-lane-change timer, blinker-required threshold, BSM pause
+                <strong className="text-zinc-200">Visuals</strong> —
+                <em>HUD Overlays</em>: blind spot warnings, steering arc, true speed, chevron info.{" "}
+                <em>Display</em>: screen brightness, metric units, quiet mode
               </>,
               <>
-                <strong className="text-zinc-200">Maps</strong> — OSM
-                local maps speed-limit data toggle
+                <strong className="text-zinc-200">Device</strong> —
+                <em>Connectivity</em>: SunnyLink Connect integration.{" "}
+                <em>Device Settings</em>: always-on connectivity, wide-camera lead, auto-shutdown
               </>,
               <>
-                <strong className="text-zinc-200">Visuals</strong> — HUD
-                overlays (blind spot warnings, steering arc, true speed,
-                chevron info), screen brightness, metric units, quiet mode
+                <strong className="text-zinc-200">Developer</strong> —
+                <em>Longitudinal</em>: longitudinal developer tune.{" "}
+                <em>System</em>: quick-boot toggle
               </>,
-              <>
-                <strong className="text-zinc-200">Device &amp; Toggles</strong> — MADS
-                (steering mode, unified engagement), drive recording, disengage
-                behaviour, SunnyLink Connect integration
-              </>,
-              <>
-                <strong className="text-zinc-200">Developer</strong> — Quick-boot
-                toggle
-              </>,,
             ]}
           />
+          <H3>Help tooltips</H3>
+          <P>
+            Every parameter row has a <Code>ⓘ</Code> icon. Hovering (or tapping
+            on mobile) opens a tooltip panel showing the parameter’s description,
+            recommended value, tips, tradeoffs, and a link to the sunnypilot
+            community documentation. The panel auto-positions itself so it never
+            clips off the screen edge.
+          </P>
           <H3>Unsaved-change guard</H3>
           <P>
             If you navigate away before saving, a confirmation dialog will
@@ -255,6 +272,60 @@ const CONTENT: Record<string, DocBlock[]> = {
             <strong className="text-zinc-200">Export</strong> downloads the
             current config as a <Code>.json</Code> file.
           </P>
+        </>
+      ),
+    },
+  ],
+  compare: [
+    {
+      title: "Compare Configs",
+      content: (
+        <>
+          <P>
+            The <strong className="text-zinc-200">Compare</strong> button appears
+            in the action bar of every shared config page. It lets you diff the
+            current config against any other config — public or your own.
+          </P>
+          <H3>Comparing against a public config</H3>
+          <UL
+            items={[
+              "Open any shared config page.",
+              <>
+                Click the <strong className="text-zinc-200">Compare</strong>{" "}
+                button in the action bar.
+              </>,
+              "Paste a share URL (e.g. sunny-tune.vercel.app/shared/abc123) or a bare share token into the input field.",
+              <>
+                Click <strong className="text-zinc-200">Fetch</strong> —
+                SunnyTune fetches the other config and immediately computes the
+                diff.
+              </>,
+              "The diff is grouped by section (Vehicle, Steering, Cruise…) and shows each changed parameter with its old value (red, strikethrough) and new value (green).",
+            ]}
+          />
+          <H3>Comparing against your own configs</H3>
+          <P>
+            When you are signed in (have a token), a dropdown appears below the
+            URL input listing all your saved configs. Selecting one immediately
+            computes the diff — no URL needed.
+          </P>
+          <H3>Reading the diff</H3>
+          <UL
+            items={[
+              <>Parameters are grouped by section label (e.g. <strong className="text-zinc-200">Steering</strong>, <strong className="text-zinc-200">Cruise</strong>).</>,
+              <>The <strong className="text-zinc-200">base config</strong> (the page you opened Compare from) values appear in red with a strikethrough.</>,
+              <>The <strong className="text-zinc-200">comparison config</strong> values appear in green.</>,
+              'If the configs are identical, "Configs are identical" is shown instead of a diff table.',
+            ]}
+          />
+          <Callout
+            icon={GitCompare}
+            color="border-blue-800/40 bg-blue-950/20 text-blue-300"
+          >
+            The diff is computed entirely in-browser — the same engine used by
+            the Version History diff viewer. Only the second config requires an
+            extra network request.
+          </Callout>
         </>
       ),
     },
@@ -500,18 +571,50 @@ const CONTENT: Record<string, DocBlock[]> = {
               "Your configs are associated with this token — keep it safe.",
             ]}
           />
-          <H3>Revoking / rolling your token</H3>
+          <H3>Viewing your token</H3>
           <P>
-            Click your token badge in the header to open the Token modal. You
-            can copy your token or roll it (generate a new one). Rolling your
-            token will break access from other devices.
+            Click the key icon (token pill) in the header to open the Token
+            modal. It shows your full token, user ID, config count, and
+            member-since date.
+          </P>
+          <H3>Importing a token from another device</H3>
+          <P>
+            If you open SunnyTune on a new device it will generate a fresh
+            token, disconnecting you from your existing configs. To restore
+            access:
+          </P>
+          <UL
+            items={[
+              "Open the Token modal (key icon in the header).",
+              <>
+                Click{" "}
+                <strong className="text-zinc-200">
+                  Use token from another device…
+                </strong>
+              </>,
+              "Paste your token (starts with sp_) into the input field.",
+              <>
+                Click <strong className="text-zinc-200">Confirm</strong> —
+                SunnyTune validates the token server-side. If valid, it replaces
+                the generated token and loads your account immediately. If
+                invalid, your previous token is automatically restored.
+              </>,
+            ]}
+          />
+          <H3>Regenerating your token</H3>
+          <P>
+            In the Token modal click{" "}
+            <strong className="text-zinc-200">Regenerate token…</strong> and
+            confirm. This permanently invalidates the old token — any other
+            device using it will be signed out immediately.
           </P>
           <Callout
             icon={Lock}
             color="border-red-800/40 bg-red-950/20 text-red-300"
           >
             If you clear browser storage you will lose access to your configs.
-            Export important configs as JSON before clearing.
+            Copy your token from the Token modal, or export configs as JSON,
+            before clearing.
           </Callout>
         </>
       ),
@@ -713,8 +816,30 @@ const CONTENT: Record<string, DocBlock[]> = {
           <H3>What happens to my data if I clear browser storage?</H3>
           <P>
             Your anonymous token is stored in <Code>localStorage</Code>. If you
-            clear it, you lose access to your configs unless you export them
-            first. Export configs as JSON before clearing.
+            clear it, you lose access to your configs unless you have saved the
+            token elsewhere. Copy your token from the Token modal, or export
+            configs as JSON, before clearing.
+          </P>
+          <H3>How do I use SunnyTune on a second device?</H3>
+          <P>
+            Copy your token from the Token modal on your original device. On the
+            new device, open the Token modal and click{" "}
+            <strong className="text-zinc-200">Use token from another device…</strong>,
+            paste the token, and confirm. See the{" "}
+            <strong className="text-zinc-200">Authentication</strong> section for
+            full details.
+          </P>
+          <H3>What is the SP Docs Sync badge?</H3>
+          <P>
+            The faint amber badge in the header nav shows the date the SunnyTune
+            team last audited the sunnypilot docs to update the help tooltips.
+            Clicking it opens the GitHub Actions docs-audit workflow log.
+          </P>
+          <H3>What does the blue pulsing dot on Changelog mean?</H3>
+          <P>
+            You haven’t viewed the latest SunnyTune release notes yet. Click{" "}
+            <strong className="text-zinc-200">Changelog</strong> to read what
+            changed — the dot disappears once you visit the page.
           </P>
         </>
       ),

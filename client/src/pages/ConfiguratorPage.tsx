@@ -1,24 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-  AlertCircle,
-  ArrowUpDown,
-  Car,
-  CheckCircle2,
-  Clock,
-  Cpu,
-  Download,
-  Gauge,
-  GitBranch,
-  Map,
-  Monitor,
-  Save,
-  Share2,
-  Upload,
-  Wrench,
+    AlertCircle,
+    ArrowUpDown,
+    Car,
+    CheckCircle2,
+    Clock,
+    Cpu,
+    Download,
+    Gauge,
+    GitBranch,
+    Map,
+    Monitor,
+    Save,
+    Share2,
+    Upload,
+    Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { createConfig, fetchConfig, updateConfig } from "../api";
 import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { ShareModal } from "../components/config/ShareModal";
@@ -33,10 +33,11 @@ import { NavigationSection } from "../components/config/sections/NavigationSecti
 import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { Modal } from "../components/ui/Modal";
 import {
-  exportConfigAsJson,
-  ImportValidationError,
-  parseImportFile,
+    exportConfigAsJson,
+    ImportValidationError,
+    parseImportFile,
 } from "../lib/configExport";
 import { useConfigStore } from "../store/configStore";
 
@@ -76,6 +77,12 @@ export default function ConfiguratorPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sunnyLinkExportOpen, setSunnyLinkExportOpen] = useState(false);
+
+  // Block in-app SPA navigation when there are unsaved changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname,
+  );
 
   // Warn on browser refresh / tab close
   useEffect(() => {
@@ -421,6 +428,38 @@ export default function ConfiguratorPage() {
           }}
         />
       )}
+
+      {/* Unsaved-changes navigation guard */}
+      <Modal
+        open={blocker.state === "blocked"}
+        onClose={() => blocker.reset?.()}
+        title="Unsaved changes"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-zinc-300 leading-relaxed">
+            You have unsaved changes. If you leave now they will be lost.
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => blocker.reset?.()}
+            >
+              Stay & keep editing
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => {
+                markClean();
+                blocker.proceed?.();
+              }}
+            >
+              Discard & leave
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

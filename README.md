@@ -328,12 +328,19 @@ SunnyTune uses **anonymous UUID tokens** — no sign-up or password required.
 
 - On first visit, the client auto-calls `POST /api/users/register` which returns a `sp_<uuid>` token.
 - The token is stored in `localStorage` under `sp_user_token` and sent as `Authorization: Bearer sp_...` on every request.
-- To switch to a different user: DevTools → Application → Local Storage → delete `sp_user_token` → refresh.
-- To view your token: click the key icon in the header, or run `localStorage.getItem('sp_user_token')` in the browser console.
+- To view your token: click the key icon in the header to open the Token modal.
 
----
+### Moving to a new device
 
-## Admin Panel
+If you open SunnyTune on a new device it will generate a fresh token (disconnecting you from your existing configs). To restore access:
+
+1. Copy your token from the Token modal on your original device.
+2. On the new device, open the Token modal and click **Use token from another device…**
+3. Paste the token and click **Confirm**. SunnyTune validates it server-side and, if valid, replaces the generated token immediately.
+
+If the token is invalid, the previous token is automatically restored — you will not be left in a broken state.
+
+### Token revocation
 
 Access the admin panel at `/admin`. You'll be prompted for the `ADMIN_SECRET` (or the plain-text value behind `ADMIN_SECRET_HASH`) value set in your environment.
 
@@ -376,7 +383,7 @@ Every registry entry has a **required** `source` field. TypeScript will refuse t
 | `'sunnypilot'` | Exclusive to the SP fork            | Params with `SP_*` prefix, SP-only behaviour |
 | `'openpilot'`  | Stock Comma AI / upstream openpilot | Params that exist in vanilla openpilot       |
 
-The UI reads `source` to badge each parameter as **SP** or **Comma AI** in the configurator.
+The `source` field is used internally for registry bookkeeping. The SP / Comma AI origin chips (yellow/blue badges) that previously appeared in the config editor UI have been removed — the `source` field is still required in the registry but is no longer rendered visually.
 
 ### Adding a feature
 
