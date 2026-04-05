@@ -106,6 +106,9 @@ interface ConfigEditorState {
   setDescription: (desc: string) => void;
   setTags: (tags: string[]) => void;
   setCategory: (cat: string) => void;
+  /** Update tags and category without touching isDirty (e.g. after a remote
+   * metadata-only save via the share modal). */
+  syncTagsCategory: (tags: string[], category: string) => void;
   setActiveSection: (key: string) => void;
   markClean: () => void;
 }
@@ -162,6 +165,8 @@ export const useConfigStore = create<ConfigEditorState>((set) => ({
   setDescription: (desc) => set({ editingDescription: desc, isDirty: true }),
   setTags: (tags) => set({ editingTags: tags, isDirty: true }),
   setCategory: (cat) => set({ editingCategory: cat, isDirty: true }),
+  syncTagsCategory: (tags, category) =>
+    set({ editingTags: tags, editingCategory: category }),
   setActiveSection: (key) => set({ activeSection: key }),
   markClean: () => set({ isDirty: false }),
 }));

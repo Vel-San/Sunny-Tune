@@ -1,23 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
-  AlertCircle,
-  ArrowUpDown,
-  Car,
-  CheckCircle2,
-  Clock,
-  Cpu,
-  Download,
-  Gauge,
-  GitBranch,
-  Map,
-  Monitor,
-  Save,
-  Share2,
-  Upload,
-  Wrench,
+    AlertCircle,
+    ArrowUpDown,
+    Car,
+    CheckCircle2,
+    Clock,
+    Cpu,
+    Download,
+    Gauge,
+    GitBranch,
+    Map,
+    Monitor,
+    Save,
+    Share2,
+    Upload,
+    Wrench,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { createConfig, fetchConfig, updateConfig } from "../api";
 import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
@@ -35,10 +35,11 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import {
-  exportConfigAsJson,
-  ImportValidationError,
-  parseImportFile,
+    exportConfigAsJson,
+    ImportValidationError,
+    parseImportFile,
 } from "../lib/configExport";
+import { unmarkSeen } from "../lib/seenConfigs";
 import { useConfigStore } from "../store/configStore";
 
 const SECTIONS = [
@@ -68,6 +69,7 @@ export default function ConfiguratorPage() {
     loadConfig,
     setName,
     setDescription,
+    syncTagsCategory,
     activeSection,
     setActiveSection,
     markClean,
@@ -101,16 +103,28 @@ export default function ConfiguratorPage() {
     enabled: !!id,
   });
 
+  // Keep a ref to isDirty so the effect below can read the latest value
+  // without adding it to the dependency array (avoids re-running on every
+  // keystroke while still preventing background refetches from wiping edits).
+  const isDirtyRef = useRef(isDirty);
+  isDirtyRef.current = isDirty;
+
   useEffect(() => {
     if (id && existingConfig) {
-      loadConfig(
-        existingConfig.id,
-        existingConfig.name,
-        existingConfig.description ?? "",
-        existingConfig.config,
-        existingConfig.tags ?? [],
-        existingConfig.category ?? "",
-      );
+      // Only re-seed the store when there are no unsaved edits in progress.
+      // This prevents a ShareModal tag/category update (which invalidates
+      // ["config", id] and triggers a background refetch) from wiping the
+      // user's unsaved configurator changes.
+      if (!isDirtyRef.current) {
+        loadConfig(
+          existingConfig.id,
+          existingConfig.name,
+          existingConfig.description ?? "",
+          existingConfig.config,
+          existingConfig.tags ?? [],
+          existingConfig.category ?? "",
+        );
+      }
     } else if (!id) {
       initNew();
     }
@@ -142,7 +156,11 @@ export default function ConfiguratorPage() {
       markClean();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      if (!editingId) {
+      if (editingId) {
+        // Reset the "seen" flag so the Updated badge re-appears on the
+        // My Configs page now that the version has (potentially) bumped.
+        unmarkSeen(editingId);
+      } else {
         navigate(`/configure/${data.id}`, { replace: true });
       }
     },
@@ -400,6 +418,9 @@ export default function ConfiguratorPage() {
           existingShareToken={existingConfig?.shareToken ?? undefined}
           existingTags={editingTags}
           existingCategory={editingCategory}
+          onTagsCategoryUpdate={(tags, category) => {
+            syncTagsCategory(tags, category);
+          }}
         />
       )}
 

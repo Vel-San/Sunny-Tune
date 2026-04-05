@@ -18,6 +18,9 @@ interface ShareModalProps {
   existingShareToken?: string;
   existingTags?: string[];
   existingCategory?: string;
+  /** Called after a successful tags/category save so callers can sync their
+   * own state (e.g. the Configurator store) without waiting for a refetch. */
+  onTagsCategoryUpdate?: (tags: string[], category: string) => void;
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({
@@ -28,6 +31,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   existingShareToken,
   existingTags,
   existingCategory,
+  onTagsCategoryUpdate,
 }) => {
   const qc = useQueryClient();
   const [localTags, setLocalTags] = useState<string[]>([]);
@@ -75,7 +79,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const shareMutation = useMutation({
     mutationFn: ({ tags, category }: { tags: string[]; category: string }) =>
-      shareConfig(configId, { tags, category: category || undefined }),
+      shareConfig(configId, { tags, category }),
     onSuccess: ({ shareToken: token }) => {
       setShareToken(token);
       setUpdateDone(true);
@@ -83,6 +87,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       qc.invalidateQueries({ queryKey: ["community-stats"] });
       qc.invalidateQueries({ queryKey: ["explore"] });
       qc.invalidateQueries({ queryKey: ["config", configId] });
+      onTagsCategoryUpdate?.(localTags, localCategory);
     },
   });
 

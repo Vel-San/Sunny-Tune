@@ -4,17 +4,17 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { prisma } from "../config/database";
 import {
-  checkConfigCap,
-  pruneNotificationsIfNeeded,
-  validateUuidParams,
+    checkConfigCap,
+    pruneNotificationsIfNeeded,
+    validateUuidParams,
 } from "../lib/guards";
 import { logger } from "../lib/logger";
 import { configsQuerySchema } from "../lib/querySchemas";
 import { stripControlChars } from "../lib/sanitize";
 import {
-  authenticate,
-  AuthRequest,
-  optionalAuthenticate,
+    authenticate,
+    AuthRequest,
+    optionalAuthenticate,
 } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
 
@@ -103,7 +103,7 @@ const configBodySchema = z.object({
   vehicleModel: sanitized(100).optional(),
   vehicleYear: z.number().int().min(2012).max(2030).optional(),
   config: configDataSchema,
-  tags: z.array(sanitized(30)).max(10).optional(),
+  tags: z.array(sanitized(30)).max(20).optional(),
   category: sanitized(50).optional(),
 });
 
@@ -352,17 +352,20 @@ configsRouter.post(
         return;
       }
 
-      // Tags and category may be supplied at share time
+      // Tags and category may be supplied at share time.
+      // Raise the tag limit to 20 to match the client UI.
       const tags: string[] | undefined = Array.isArray(req.body?.tags)
-        ? req.body.tags.slice(0, 10).map(String)
+        ? req.body.tags.slice(0, 20).map(String)
         : undefined;
-      const category: string | undefined =
+      // An empty-string category means "clear it"; treat it as null.
+      const category: string | null | undefined =
         typeof req.body?.category === "string" && req.body.category.length <= 50
-          ? req.body.category
+          ? req.body.category || null
           : undefined;
 
       if (existing.isShared && existing.shareToken) {
-        // Already shared — just update tags/category if provided
+        // Already shared — update tags/category whenever either is present in
+        // the request body (including an empty-string category → null clear).
         if (tags !== undefined || category !== undefined) {
           await prisma.configuration.update({
             where: { id: req.params.id },

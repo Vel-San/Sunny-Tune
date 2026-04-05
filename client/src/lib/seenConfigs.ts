@@ -29,6 +29,17 @@ export function markSeen(id: string): void {
   }
 }
 
+export function unmarkSeen(id: string): void {
+  const s = readSet();
+  if (!s.has(id)) return;
+  s.delete(id);
+  try {
+    localStorage.setItem(KEY, JSON.stringify([...s]));
+  } catch {
+    // storage quota exceeded or disabled — silently ignore
+  }
+}
+
 /**
  * Broadcasts a "clear all" event so every mounted card immediately hides its
  * indicator. Each card also persists its own seen state to localStorage via
