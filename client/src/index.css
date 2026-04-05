@@ -98,6 +98,12 @@
   animation: neon-updated-pulse 2.5s ease-in-out infinite;
 }
 
+/* When New badge needs to sit beside Updated badge */
+.neon-new-badge--right {
+  left: auto;
+  right: 10px;
+}
+
 /* Subtle shine sweep on "New" cards — contained by overflow-hidden on the card */
 .neon-new-shine {
   position: relative;

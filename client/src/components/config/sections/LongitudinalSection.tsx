@@ -182,6 +182,17 @@ export const LongitudinalSection: React.FC = () => {
         />
       </ParamRow>
 
+      <ParamRow
+        label="Map Advisory Speed Limit"
+        spKey="SpeedLimitMapAdvisory"
+        description="SpeedLimitMapAdvisory — honour advisory (recommended) speed limits from map data in addition to posted legal limits."
+      >
+        <Toggle
+          checked={s.mapAdvisorySpeedLimit}
+          onChange={(v) => setSpd("mapAdvisorySpeedLimit", v)}
+        />
+      </ParamRow>
+
       {/* ─── Cruise — Speed Limit (SLC) ─── */}
       <div className="divider" />
       <div className="space-y-3">

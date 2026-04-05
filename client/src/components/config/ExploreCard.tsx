@@ -55,6 +55,8 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
 
   const isNew = (config.version ?? 1) <= 1;
   const isUpdated = (config.version ?? 1) > 1;
+  const showNew = !seen && isNew;
+  const showUpdated = !seen && isUpdated;
 
   useEffect(() => {
     setFavorited(isFavorited);
@@ -87,27 +89,32 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
 
   return (
     <div
-      className={clsx("relative isolate", className)}
+      className={clsx("relative isolate flex flex-col", className)}
       onClick={handleMarkSeen}
     >
-      {isUpdated && !seen && (
-        <div className="neon-updated-ring" aria-hidden="true" />
-      )}
-      {isUpdated && !seen && (
+      {showUpdated && <div className="neon-updated-ring" aria-hidden="true" />}
+      {showUpdated && (
         <div className="neon-updated-badge" aria-hidden="true">
           Updated
         </div>
       )}
-      {isNew && !seen && (
-        <div className="neon-new-badge" aria-hidden="true">
+      {showNew && (
+        <div
+          className={
+            showUpdated
+              ? "neon-new-badge neon-new-badge--right"
+              : "neon-new-badge"
+          }
+          aria-hidden="true"
+        >
           New
         </div>
       )}
       <Link
         to={`/shared/${config.shareToken}`}
         className={clsx(
-          "group block card border border-zinc-800 hover:border-zinc-600 rounded-xl p-4 space-y-3 transition-colors duration-150",
-          isNew && !seen && "neon-new-shine overflow-hidden",
+          "group flex flex-col flex-1 card border border-zinc-800 hover:border-zinc-600 rounded-xl p-4 gap-3 transition-colors duration-150",
+          showNew && "neon-new-shine overflow-hidden",
         )}
       >
         {/* Vehicle header */}
@@ -156,83 +163,79 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
           </button>
         </div>
 
-        {/* Description */}
-        {config.description && (
-          <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
-            {config.description}
-          </p>
-        )}
+        {/* Description — always 2-line space to keep cards uniform */}
+        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 min-h-[2.5rem]">
+          {config.description || ""}
+        </p>
 
-        {/* SP version + branch + config version */}
-        {(config.config.metadata?.sunnypilotVersion ||
-          config.config.metadata?.branch ||
-          config.version != null) && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {config.config.metadata?.sunnypilotVersion && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-400/80 bg-blue-950/40 border border-blue-800/40 px-1.5 py-0.5 rounded">
-                SP {config.config.metadata.sunnypilotVersion}
-              </span>
-            )}
-            {config.config.metadata?.branch && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
-                <GitBranch className="w-2.5 h-2.5" />
-                {config.config.metadata.branch}
-              </span>
-            )}
-            {config.version != null && (
-              <span className="inline-flex items-center text-[10px] font-mono font-semibold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded">
-                v{config.version}
-              </span>
-            )}
-          </div>
-        )}
+        {/* SP version + branch + config version — always rendered to keep height uniform */}
+        <div className="flex flex-wrap items-center gap-1.5 min-h-[1.5rem]">
+          {config.config.metadata?.sunnypilotVersion && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-400/80 bg-blue-950/40 border border-blue-800/40 px-1.5 py-0.5 rounded">
+              SP {config.config.metadata.sunnypilotVersion}
+            </span>
+          )}
+          {config.config.metadata?.branch && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+              <GitBranch className="w-2.5 h-2.5" />
+              {config.config.metadata.branch}
+            </span>
+          )}
+          {config.version != null && (
+            <span className="inline-flex items-center text-[10px] font-mono font-semibold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded">
+              v{config.version}
+            </span>
+          )}
+        </div>
 
-        {/* Tags */}
-        {config.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 items-center">
-            {(showAllTags ? config.tags : config.tags.slice(0, 3)).map(
-              (tag) => (
-                <span
-                  key={tag}
-                  className={clsx(
-                    "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
-                    tagColor(tag),
-                  )}
+        {/* Tags — always rendered to keep height uniform */}
+        <div className="flex flex-wrap gap-1 items-center min-h-[1.5rem]">
+          {config.tags.length > 0 && (
+            <>
+              {(showAllTags ? config.tags : config.tags.slice(0, 3)).map(
+                (tag) => (
+                  <span
+                    key={tag}
+                    className={clsx(
+                      "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                      tagColor(tag),
+                    )}
+                  >
+                    <Tag className="w-2 h-2" />
+                    {tag}
+                  </span>
+                ),
+              )}
+              {!showAllTags && config.tags.length > 3 && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowAllTags(true);
+                  }}
+                  className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
                 >
-                  <Tag className="w-2 h-2" />
-                  {tag}
-                </span>
-              ),
-            )}
-            {!showAllTags && config.tags.length > 3 && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowAllTags(true);
-                }}
-                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                +{config.tags.length - 3} more
-              </button>
-            )}
-            {showAllTags && config.tags.length > 3 && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowAllTags(false);
-                }}
-                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                less
-              </button>
-            )}
-          </div>
-        )}
+                  +{config.tags.length - 3} more
+                </button>
+              )}
+              {showAllTags && config.tags.length > 3 && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowAllTags(false);
+                  }}
+                  className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  less
+                </button>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Divider */}
-        <div className="border-t border-zinc-800" />
+        <div className="mt-auto border-t border-zinc-800" />
 
         {/* Rating + stats */}
         <div className="flex items-center justify-between gap-2">

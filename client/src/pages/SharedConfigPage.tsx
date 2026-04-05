@@ -59,7 +59,7 @@ import type {
   RatingRecord,
   RatingSummary,
 } from "../types/config";
-import { CATEGORIES } from "../types/config";
+import { CATEGORIES, createDefaultConfig } from "../types/config";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -296,6 +296,27 @@ export default function SharedConfigPage() {
     : null;
   const catLabel = CATEGORIES.find((c) => c.value === config.category)?.label;
   const isOwner = config.isOwn ?? false;
+
+  // Normalize raw API config — old configs won't have new sections like
+  // vehicleSpecific; merge with defaults so the viewer never crashes.
+  const defaults = createDefaultConfig();
+  const rawC = config.config as unknown as Record<string, unknown>;
+  for (const key of Object.keys(defaults) as (keyof typeof defaults)[]) {
+    if (rawC[key] === undefined || rawC[key] === null) {
+      rawC[key] = structuredClone(defaults[key] as unknown);
+    } else if (
+      typeof defaults[key] === "object" &&
+      defaults[key] !== null &&
+      !Array.isArray(defaults[key])
+    ) {
+      const section = rawC[key] as Record<string, unknown>;
+      const defSection = defaults[key] as Record<string, unknown>;
+      for (const field of Object.keys(defSection)) {
+        if (section[field] === undefined)
+          section[field] = structuredClone(defSection[field]);
+      }
+    }
+  }
   const c = config.config;
 
   return (
@@ -478,16 +499,14 @@ export default function SharedConfigPage() {
               </Button>
             </Link>
           )}
-          {isOwner && (
-            <Button
-              variant="ghost"
-              size="sm"
-              leftIcon={<Clock className="w-3.5 h-3.5" />}
-              onClick={() => setHistoryOpen(true)}
-            >
-              History
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<Clock className="w-3.5 h-3.5" />}
+            onClick={() => setHistoryOpen(true)}
+          >
+            History
+          </Button>
         </div>
       </div>
 
@@ -522,8 +541,29 @@ export default function SharedConfigPage() {
             <ROW label="SP Version" value={c.metadata.sunnypilotVersion} mono />
             <ROW label="Branch" value={c.metadata.branch} mono />
             {c.metadata.activeModel && (
-              <ROW label="Driving Model" value={c.metadata.activeModel} mono />
+              <ROW
+                label="Driving Model"
+                spKey="ModelManager_ActiveBundle"
+                value={c.metadata.activeModel}
+                mono
+              />
             )}
+            <SubH>Make-specific Features</SubH>
+            <ROW
+              label="Tesla: Coop Steering"
+              spKey="TeslaCoopSteering"
+              value={c.vehicleSpecific.teslaCoopSteering ? "On" : "Off"}
+            />
+            <ROW
+              label="Subaru: Stop and Go"
+              spKey="SubaruStopAndGo"
+              value={c.vehicleSpecific.subaruStopAndGo ? "On" : "Off"}
+            />
+            <ROW
+              label="Toyota: Enforce Factory Long"
+              spKey="ToyotaEnforceFactoryLong"
+              value={c.vehicleSpecific.toyotaEnforceFactoryLong ? "On" : "Off"}
+            />
           </SectionBlock>
 
           <SectionBlock icon={Gauge} title="Toggles" defaultOpen>
@@ -710,6 +750,21 @@ export default function SharedConfigPage() {
               spKey="BlindSpot"
               value={c.laneChange.bsmMonitoring ? "On" : "Off"}
             />
+            <ROW
+              label="Lane Turn Desires"
+              spKey="LaneTurnDesire"
+              value={c.laneChange.laneTurnDesire ? "On" : "Off"}
+            />
+            <ROW
+              label="Adjust Lane Turn Speed"
+              spKey="AdjustLaneTurnSpeed"
+              value={
+                c.laneChange.adjustLaneTurnSpeed === 0
+                  ? "Always active"
+                  : `${c.laneChange.adjustLaneTurnSpeed} kph`
+              }
+              mono
+            />
           </SectionBlock>
 
           <SectionBlock
@@ -767,6 +822,11 @@ export default function SharedConfigPage() {
               label="Map Turn Speed"
               spKey="SmartCruiseControlMap"
               value={c.speedControl.mapEnabled ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Map Advisory Speed"
+              spKey="SpeedLimitMapAdvisory"
+              value={c.speedControl.mapAdvisorySpeedLimit ? "On" : "Off"}
             />
             <SubH>Speed Limit</SubH>
             <ROW
@@ -886,18 +946,61 @@ export default function SharedConfigPage() {
               }
               mono
             />
+            <ROW
+              label="Interactivity Timeout"
+              spKey="InteractivityTimer"
+              value={
+                c.interface.interactivityTimeout === 0
+                  ? "Never"
+                  : `${c.interface.interactivityTimeout}s`
+              }
+              mono
+            />
+            <ROW
+              label="Real-time Accel Bar"
+              spKey="RealTimeAccelBar"
+              value={c.interface.realTimeAccelBar ? "On" : "Off"}
+            />
+            <ROW
+              label="Language"
+              spKey="LanguageSetting"
+              value={c.interface.language || "main_en"}
+              mono
+            />
           </SectionBlock>
 
           <SectionBlock icon={Cpu} title="Device">
             <SubH first>Connectivity</SubH>
             <ROW
+              label="Enable sunnypilot"
+              spKey="SunnypilotEnabled"
+              value={c.commaAI.sunnypilotEnabled ? "On" : "Off"}
+            />
+            <ROW
               label="SunnyLink Connect"
               spKey="SunnylinkEnabled"
               value={c.commaAI.connectEnabled ? "On" : "Off"}
             />
+            <ROW
+              label="GSM APN"
+              spKey="GsmApn"
+              value={c.commaAI.gsmApn || "(none)"}
+              mono
+            />
+            <ROW
+              label="GSM Roaming"
+              spKey="GsmRoaming"
+              value={c.commaAI.gsmRoaming ? "On" : "Off"}
+            />
             <SubH>Device Settings</SubH>
             <ROW
+              label="Show Advanced Controls"
+              spKey="ShowAdvancedControls"
+              value={c.interface.showAdvancedControls ? "On" : "Off"}
+            />
+            <ROW
               label="Use Metric"
+              spKey="IsMetric"
               value={c.interface.useMetric ? "On" : "Off"}
             />
             <ROW
@@ -924,6 +1027,37 @@ export default function SharedConfigPage() {
               label="Quick Boot"
               spKey="QuickBootToggle"
               value={c.advanced.quickBoot ? "Enabled" : "Disabled"}
+            />
+            <ROW
+              label="Max Time Offroad"
+              spKey="MaxTimeOffroad"
+              value={
+                c.advanced.maxTimeOffroad === 0
+                  ? "No limit"
+                  : `${c.advanced.maxTimeOffroad}s`
+              }
+              mono
+            />
+            <ROW
+              label="Disable Power Down"
+              spKey="DisablePowerDown"
+              value={c.advanced.disablePowerDown ? "On" : "Off"}
+            />
+            <ROW
+              label="Wake Up Behavior"
+              spKey="WakeupBehavior"
+              value={
+                c.advanced.wakeupBehavior === 0
+                  ? "Manual only"
+                  : c.advanced.wakeupBehavior === 1
+                    ? "On cable"
+                    : "Always on"
+              }
+            />
+            <ROW
+              label="Disable Updates"
+              spKey="DisableUpdates"
+              value={c.advanced.disableUpdates ? "On" : "Off"}
             />
           </SectionBlock>
         </div>
@@ -1034,16 +1168,14 @@ export default function SharedConfigPage() {
         />
       )}
 
-      {/* Version history modal (owner only) */}
-      {isOwner && (
-        <ConfigHistoryModal
-          open={historyOpen}
-          onClose={() => setHistoryOpen(false)}
-          configId={config.id}
-          currentConfig={config.config}
-          currentName={config.name}
-        />
-      )}
+      {/* Version history modal */}
+      <ConfigHistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        configId={config.id}
+        currentConfig={config.config}
+        currentName={config.name}
+      />
     </div>
   );
 }

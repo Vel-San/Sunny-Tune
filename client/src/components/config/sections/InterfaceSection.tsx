@@ -15,6 +15,31 @@ const SCREEN_OFF_OPTS = [
   { value: "300", label: "5 minutes" },
 ];
 
+const LANG_OPTS = [
+  { value: "main_en", label: "English" },
+  { value: "main_ko", label: "Korean" },
+  { value: "main_ja", label: "Japanese" },
+  { value: "main_de", label: "German" },
+  { value: "main_es", label: "Spanish" },
+  { value: "main_fr", label: "French" },
+  { value: "main_pt-BR", label: "Portuguese (Brazil)" },
+  { value: "main_it", label: "Italian" },
+  { value: "main_nl", label: "Dutch" },
+  { value: "main_pl", label: "Polish" },
+  { value: "main_tr", label: "Turkish" },
+  { value: "main_zh-Hans", label: "Chinese (Simplified)" },
+  { value: "main_zh-Hant", label: "Chinese (Traditional)" },
+];
+
+const INTERACTIVITY_OPTS = [
+  { value: "0", label: "Never" },
+  { value: "30", label: "30 seconds" },
+  { value: "60", label: "1 minute" },
+  { value: "90", label: "1.5 minutes (default)" },
+  { value: "120", label: "2 minutes" },
+  { value: "300", label: "5 minutes" },
+];
+
 export const InterfaceSection: React.FC = () => {
   const { editingConfig, updateField } = useConfigStore();
   const ui = editingConfig.interface;
@@ -176,6 +201,7 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Screen Brightness"
+        spKey="Brightness"
         description="Brightness — onroad screen brightness 0–100%."
       >
         <Slider
@@ -191,12 +217,48 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Screen Off Timer"
+        spKey="OnroadScreenOffTimer"
         description="OnroadScreenOffTimer — dim the screen after an idle period while driving."
       >
         <Select
           value={String(ui.screenOffTimer)}
           onChange={(v) => set("screenOffTimer", parseInt(v))}
           options={SCREEN_OFF_OPTS}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Interactivity Timeout"
+        spKey="InteractivityTimer"
+        description="InteractivityTimer — seconds of inactivity before the HUD becomes non-interactive."
+      >
+        <Select
+          value={String(ui.interactivityTimeout)}
+          onChange={(v) => set("interactivityTimeout", parseInt(v))}
+          options={INTERACTIVITY_OPTS}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Real-time Accel Bar"
+        spKey="RealTimeAccelBar"
+        description="RealTimeAccelBar — show a live acceleration/deceleration bar on the HUD."
+      >
+        <Toggle
+          checked={ui.realTimeAccelBar}
+          onChange={(v) => set("realTimeAccelBar", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Language"
+        spKey="LanguageSetting"
+        description="LanguageSetting — language used for all text in the sunnypilot onroad UI."
+      >
+        <Select
+          value={ui.language}
+          onChange={(v) => set("language", v)}
+          options={LANG_OPTS}
         />
       </ParamRow>
     </ConfigSection>

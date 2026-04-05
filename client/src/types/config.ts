@@ -138,6 +138,8 @@ export interface SPConfig {
     mapEnabled: boolean;
     /** Intelligent Cruise Button Management (Alpha) — IntelligentCruiseButtonManagement */
     icbmEnabled: boolean;
+    /** Use map advisory speed limits from OSM data — SpeedLimitMapAdvisory */
+    mapAdvisorySpeedLimit: boolean;
   };
 
   // ── 6. Lane Change ────────────────────────────────────────────────────────
@@ -157,6 +159,10 @@ export interface SPConfig {
     blinkerPauseLateral: boolean;
     /** Seconds before lateral re-engages after blinker off — BlinkerLateralReengageDelay */
     blinkerReengageDelay: number;
+    /** Use desired path on curves / turns — LaneTurnDesire */
+    laneTurnDesire: boolean;
+    /** Speed (kph) at which lane-turn desire activates; 0 = disabled — AdjustLaneTurnSpeed */
+    adjustLaneTurnSpeed: number;
   };
 
   // ── 7. Navigation ─────────────────────────────────────────────────────────
@@ -205,6 +211,14 @@ export interface SPConfig {
     chevronInfo: boolean;
     /** Enable Tesla Rainbow Mode (cosmetic) — RainbowMode */
     rainbowMode: boolean;
+    /** Show advanced controls in sunnypilot's own settings UI — ShowAdvancedControls */
+    showAdvancedControls: boolean;
+    /** UI language for sunnypilot — LanguageSetting */
+    language: string;
+    /** Seconds of inactivity before HUD interaction times out — InteractivityTimer */
+    interactivityTimeout: number;
+    /** Show real-time acceleration bar on the HUD — RealTimeAccelBar */
+    realTimeAccelBar: boolean;
   };
 
   // ── 9. Comma AI Core ──────────────────────────────────────────────────────
@@ -229,12 +243,42 @@ export interface SPConfig {
     madsUnifiedEngagement: boolean;
     /** Record cabin audio with drive footage — RecordAudioFeedback */
     recordAudioFeedback: boolean;
+    /** Master toggle for all sunnypilot-specific features — SunnypilotEnabled */
+    sunnypilotEnabled: boolean;
+    /** Carrier APN for SIM-based data — GsmApn */
+    gsmApn: string;
+    /** Allow mobile data roaming for SIM uploads — GsmRoaming */
+    gsmRoaming: boolean;
   };
 
   // ── 10. Advanced ──────────────────────────────────────────────────────────
   advanced: {
     /** Skip boot animation for faster startup — QuickBootToggle */
     quickBoot: boolean;
+    /**
+     * Maximum time (seconds) device stays off-road before auto power-down.
+     * 0 = no limit — MaxTimeOffroad
+     */
+    maxTimeOffroad: number;
+    /** Prevent the device from powering down when parked — DisablePowerDown */
+    disablePowerDown: boolean;
+    /**
+     * When the device wakes up from sleep.
+     * 0 = Off (manual only), 1 = On cable connection, 2 = Always on — WakeupBehavior
+     */
+    wakeupBehavior: number;
+    /** Disable automatic over-the-air updates (locks installed version) — DisableUpdates */
+    disableUpdates: boolean;
+  };
+
+  // ── 11. Vehicle-specific ──────────────────────────────────────────────────
+  vehicleSpecific: {
+    /** Tesla coaxial/cooperative steering via torque actuator — TeslaCoopSteering */
+    teslaCoopSteering: boolean;
+    /** Subaru: enable stop-and-go with low-speed ACC — SubaruStopAndGo */
+    subaruStopAndGo: boolean;
+    /** Toyota: enforce stock longitudinal instead of SP override — ToyotaEnforceFactoryLong */
+    toyotaEnforceFactoryLong: boolean;
   };
 }
 
@@ -290,6 +334,7 @@ export function createDefaultConfig(): SPConfig {
       visionEnabled: false,
       mapEnabled: false,
       icbmEnabled: false,
+      mapAdvisorySpeedLimit: false,
     },
     laneChange: {
       enabled: true,
@@ -298,6 +343,8 @@ export function createDefaultConfig(): SPConfig {
       bsmMonitoring: false,
       blinkerPauseLateral: false,
       blinkerReengageDelay: 0,
+      laneTurnDesire: false,
+      adjustLaneTurnSpeed: 0,
     },
     navigation: {
       osmEnabled: false,
@@ -322,6 +369,10 @@ export function createDefaultConfig(): SPConfig {
       steeringArc: false,
       chevronInfo: false,
       rainbowMode: false,
+      showAdvancedControls: false,
+      language: "main_en",
+      interactivityTimeout: 90,
+      realTimeAccelBar: false,
     },
     commaAI: {
       recordDrives: true,
@@ -334,9 +385,21 @@ export function createDefaultConfig(): SPConfig {
       madsSteeringMode: 0,
       madsUnifiedEngagement: false,
       recordAudioFeedback: false,
+      sunnypilotEnabled: true,
+      gsmApn: "",
+      gsmRoaming: false,
     },
     advanced: {
       quickBoot: false,
+      maxTimeOffroad: 0,
+      disablePowerDown: false,
+      wakeupBehavior: 0,
+      disableUpdates: false,
+    },
+    vehicleSpecific: {
+      teslaCoopSteering: false,
+      subaruStopAndGo: false,
+      toyotaEnforceFactoryLong: false,
     },
   };
 }

@@ -11,6 +11,57 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.2.0",
+    date: "2026-04-05",
+    tags: ["feature", "fix", "ux"],
+    changes: [
+      {
+        type: "added",
+        text: "17 new sunnypilot parameters: Lane Turn Desire, Adjust Lane Turn Speed, Map Advisory Speed Limit, Show Advanced Controls, Language, Interactivity Timeout, Real-time Acceleration Bar, sunnypilot Enabled, GSM APN, GSM Roaming, Max Time Offroad, Disable Power Down, Wake Up Behavior, Disable Updates — and a brand new Vehicle Specific section with Tesla Cooperative Steering, Subaru Stop & Go, and Toyota Enforce Factory Longitudinal",
+      },
+      {
+        type: "added",
+        text: "SP Docs audit: TorqueParamsOverrideFriction key corrected, 4 missing FIELD_HELP entries added, plus entries for all 17 new parameters; docs sync date updated to 2026-04-08",
+      },
+      {
+        type: "changed",
+        text: "Save button is now disabled (greyed out) for existing configs when there are no unsaved changes",
+      },
+      {
+        type: "changed",
+        text: "Version counter only increments when config data actually changes — metadata-only saves (name, description, tags, category) no longer bump the version or create a history snapshot",
+      },
+      {
+        type: "changed",
+        text: "ShareModal now uses local state — editing the share form no longer marks the config as dirty, so the Unsaved Changes navigation guard no longer fires after sharing",
+      },
+      {
+        type: "fixed",
+        text: "Old configs missing newly added sections (e.g. vehicleSpecific) no longer crash when loaded — deep-merged with createDefaultConfig() defaults on load",
+      },
+      {
+        type: "fixed",
+        text: "Server now accepts configs containing the new vehicleSpecific section — previously returned 400 Invalid payload",
+      },
+      {
+        type: "fixed",
+        text: "Config cards now have fully uniform height regardless of whether a config is shared, has tags, has stats, or was cloned — all optional slot containers now reserve a fixed minimum height",
+      },
+      {
+        type: "fixed",
+        text: "New + Updated badges now both display simultaneously on a card; neon rings are constrained to card bounds",
+      },
+      {
+        type: "fixed",
+        text: "History button on the shared config page is now visible to all users, not only the config owner",
+      },
+      {
+        type: "fixed",
+        text: "Dashboard Top Configs charts no longer log React duplicate-key warnings when multiple configs share the same name",
+      },
+    ],
+  },
+  {
     version: "2.1.0",
     date: "2026-04-06",
     tags: ["feature", "ux", "fix"],

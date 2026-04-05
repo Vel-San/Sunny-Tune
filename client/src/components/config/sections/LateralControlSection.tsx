@@ -1,6 +1,7 @@
 import { GitBranch } from "lucide-react";
 import React from "react";
 import { useConfigStore } from "../../../store/configStore";
+import { NumberInput } from "../../ui/NumberInput";
 import { Select } from "../../ui/Select";
 import { Slider } from "../../ui/Slider";
 import { Toggle } from "../../ui/Toggle";
@@ -310,7 +311,7 @@ export const LateralControlSection: React.FC = () => {
 
       <ParamRow
         label="Friction Override"
-        spKey="ManualTuneFriction"
+        spKey="TorqueParamsOverrideFriction"
         description="TorqueParamsOverrideFriction — rolling friction compensation (0.01–0.5). Higher = more steering resistance compensation."
       >
         <Slider
@@ -326,6 +327,7 @@ export const LateralControlSection: React.FC = () => {
 
       <ParamRow
         label="Lat Accel Factor Override"
+        spKey="TorqueParamsOverrideLatAccelFactor"
         description="TorqueParamsOverrideLatAccelFactor — scales lateral acceleration requests (1.0–4.0). Higher = more aggressive steering response."
       >
         <Slider
@@ -347,7 +349,8 @@ export const LateralControlSection: React.FC = () => {
 
       <ParamRow
         label="Lane Change Assist"
-        description="Enable openpilot-assisted lane changes when the turn signal is held."
+        spKey="AutoLaneChangeEnabled"
+        description="AutoLaneChangeEnabled — enable openpilot-assisted lane changes when the turn signal is held."
       >
         <Toggle checked={lc.enabled} onChange={(v) => setLc("enabled", v)} />
       </ParamRow>
@@ -376,6 +379,33 @@ export const LateralControlSection: React.FC = () => {
           checked={lc.bsmMonitoring}
           onChange={(v) => setLc("bsmMonitoring", v)}
           disabled={!lc.enabled}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Use Lane Turn Desires"
+        spKey="LaneTurnDesire"
+        description="LaneTurnDesire — use the desired-path planner on curves and turns for smoother lane-following."
+      >
+        <Toggle
+          checked={lc.laneTurnDesire}
+          onChange={(v) => setLc("laneTurnDesire", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Adjust Lane Turn Speed"
+        spKey="AdjustLaneTurnSpeed"
+        description="AdjustLaneTurnSpeed — speed limit (kph) at which lane-turn desire activates. 0 — always active. Requires Lane Turn Desires — ON (ShowAdvancedControls)."
+      >
+        <NumberInput
+          value={lc.adjustLaneTurnSpeed}
+          onChange={(v) => setLc("adjustLaneTurnSpeed", v)}
+          min={0}
+          max={130}
+          step={5}
+          decimals={0}
+          disabled={!lc.laneTurnDesire}
         />
       </ParamRow>
     </ConfigSection>

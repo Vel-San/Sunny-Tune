@@ -5,7 +5,6 @@ import { QRCodeSVG } from "qrcode.react";
 import React, { useState } from "react";
 import { shareConfig } from "../../api";
 import { categoryColor, tagColor } from "../../lib/colorUtils";
-import { useConfigStore } from "../../store/configStore";
 import { CATEGORIES, PREDEFINED_TAGS } from "../../types/config";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -31,8 +30,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   existingCategory,
 }) => {
   const qc = useQueryClient();
-  const { editingTags, editingCategory, setTags, setCategory } =
-    useConfigStore();
+  const [localTags, setLocalTags] = useState<string[]>([]);
+  const [localCategory, setLocalCategory] = useState("");
 
   // For already-shared configs we show the existing link immediately and
   // pre-populate tags/category from the saved values.
@@ -50,43 +49,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "")
       .slice(0, 30);
-    if (!t || editingTags.includes(t) || editingTags.length >= 20) return;
-    setTags([...editingTags, t]);
+    if (!t || localTags.includes(t) || localTags.length >= 20) return;
+    setLocalTags([...localTags, t]);
     setCustomTagInput("");
   };
 
   const toggleTag = (tag: string) => {
-    if (editingTags.includes(tag)) {
-      setTags(editingTags.filter((t) => t !== tag));
-    } else if (editingTags.length < 20) {
-      setTags([...editingTags, tag]);
+    if (localTags.includes(tag)) {
+      setLocalTags(localTags.filter((t) => t !== tag));
+    } else if (localTags.length < 20) {
+      setLocalTags([...localTags, tag]);
     }
   };
 
   const removeCustomTag = (tag: string) =>
-    setTags(editingTags.filter((t) => t !== tag));
+    setLocalTags(localTags.filter((t) => t !== tag));
 
-  // Seed the store fields when opening an already-shared config
+  // Seed local tag/category state whenever the modal opens
   React.useEffect(() => {
-    if (open && isAlreadyShared) {
-      setTags(existingTags ?? []);
-      setCategory(existingCategory ?? "");
+    if (open) {
+      setLocalTags(existingTags ?? []);
+      setLocalCategory(existingCategory ?? "");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const shareMutation = useMutation({
-    mutationFn: () =>
-      shareConfig(configId, {
-        tags: editingTags,
-        category: editingCategory || undefined,
-      }),
+    mutationFn: ({ tags, category }: { tags: string[]; category: string }) =>
+      shareConfig(configId, { tags, category: category || undefined }),
     onSuccess: ({ shareToken: token }) => {
       setShareToken(token);
       setUpdateDone(true);
       qc.invalidateQueries({ queryKey: ["configs"] });
       qc.invalidateQueries({ queryKey: ["community-stats"] });
       qc.invalidateQueries({ queryKey: ["explore"] });
+      qc.invalidateQueries({ queryKey: ["config", configId] });
     },
   });
 
@@ -164,11 +160,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* Tags */}
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
-                <Tag className="w-3 h-3" /> Tags ({editingTags.length}/20)
+                <Tag className="w-3 h-3" /> Tags ({localTags.length}/20)
               </label>
               <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1">
                 {PREDEFINED_TAGS.map((tag) => {
-                  const active = editingTags.includes(tag);
+                  const active = localTags.includes(tag);
                   return (
                     <button
                       key={tag}
@@ -189,7 +185,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   );
                 })}
               </div>
-              {editingTags
+              {localTags
                 .filter(
                   (t) => !(PREDEFINED_TAGS as readonly string[]).includes(t),
                 )
@@ -207,7 +203,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     </button>
                   </span>
                 ))}
-              {editingTags.length < 20 && (
+              {localTags.length < 20 && (
                 <input
                   type="text"
                   value={customTagInput}
@@ -235,12 +231,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map((cat) => {
-                  const active = editingCategory === cat.value;
+                  const active = localCategory === cat.value;
                   return (
                     <button
                       key={cat.value}
                       type="button"
-                      onClick={() => setCategory(active ? "" : cat.value)}
+                      onClick={() => setLocalCategory(active ? "" : cat.value)}
                       className={clsx(
                         "inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-all",
                         active
@@ -264,7 +260,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 variant="primary"
                 size="sm"
                 loading={shareMutation.isPending}
-                onClick={() => shareMutation.mutate()}
+                onClick={() =>
+                  shareMutation.mutate({
+                    tags: localTags,
+                    category: localCategory,
+                  })
+                }
                 leftIcon={<Share2 className="w-3.5 h-3.5" />}
               >
                 Update
@@ -278,11 +279,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           {/* Tags */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
-              <Tag className="w-3 h-3" /> Tags ({editingTags.length}/20)
+              <Tag className="w-3 h-3" /> Tags ({localTags.length}/20)
             </label>
             <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1">
               {PREDEFINED_TAGS.map((tag) => {
-                const active = editingTags.includes(tag);
+                const active = localTags.includes(tag);
                 return (
                   <button
                     key={tag}
@@ -303,7 +304,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 );
               })}
             </div>
-            {editingTags
+            {localTags
               .filter(
                 (t) => !(PREDEFINED_TAGS as readonly string[]).includes(t),
               )
@@ -321,7 +322,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   </button>
                 </span>
               ))}
-            {editingTags.length < 20 && (
+            {localTags.length < 20 && (
               <input
                 type="text"
                 value={customTagInput}
@@ -349,12 +350,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             </label>
             <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map((cat) => {
-                const active = editingCategory === cat.value;
+                const active = localCategory === cat.value;
                 return (
                   <button
                     key={cat.value}
                     type="button"
-                    onClick={() => setCategory(active ? "" : cat.value)}
+                    onClick={() => setLocalCategory(active ? "" : cat.value)}
                     className={clsx(
                       "inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-all",
                       active
@@ -378,12 +379,34 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               variant="primary"
               size="sm"
               loading={shareMutation.isPending}
-              onClick={() => shareMutation.mutate()}
+              disabled={localTags.length === 0 || !localCategory}
+              onClick={() =>
+                shareMutation.mutate({
+                  tags: localTags,
+                  category: localCategory,
+                })
+              }
               leftIcon={<Share2 className="w-3.5 h-3.5" />}
+              title={
+                localTags.length === 0
+                  ? "Add at least one tag before sharing"
+                  : !localCategory
+                    ? "Select a category before sharing"
+                    : undefined
+              }
             >
               Publish & Share
             </Button>
           </div>
+          {(localTags.length === 0 || !localCategory) && (
+            <p className="text-[11px] text-amber-500/80 text-right -mt-1">
+              {localTags.length === 0 && !localCategory
+                ? "A tag and a category are required to share."
+                : localTags.length === 0
+                  ? "Add at least one tag to share."
+                  : "Select a category to share."}
+            </p>
+          )}
         </div>
       ) : (
         /* ── Just published: show link + QR ── */

@@ -44,7 +44,7 @@ function HBar({
   return (
     <div className="space-y-2">
       {data.map((d, i) => (
-        <div key={d.label} className="flex items-center gap-3">
+        <div key={`${d.label}-${i}`} className="flex items-center gap-3">
           <span className="text-xs text-zinc-500 w-28 truncate flex-shrink-0 text-right">
             {d.label}
           </span>

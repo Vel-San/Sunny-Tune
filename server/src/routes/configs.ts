@@ -8,6 +8,7 @@ import {
   pruneNotificationsIfNeeded,
   validateUuidParams,
 } from "../lib/guards";
+import { logger } from "../lib/logger";
 import { configsQuerySchema } from "../lib/querySchemas";
 import { stripControlChars } from "../lib/sanitize";
 import {
@@ -16,7 +17,6 @@ import {
   optionalAuthenticate,
 } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
-import { logger } from "../lib/logger";
 
 const nanoid = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 16);
 
@@ -75,6 +75,7 @@ const VALID_CONFIG_SECTIONS = new Set([
   "interface",
   "commaAI",
   "advanced",
+  "vehicleSpecific",
 ]);
 
 const configDataSchema = z
@@ -257,36 +258,44 @@ configsRouter.put(
       }
       const { config: configData, ...rest } = parsed.data;
 
-      // Save an immutable snapshot of the current state before overwriting it.
-      // Keep at most 20 snapshots per config — delete the oldest if over limit.
-      const snapshotCount = await prisma.configSnapshot.count({
-        where: { configId: existing.id },
-      });
-      if (snapshotCount >= 20) {
-        const oldest = await prisma.configSnapshot.findFirst({
+      // Only bump version and create a snapshot when the config JSON actually
+      // changes — metadata-only updates (name, description, tags, category)
+      // should not increment the version counter.
+      const configChanged =
+        JSON.stringify(configData) !== JSON.stringify(existing.config);
+
+      if (configChanged) {
+        // Save an immutable snapshot of the current state before overwriting it.
+        // Keep at most 20 snapshots per config — delete the oldest if over limit.
+        const snapshotCount = await prisma.configSnapshot.count({
           where: { configId: existing.id },
-          orderBy: { createdAt: "asc" },
-          select: { id: true },
         });
-        if (oldest) {
-          await prisma.configSnapshot.delete({ where: { id: oldest.id } });
+        if (snapshotCount >= 20) {
+          const oldest = await prisma.configSnapshot.findFirst({
+            where: { configId: existing.id },
+            orderBy: { createdAt: "asc" },
+            select: { id: true },
+          });
+          if (oldest) {
+            await prisma.configSnapshot.delete({ where: { id: oldest.id } });
+          }
         }
+        await prisma.configSnapshot.create({
+          data: {
+            configId: existing.id,
+            version: existing.version,
+            name: existing.name,
+            data: existing.config as object,
+          },
+        });
       }
-      await prisma.configSnapshot.create({
-        data: {
-          configId: existing.id,
-          version: existing.version,
-          name: existing.name,
-          data: existing.config as object,
-        },
-      });
 
       const updated = await prisma.configuration.update({
         where: { id: req.params.id },
         data: {
           ...rest,
           config: configData as object,
-          version: { increment: 1 },
+          ...(configChanged ? { version: { increment: 1 } } : {}),
         },
       });
       res.json(updated);

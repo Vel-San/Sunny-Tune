@@ -53,6 +53,7 @@ const VALID_CONFIG_SECTIONS = new Set([
   "interface",
   "commaAI",
   "advanced",
+  "vehicleSpecific",
 ]);
 
 const importSchema = z.object({
@@ -405,6 +406,9 @@ export function parseSunnyLinkExportObject(
     s["BlinkerLateralReengageDelay"],
     0,
   );
+  cfg.laneChange.enabled = slBool(s["AutoLaneChangeEnabled"], true);
+  cfg.laneChange.laneTurnDesire = slBool(s["LaneTurnDesire"], false);
+  cfg.laneChange.adjustLaneTurnSpeed = slNum(s["AdjustLaneTurnSpeed"], 0);
 
   // ── speedControl ─────────────────────────────────────────────────────────
   const slcMode = Math.max(0, Math.min(3, slInt(s["SpeedLimitMode"], 0))) as
@@ -431,6 +435,10 @@ export function parseSunnyLinkExportObject(
     s["IntelligentCruiseButtonManagement"],
     false,
   );
+  cfg.speedControl.mapAdvisorySpeedLimit = slBool(
+    s["SpeedLimitMapAdvisory"],
+    false,
+  );
 
   // ── navigation ───────────────────────────────────────────────────────────
   cfg.navigation.osmEnabled = slBool(s["OsmLocal"], false);
@@ -455,6 +463,10 @@ export function parseSunnyLinkExportObject(
   cfg.interface.steeringArc = slBool(s["SteeringArc"], false);
   cfg.interface.chevronInfo = slBool(s["ChevronInfo"], false);
   cfg.interface.rainbowMode = slBool(s["RainbowMode"], false);
+  cfg.interface.showAdvancedControls = slBool(s["ShowAdvancedControls"], false);
+  cfg.interface.language = String(s["LanguageSetting"] ?? "main_en");
+  cfg.interface.interactivityTimeout = slInt(s["InteractivityTimer"], 90);
+  cfg.interface.realTimeAccelBar = slBool(s["RealTimeAccelBar"], false);
 
   // ── commaAI ──────────────────────────────────────────────────────────────
   cfg.commaAI.recordDrives = slBool(s["RecordFront"], true);
@@ -473,10 +485,24 @@ export function parseSunnyLinkExportObject(
     false,
   );
   cfg.commaAI.recordAudioFeedback = slBool(s["RecordAudioFeedback"], false);
+  cfg.commaAI.sunnypilotEnabled = slBool(s["SunnypilotEnabled"], true);
+  cfg.commaAI.gsmApn = String(s["GsmApn"] ?? "");
+  cfg.commaAI.gsmRoaming = slBool(s["GsmRoaming"], false);
 
   // ── advanced ─────────────────────────────────────────────────────────────
   cfg.advanced.quickBoot = slBool(s["QuickBootToggle"], false);
+  cfg.advanced.maxTimeOffroad = slInt(s["MaxTimeOffroad"], 0);
+  cfg.advanced.disablePowerDown = slBool(s["DisablePowerDown"], false);
+  cfg.advanced.wakeupBehavior = slInt(s["WakeupBehavior"], 0);
+  cfg.advanced.disableUpdates = slBool(s["DisableUpdates"], false);
 
+  // ── vehicleSpecific ──────────────────────────────────────────────────
+  cfg.vehicleSpecific.teslaCoopSteering = slBool(s["TeslaCoopSteering"], false);
+  cfg.vehicleSpecific.subaruStopAndGo = slBool(s["SubaruStopAndGo"], false);
+  cfg.vehicleSpecific.toyotaEnforceFactoryLong = slBool(
+    s["ToyotaEnforceFactoryLongitudinal"],
+    false,
+  );
   // ── name / description ────────────────────────────────────────────────────
   const vehicleName = [cfg.vehicle.make, cfg.vehicle.model, cfg.vehicle.year]
     .filter(Boolean)
@@ -592,12 +618,15 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
       lpMap[c.drivingPersonality.longitudinalPersonality] ?? "2",
 
     // lane change
+    AutoLaneChangeEnabled: c.laneChange.enabled ? "True" : "False",
     AutoLaneChangeTimer: String(c.laneChange.autoTimer),
     BlindSpot: c.laneChange.bsmMonitoring ? "True" : "False",
     AutoLaneChangeBsmDelay: c.laneChange.bsmMonitoring ? "True" : "False",
     BlinkerMinLateralControlSpeed: String(c.laneChange.minimumSpeed),
     BlinkerPauseLateralControl: c.laneChange.blinkerPauseLateral ? "1" : "0",
     BlinkerLateralReengageDelay: String(c.laneChange.blinkerReengageDelay),
+    LaneTurnDesire: c.laneChange.laneTurnDesire ? "True" : "False",
+    AdjustLaneTurnSpeed: String(c.laneChange.adjustLaneTurnSpeed),
 
     // speed control
     SpeedLimitMode: c.speedControl.speedLimitControl.mode,
@@ -609,6 +638,9 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     SmartCruiseControlVision: c.speedControl.visionEnabled,
     SmartCruiseControlMap: c.speedControl.mapEnabled,
     IntelligentCruiseButtonManagement: c.speedControl.icbmEnabled,
+    SpeedLimitMapAdvisory: c.speedControl.mapAdvisorySpeedLimit
+      ? "True"
+      : "False",
 
     // navigation
     OsmLocal: c.navigation.osmEnabled ? "True" : "False",
@@ -633,6 +665,10 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     SteeringArc: c.interface.steeringArc ? "True" : "False",
     ChevronInfo: c.interface.chevronInfo ? "True" : "False",
     RainbowMode: c.interface.rainbowMode ? "True" : "False",
+    ShowAdvancedControls: c.interface.showAdvancedControls ? "True" : "False",
+    LanguageSetting: c.interface.language,
+    InteractivityTimer: String(c.interface.interactivityTimeout),
+    RealTimeAccelBar: c.interface.realTimeAccelBar ? "True" : "False",
 
     // commaAI
     RecordFront: c.commaAI.recordDrives ? "True" : "False",
@@ -645,9 +681,23 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     MadsSteeringMode: c.commaAI.madsSteeringMode,
     MadsUnifiedEngagementMode: c.commaAI.madsUnifiedEngagement,
     RecordAudioFeedback: c.commaAI.recordAudioFeedback ? "True" : "False",
+    SunnypilotEnabled: c.commaAI.sunnypilotEnabled ? "True" : "False",
+    GsmApn: c.commaAI.gsmApn,
+    GsmRoaming: c.commaAI.gsmRoaming ? "True" : "False",
 
     // advanced
     QuickBootToggle: c.advanced.quickBoot ? "True" : "False",
+    MaxTimeOffroad: String(c.advanced.maxTimeOffroad),
+    DisablePowerDown: c.advanced.disablePowerDown ? "True" : "False",
+    WakeupBehavior: String(c.advanced.wakeupBehavior),
+    DisableUpdates: c.advanced.disableUpdates ? "True" : "False",
+
+    // vehicleSpecific
+    TeslaCoopSteering: c.vehicleSpecific.teslaCoopSteering ? "True" : "False",
+    SubaruStopAndGo: c.vehicleSpecific.subaruStopAndGo ? "True" : "False",
+    ToyotaEnforceFactoryLongitudinal: c.vehicleSpecific.toyotaEnforceFactoryLong
+      ? "True"
+      : "False",
   };
 
   const payload: SunnyLinkExportFile = {

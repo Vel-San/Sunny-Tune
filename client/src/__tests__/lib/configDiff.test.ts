@@ -54,6 +54,7 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       visionEnabled: false,
       mapEnabled: false,
       icbmEnabled: false,
+      mapAdvisorySpeedLimit: false,
     },
     laneChange: {
       enabled: true,
@@ -62,6 +63,8 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       bsmMonitoring: false,
       blinkerPauseLateral: false,
       blinkerReengageDelay: 0,
+      laneTurnDesire: false,
+      adjustLaneTurnSpeed: 0,
     },
     navigation: {
       osmEnabled: false,
@@ -86,6 +89,10 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       steeringArc: false,
       chevronInfo: false,
       rainbowMode: false,
+      showAdvancedControls: false,
+      language: "main_en",
+      interactivityTimeout: 90,
+      realTimeAccelBar: false,
     },
     commaAI: {
       recordDrives: true,
@@ -98,9 +105,21 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       madsSteeringMode: 0,
       madsUnifiedEngagement: false,
       recordAudioFeedback: false,
+      sunnypilotEnabled: true,
+      gsmApn: "",
+      gsmRoaming: false,
     },
     advanced: {
       quickBoot: false,
+      maxTimeOffroad: 0,
+      disablePowerDown: false,
+      wakeupBehavior: 0,
+      disableUpdates: false,
+    },
+    vehicleSpecific: {
+      teslaCoopSteering: false,
+      subaruStopAndGo: false,
+      toyotaEnforceFactoryLong: false,
     },
   };
   return { ...base, ...overrides };

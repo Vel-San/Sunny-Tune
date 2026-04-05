@@ -131,11 +131,12 @@ const CONTENT: Record<string, DocBlock[]> = {
           <UL
             items={[
               "Full 8-section config editor (Vehicle, Toggles, Steering, Cruise, Maps, Visuals, Device, Developer) — each section broken into labelled subsections for easy navigation",
+              "Vehicle Specific section: make-specific feature flags for Tesla (Cooperative Steering), Subaru (Stop & Go), and Toyota (Enforce Factory Longitudinal)",
               "Context-sensitive help tooltips on every parameter — hover the ⓘ icon for a description, recommended value, tips, and tradeoffs",
               "One-click sharing with a public URL and QR code",
               "Config comparison — diff any two public shared configs (or your own saved configs) side-by-side, grouped by section",
               "Browse the Explore page to find configs from other drivers sorted by rating, views, clones, or trending this week",
-              "Version history — every save creates a snapshot you can browse, diff, and restore",
+              "Version history — every save that changes your config creates a snapshot you can browse, diff, and restore",
               "Collections to group related configs into named playlists",
               "Community ratings, comments, and reply threads",
               "Changelog new-version pulse — the Changelog nav item glows blue when a new app version hasn't been viewed yet",
@@ -238,14 +239,22 @@ const CONTENT: Record<string, DocBlock[]> = {
               </>,
               <>
                 <strong className="text-zinc-200">Device</strong> —
-                <em>Connectivity</em>: SunnyLink Connect integration.{" "}
-                <em>Device Settings</em>: always-on connectivity, wide-camera
-                lead, auto-shutdown
+                <em>Connectivity</em>: SunnyLink Connect integration, sunnypilot
+                Enabled, GSM APN, GSM Roaming. <em>Device Settings</em>:
+                always-on connectivity, wide-camera lead, auto-shutdown, Max
+                Time Offroad, Disable Power Down, Wake Up Behavior, Disable
+                Updates
               </>,
               <>
                 <strong className="text-zinc-200">Developer</strong> —
                 <em>Longitudinal</em>: longitudinal developer tune.{" "}
                 <em>System</em>: quick-boot toggle
+              </>,
+              <>
+                <strong className="text-zinc-200">Vehicle Specific</strong> —
+                make-specific feature flags: <em>Tesla</em>: Cooperative
+                Steering. <em>Subaru</em>: Stop &amp; Go. <em>Toyota</em>:
+                Enforce Factory Longitudinal
               </>,
             ]}
           />
@@ -256,6 +265,12 @@ const CONTENT: Record<string, DocBlock[]> = {
             description, recommended value, tips, tradeoffs, and a link to the
             sunnypilot community documentation. The panel auto-positions itself
             so it never clips off the screen edge.
+          </P>
+          <H3>Steering section (Cruise → Lane Change)</H3>
+          <P>
+            The Steering section also contains lane-change sub-parameters: Lane
+            Turn Desire, Adjust Lane Turn Speed, Auto Lane Change Timer, BSM
+            pause, and blinker re-engage delay.
           </P>
           <H3>Unsaved-change guard</H3>
           <P>
@@ -395,9 +410,12 @@ const CONTENT: Record<string, DocBlock[]> = {
           </Callout>
           <H3>Version number</H3>
           <P>
-            Each config starts at v1. Every save increments the version counter.
-            The version is always shown on every config card (v1, v2, v3…)
-            across My Configs, Explore, Favorites, and the shared config page.
+            Each config starts at v1. Every save that{" "}
+            <em>changes the config data</em> increments the version counter.
+            Metadata-only saves (name, description, tags, category) do{" "}
+            <strong className="text-zinc-200">not</strong> bump the version. The
+            version is always shown on every config card across My Configs,
+            Explore, Favorites, and the shared config page.
           </P>
         </>
       ),
@@ -515,8 +533,8 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             Click the <strong className="text-zinc-200">History</strong> button
             (clock icon) on any config card in My Configs, on the shared config
-            page (owner only), or in the config editor top bar. A modal lists
-            all saved snapshots in reverse-version order.
+            page (accessible by all users), or in the config editor top bar. A
+            modal lists all saved snapshots in reverse-version order.
           </P>
           <H3>Comparing snapshots</H3>
           <P>
@@ -535,8 +553,9 @@ const CONTENT: Record<string, DocBlock[]> = {
             icon={BookOpen}
             color="border-amber-800/40 bg-amber-950/20 text-amber-300"
           >
-            SunnyTune keeps the most recent 20 snapshots per config. Older ones
-            are automatically pruned.
+            SunnyTune keeps the most recent 20 snapshots per config. Snapshots
+            are only created when the config data changes — saving only a name
+            or description does not add an extra snapshot entry.
           </Callout>
         </>
       ),
@@ -673,8 +692,8 @@ const CONTENT: Record<string, DocBlock[]> = {
               </>,
               <>
                 <Code>PUT /api/configs/:id</Code>
-                <LockedBadge /> — update config (increments version, saves
-                snapshot)
+                <LockedBadge /> — update config (increments version and saves
+                snapshot only when config data changes)
               </>,
               <>
                 <Code>DELETE /api/configs/:id</Code>

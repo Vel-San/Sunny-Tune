@@ -41,7 +41,9 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
 
   const isNew = (config.version ?? 1) <= 1;
   const isUpdated = (config.version ?? 1) > 1;
-  const showIndicator = !seen && (isNew || isUpdated);
+  const showNew = !seen && isNew;
+  const showUpdated = !seen && isUpdated;
+  const showIndicator = showNew || showUpdated;
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteConfig(config.id),
@@ -59,24 +61,33 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
 
   return (
     <>
-      <div className="relative isolate" onClick={handleMarkSeen}>
-        {isUpdated && !seen && (
+      {/* outer wrapper: flex column so the inner card always fills the full
+          grid-cell height — this stops neon rings from bleeding into whitespace */}
+      <div className="relative isolate flex flex-col" onClick={handleMarkSeen}>
+        {showUpdated && (
           <div className="neon-updated-ring" aria-hidden="true" />
         )}
-        {isUpdated && !seen && (
+        {showUpdated && (
           <div className="neon-updated-badge" aria-hidden="true">
             Updated
           </div>
         )}
-        {isNew && !seen && (
-          <div className="neon-new-badge" aria-hidden="true">
+        {showNew && (
+          <div
+            className={
+              showUpdated
+                ? "neon-new-badge neon-new-badge--right"
+                : "neon-new-badge"
+            }
+            aria-hidden="true"
+          >
             New
           </div>
         )}
         <div
           className={clsx(
-            "card rounded-xl p-4 space-y-3 group",
-            isNew && !seen && "neon-new-shine overflow-hidden",
+            "card rounded-xl p-4 flex flex-col flex-1 gap-3 group",
+            showNew && "neon-new-shine overflow-hidden",
           )}
         >
           {/* Header */}
@@ -102,15 +113,13 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
             )}
           </div>
 
-          {/* Description */}
-          {config.description && (
-            <p className="text-xs text-zinc-500 line-clamp-2">
-              {config.description}
-            </p>
-          )}
+          {/* Description — always takes up 2-line space to keep cards uniform */}
+          <p className="text-xs text-zinc-500 line-clamp-2 min-h-[2.5rem]">
+            {config.description || ""}
+          </p>
 
-          {/* SP version + branch + config version */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* SP version + branch + config version — always rendered to keep height uniform */}
+          <div className="flex flex-wrap items-center gap-1.5 min-h-[1.5rem]">
             {config.config.metadata?.sunnypilotVersion && (
               <span className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-400/80 bg-blue-950/40 border border-blue-800/40 px-1.5 py-0.5 rounded">
                 SP {config.config.metadata.sunnypilotVersion}
@@ -129,84 +138,90 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
             )}
           </div>
 
-          {/* Clone provenance */}
-          {config.clonedFrom && (
-            <div className="flex items-center gap-1 text-[11px] text-zinc-500">
-              <GitFork className="w-3 h-3 flex-shrink-0" />
-              <span>Cloned from</span>
-              {config.clonedFrom.shareToken ? (
-                <Link
-                  to={`/shared/${config.clonedFrom.shareToken}`}
-                  className="text-blue-400 hover:text-blue-300 truncate max-w-[140px]"
-                >
-                  {config.clonedFrom.name}
-                </Link>
-              ) : (
-                <span className="text-zinc-400 truncate max-w-[140px]">
-                  {config.clonedFrom.name}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Tags */}
-          {config.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-1 items-center">
-              {(showAllTags ? config.tags : config.tags.slice(0, 3)).map(
-                (tag) => (
-                  <span
-                    key={tag}
-                    className={clsx(
-                      "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
-                      tagColor(tag),
-                    )}
+          {/* Clone provenance — always rendered to keep height uniform */}
+          <div className="flex items-center gap-1 text-[11px] text-zinc-500 min-h-[1.25rem]">
+            {config.clonedFrom && (
+              <>
+                <GitFork className="w-3 h-3 flex-shrink-0" />
+                <span>Cloned from</span>
+                {config.clonedFrom.shareToken ? (
+                  <Link
+                    to={`/shared/${config.clonedFrom.shareToken}`}
+                    className="text-blue-400 hover:text-blue-300 truncate max-w-[140px]"
                   >
-                    <Tag className="w-2 h-2" /> {tag}
+                    {config.clonedFrom.name}
+                  </Link>
+                ) : (
+                  <span className="text-zinc-400 truncate max-w-[140px]">
+                    {config.clonedFrom.name}
                   </span>
-                ),
-              )}
-              {!showAllTags && config.tags.length > 3 && (
-                <button
-                  onClick={() => setShowAllTags(true)}
-                  className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
-                >
-                  +{config.tags.length - 3} more
-                </button>
-              )}
-              {showAllTags && config.tags.length > 3 && (
-                <button
-                  onClick={() => setShowAllTags(false)}
-                  className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
-                >
-                  less
-                </button>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
 
-          {/* Stats */}
-          {config.isShared && (
-            <div className="flex items-center gap-3 text-xs text-zinc-600">
-              <span className="inline-flex items-center gap-1">
-                <Eye className="w-3 h-3" /> {config.viewCount}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Copy className="w-3 h-3" /> {config.cloneCount}
-              </span>
-              {config.ratingCount != null && config.ratingCount > 0 && (
-                <span className="inline-flex items-center gap-1">
-                  <Star className="w-3 h-3" /> {config.ratingCount}
-                </span>
-              )}
-              {config.commentCount != null && config.commentCount > 0 && (
-                <span className="inline-flex items-center gap-1">
-                  <MessageSquare className="w-3 h-3" /> {config.commentCount}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Tags — always rendered to keep height uniform */}
+          <div className="flex flex-wrap gap-1 items-center min-h-[1.5rem]">
+            {config.tags?.length > 0 && (
+              <>
+                {(showAllTags ? config.tags : config.tags.slice(0, 3)).map(
+                  (tag) => (
+                    <span
+                      key={tag}
+                      className={clsx(
+                        "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                        tagColor(tag),
+                      )}
+                    >
+                      <Tag className="w-2 h-2" /> {tag}
+                    </span>
+                  ),
+                )}
+                {!showAllTags && config.tags.length > 3 && (
+                  <button
+                    onClick={() => setShowAllTags(true)}
+                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    +{config.tags.length - 3} more
+                  </button>
+                )}
+                {showAllTags && config.tags.length > 3 && (
+                  <button
+                    onClick={() => setShowAllTags(false)}
+                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    less
+                  </button>
+                )}
+              </>
+            )}
+          </div>
 
-          <div className="border-t border-zinc-800 pt-3 flex items-center justify-between gap-2">
+          {/* Stats — always rendered to keep height uniform */}
+          <div className="flex items-center gap-3 text-xs text-zinc-600 min-h-[1rem]">
+            {config.isShared && (
+              <>
+                <span className="inline-flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> {config.viewCount}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Copy className="w-3 h-3" /> {config.cloneCount}
+                </span>
+                {config.ratingCount != null && config.ratingCount > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="w-3 h-3" /> {config.ratingCount}
+                  </span>
+                )}
+                {config.commentCount != null && config.commentCount > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <MessageSquare className="w-3 h-3" /> {config.commentCount}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="mt-auto border-t border-zinc-800 pt-3 flex items-center justify-between gap-2">
             {/* Date */}
             <span className="inline-flex items-center gap-1 text-[10px] text-zinc-600">
               <Calendar className="w-3 h-3" />

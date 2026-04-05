@@ -84,6 +84,8 @@ const CANONICAL_DEFAULT_CONFIG = {
     },
     visionEnabled: false,
     mapEnabled: false,
+    icbmEnabled: false,
+    mapAdvisorySpeedLimit: false,
   },
   laneChange: {
     enabled: true,
@@ -92,6 +94,8 @@ const CANONICAL_DEFAULT_CONFIG = {
     bsmMonitoring: false,
     blinkerPauseLateral: false,
     blinkerReengageDelay: 0,
+    laneTurnDesire: false,
+    adjustLaneTurnSpeed: 0,
   },
   navigation: {
     osmEnabled: false,
@@ -111,6 +115,15 @@ const CANONICAL_DEFAULT_CONFIG = {
     quietMode: false,
     hideVegoUI: false,
     torqueBar: false,
+    trueVegoUI: false,
+    blindSpotHUD: false,
+    steeringArc: false,
+    chevronInfo: false,
+    rainbowMode: false,
+    showAdvancedControls: false,
+    language: "main_en",
+    interactivityTimeout: 90,
+    realTimeAccelBar: false,
   },
   commaAI: {
     recordDrives: true,
@@ -123,9 +136,21 @@ const CANONICAL_DEFAULT_CONFIG = {
     madsSteeringMode: 0,
     madsUnifiedEngagement: false,
     recordAudioFeedback: false,
+    sunnypilotEnabled: true,
+    gsmApn: "",
+    gsmRoaming: false,
   },
   advanced: {
     quickBoot: false,
+    maxTimeOffroad: 0,
+    disablePowerDown: false,
+    wakeupBehavior: 0,
+    disableUpdates: false,
+  },
+  vehicleSpecific: {
+    teslaCoopSteering: false,
+    subaruStopAndGo: false,
+    toyotaEnforceFactoryLong: false,
   },
 };
 
@@ -251,6 +276,7 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
       "interface",
       "commaAI",
       "advanced",
+      "vehicleSpecific",
     ];
     for (const section of expectedSections) {
       expect(
@@ -290,6 +316,8 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
       "bsmMonitoring",
       "blinkerPauseLateral",
       "blinkerReengageDelay",
+      "laneTurnDesire",
+      "adjustLaneTurnSpeed",
     ];
     for (const key of expected) {
       expect(
@@ -314,6 +342,9 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
       "madsSteeringMode",
       "madsUnifiedEngagement",
       "recordAudioFeedback",
+      "sunnypilotEnabled",
+      "gsmApn",
+      "gsmRoaming",
     ];
     for (const key of expected) {
       expect(
@@ -327,7 +358,13 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
   });
 
   it("advanced section contains all registry-tracked fields", () => {
-    const expected = ["quickBoot"];
+    const expected = [
+      "quickBoot",
+      "maxTimeOffroad",
+      "disablePowerDown",
+      "wakeupBehavior",
+      "disableUpdates",
+    ];
     for (const key of expected) {
       expect(
         Object.prototype.hasOwnProperty.call(
@@ -335,6 +372,23 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
           key,
         ),
         `Field '${key}' is missing from CANONICAL_DEFAULT_CONFIG.advanced`,
+      ).toBe(true);
+    }
+  });
+
+  it("vehicleSpecific section contains all registry-tracked fields", () => {
+    const expected = [
+      "teslaCoopSteering",
+      "subaruStopAndGo",
+      "toyotaEnforceFactoryLong",
+    ];
+    for (const key of expected) {
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          CANONICAL_DEFAULT_CONFIG.vehicleSpecific,
+          key,
+        ),
+        `Field '${key}' is missing from CANONICAL_DEFAULT_CONFIG.vehicleSpecific`,
       ).toBe(true);
     }
   });

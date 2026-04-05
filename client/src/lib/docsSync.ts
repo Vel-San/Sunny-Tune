@@ -7,6 +7,6 @@
  *
  * Workflow:  https://github.com/Vel-San/Sunny-Tune/actions/workflows/docs-audit.yml
  */
-export const DOCS_SYNC_DATE = "2026-04-05";
+export const DOCS_SYNC_DATE = "2026-04-08";
 export const DOCS_AUDIT_WORKFLOW_URL =
   "https://github.com/Vel-San/Sunny-Tune/actions/workflows/docs-audit.yml";

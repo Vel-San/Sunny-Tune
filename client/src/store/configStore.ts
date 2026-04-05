@@ -12,15 +12,39 @@ import { createDefaultConfig } from "../types/config";
  * - New speedControl fields: default to false if missing (icbmEnabled)
  */
 function normalizeConfig(raw: SPConfig): SPConfig {
-  const cfg = structuredClone(raw) as SPConfig & {
+  // Deep-merge with defaults so any newly added top-level sections (e.g.
+  // vehicleSpecific, advanced.maxTimeOffroad) are always present even on
+  // configs that were saved before those fields existed.
+  const defaults = createDefaultConfig();
+  const cfg = structuredClone(raw) as unknown as Record<string, unknown>;
+  for (const key of Object.keys(defaults) as (keyof SPConfig)[]) {
+    if (cfg[key] === undefined || cfg[key] === null) {
+      (cfg as Record<string, unknown>)[key] = structuredClone(
+        defaults[key] as unknown,
+      );
+    } else if (
+      typeof defaults[key] === "object" &&
+      defaults[key] !== null &&
+      !Array.isArray(defaults[key])
+    ) {
+      // Shallow-merge: fill missing keys inside each section
+      const section = cfg[key] as Record<string, unknown>;
+      const defSection = defaults[key] as Record<string, unknown>;
+      for (const field of Object.keys(defSection)) {
+        if (section[field] === undefined) {
+          section[field] = structuredClone(defSection[field]);
+        }
+      }
+    }
+  }
+
+  const typed = cfg as unknown as SPConfig & {
     speedControl?: {
       speedLimitControl?: Record<string, unknown>;
-      icbmEnabled?: boolean;
     };
-    interface?: Record<string, unknown>;
   };
 
-  const slc = cfg.speedControl?.speedLimitControl as
+  const slc = typed.speedControl?.speedLimitControl as
     | Record<string, unknown>
     | undefined;
   if (slc) {
@@ -42,27 +66,7 @@ function normalizeConfig(raw: SPConfig): SPConfig {
     }
   }
 
-  // Forward-fill new speedControl fields
-  if (cfg.speedControl && typeof cfg.speedControl.icbmEnabled !== "boolean") {
-    (cfg.speedControl as Record<string, unknown>)["icbmEnabled"] = false;
-  }
-
-  // Forward-fill new interface fields
-  const iface = cfg.interface as Record<string, unknown> | undefined;
-  if (iface) {
-    const boolDefaults: string[] = [
-      "blindSpotHUD",
-      "steeringArc",
-      "trueVegoUI",
-      "chevronInfo",
-      "rainbowMode",
-    ];
-    for (const key of boolDefaults) {
-      if (typeof iface[key] !== "boolean") iface[key] = false;
-    }
-  }
-
-  return cfg as SPConfig;
+  return cfg as unknown as SPConfig;
 }
 
 interface ConfigEditorState {

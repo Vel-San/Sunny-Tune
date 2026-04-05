@@ -4,6 +4,36 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.2.0] — 2026-04-05
+
+### Added
+
+- **17 new sunnypilot parameters** across six sections:
+  - _Lane Change_: Lane Turn Desire toggle, Adjust Lane Turn Speed slider
+  - _Cruise_: Map Advisory Speed Limit toggle
+  - _Interface_: Show Advanced Controls toggle, Language selector, Interactivity Timeout selector, Real-time Acceleration Bar toggle
+  - _Device (Comma AI)_: sunnypilot Enabled toggle, GSM APN text field, GSM Roaming toggle
+  - _Developer (Advanced)_: Max Time Offroad selector, Disable Power Down toggle, Wake Up Behavior selector, Disable Updates toggle
+  - **New section — Vehicle Specific**: make-specific feature flags — Tesla Cooperative Steering, Subaru Stop & Go, Toyota Enforce Factory Longitudinal
+- SP Docs audit: `TorqueParamsOverrideFriction` key corrected (was `ManualTuneFriction`); 4 missing `FIELD_HELP` entries added (`TorqueParamsOverrideLatAccelFactor`, `AutoLaneChangeEnabled`, `Brightness`, `OnroadScreenOffTimer`) plus entries for all 17 new params; docs sync date updated to 2026-04-08
+
+### Changed
+
+- Save button is now disabled (greyed out) for existing configs when there are no unsaved changes
+- Version counter only increments when the config data actually changes — metadata-only saves (name, description, tags, category) no longer bump the version or create a history snapshot
+- ShareModal now uses local state for tags and category — editing the share form no longer marks the config as dirty, so the "Unsaved changes" navigation guard no longer fires after sharing
+
+### Fixed
+
+- Old configs missing newly added sections (e.g. `vehicleSpecific`) no longer crash when loaded — the store's `normalizeConfig()` and the Shared Config page both deep-merge with `createDefaultConfig()` defaults
+- Server now accepts configs containing the new `vehicleSpecific` section — previously returned `400 Invalid payload`
+- Config cards now have fully uniform height regardless of whether a config is shared, has tags, has stats, or was cloned — all optional slot containers now reserve a fixed `min-h` instead of conditionally rendering
+- New + Updated badges now both display simultaneously on a card (dual-badge layout); neon rings are constrained to the card bounds via a `flex flex-col` wrapper
+- History button on the shared config page is now visible to all users, not only the config owner
+- Dashboard "Top Configs" charts no longer log React duplicate-key warnings when multiple configs share the same name
+
+---
+
 ## [2.1.0] — 2026-04-06
 
 ### Added

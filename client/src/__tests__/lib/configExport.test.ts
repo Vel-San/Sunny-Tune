@@ -37,6 +37,7 @@ const VALID_PAYLOAD = JSON.stringify({
     interface: {},
     commaAI: {},
     advanced: {},
+    vehicleSpecific: {},
   },
 });
 
@@ -343,13 +344,25 @@ describe("exportAsSunnyLink", () => {
       "ExperimentalMode",
       "DynamicExperimentalControl",
       "LongitudinalPersonality",
+      "AutoLaneChangeEnabled",
       "AutoLaneChangeTimer",
+      "LaneTurnDesire",
       "SpeedLimitMode",
+      "SpeedLimitMapAdvisory",
       "OsmLocal",
       "IsMetric",
+      "ShowAdvancedControls",
+      "RealTimeAccelBar",
       "Mads",
+      "SunnypilotEnabled",
+      "GsmRoaming",
       "RecordFront",
       "QuickBootToggle",
+      "MaxTimeOffroad",
+      "DisableUpdates",
+      "TeslaCoopSteering",
+      "SubaruStopAndGo",
+      "ToyotaEnforceFactoryLongitudinal",
     ];
     for (const key of expectedKeys) {
       expect(settings, `settings.${key} should exist`).toHaveProperty(key);

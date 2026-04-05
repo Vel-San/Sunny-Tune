@@ -159,7 +159,7 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  ManualTuneFriction: {
+  TorqueParamsOverrideFriction: {
     summary: "Adjusts steering friction compensation in the torque controller.",
     tips: [
       "Default 0.10. Adjust in tiny increments (0.01).",
@@ -172,7 +172,20 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     defaultNote: "0.10",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
-
+  TorqueParamsOverrideLatAccelFactor: {
+    summary:
+      "Scales the lateral acceleration factor in the torque controller. Higher values produce more aggressive steering responses.",
+    tips: [
+      "Default is ~1.5 for most vehicles. Start at your baseline and adjust by 0.1 at a time.",
+      "Increase if the car understeers in curves; decrease if it weaves or oscillates.",
+    ],
+    tradeoffs: [
+      "Too high → aggressive, twitchy steering that may feel unsafe.",
+      "Too low → sluggish response; car drifts across lane width.",
+    ],
+    defaultNote: "~1.5 (vehicle-dependent)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
   // ── Longitudinal ──────────────────────────────────────────────────────────
 
   ExperimentalMode: {
@@ -304,7 +317,19 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  // ── Lane Change ──────────────────────────────────────────────────────────
+  AutoLaneChangeEnabled: {
+    summary:
+      "Master toggle for openpilot-assisted lane changes. When enabled, holding the turn signal will trigger a lane change assist manoeuvre.",
+    tips: [
+      "Enable to allow SP to initiate lane changes on your behalf.",
+      "Disable if you prefer fully manual lane changes but still want lane centering.",
+    ],
+    tradeoffs: [
+      "Even with assistance enabled, always check mirrors and blind spots before signalling.",
+    ],
+    defaultNote: "ON",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
 
   AutoLaneChangeTimer: {
     summary:
@@ -380,7 +405,20 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     defaultNote: "0 s",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
-
+  AdjustLaneTurnSpeed: {
+    summary:
+      "Sets the maximum speed (kph) at which lane-turn desire activates. 0 means it's always active when enabled.",
+    tips: [
+      "Only active when Use Lane Turn Desires is ON.",
+      "Lower values (e.g., 50 kph) keep the turn-path planner active at low speeds.",
+      "Requires ShowAdvancedControls to be visible in sunnypilot settings.",
+    ],
+    tradeoffs: [
+      "Setting too high may apply aggressive steering on fast sweeping ramps.",
+    ],
+    defaultNote: "0 (always active)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
   // ── Speed Control ────────────────────────────────────────────────────────
 
   IntelligentCruiseButtonManagement: {
@@ -495,7 +533,47 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
+  SpeedLimitMapAdvisory: {
+    summary:
+      "Enables the use of advisory (recommended) speed limits from OSM map data, in addition to legally posted limits.",
+    tips: [
+      "Advisory limits are often set for curves or hazard zones below the legal maximum.",
+      "Requires OSM Local Maps to be enabled.",
+    ],
+    tradeoffs: ["Map data may not always match current road conditions."],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
   // ── Interface ────────────────────────────────────────────────────────────
+
+  Brightness: {
+    summary:
+      "Sets the onroad screen brightness as a percentage (0–100%). Applies while the car is in drive.",
+    tips: [
+      "50–70% is comfortable for most driving conditions.",
+      "Lower brightness at night to reduce cockpit glare.",
+      "100% may be needed in direct sunlight.",
+    ],
+    defaultNote: "100%",
+    recommended: "50–70%",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  OnroadScreenOffTimer: {
+    summary:
+      "Automatically dims the screen when no interaction is detected for the selected duration while driving.",
+    tips: [
+      "Set to 30–60 s for a good balance between battery and visibility.",
+      '"Never" keeps the screen always on — useful for dashcam monitoring.',
+      "Screen wakes immediately on any touch or interaction.",
+    ],
+    tradeoffs: [
+      "Screen-always-on increases heat and device wear over long drives.",
+    ],
+    defaultNote: "Never",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
 
   StandstillTimer: {
     summary:
@@ -656,7 +734,54 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
   },
 
   // ── Comma AI / MADS ──────────────────────────────────────────────────────
+  ShowAdvancedControls: {
+    summary:
+      "Reveals advanced and experimental settings inside sunnypilot's own on-device settings menu.",
+    tips: [
+      "Needed to expose params like 'Adjust Lane Turn Speed'.",
+      "Leave OFF unless you know what the advanced options do.",
+    ],
+    tradeoffs: [
+      "Unlocking advanced settings can expose experimental features that may affect safety.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
 
+  LanguageSetting: {
+    summary:
+      "Sets the display language for all text in the sunnypilot onroad UI.",
+    tips: [
+      "Default is English (main_en). Change to match your preferred language.",
+      "Language takes effect after a device restart.",
+    ],
+    defaultNote: "main_en (English)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  InteractivityTimer: {
+    summary:
+      "Number of seconds of inactivity before the HUD stops responding to touch input.",
+    tips: [
+      "Set to 90–120 s for a balance between usability and distraction reduction.",
+      "0 = never time out (always interactive).",
+    ],
+    defaultNote: "90 s",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  RealTimeAccelBar: {
+    summary:
+      "Shows a live acceleration and deceleration bar on the HUD while driving.",
+    tips: [
+      "Useful for monitoring how aggressively SP is braking or accelerating.",
+      "Can help identify tuning issues by watching the bar during drives.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  // ── Comma AI / MADS ─────────────────────────────────────────────────────────
   Mads: {
     summary:
       "Modular Automated Driving System — decouples steering from ACC so lateral assist stays active during manual braking.",
@@ -779,6 +904,49 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
+  // ── Advanced ────────────────────────────────────────────────────────────
+
+  SunnypilotEnabled: {
+    summary:
+      "Master switch that enables all sunnypilot-specific features and UI elements.",
+    tips: [
+      "Keep ON to benefit from all SP enhancements over vanilla openpilot.",
+      "Turning OFF falls back to standard openpilot behavior.",
+    ],
+    tradeoffs: [
+      "Disabling SP features removes MADS, custom tuning, and other SP-only improvements.",
+    ],
+    defaultNote: "ON",
+    recommended: "ON",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  GsmApn: {
+    summary:
+      "Access Point Name for the SIM card installed in the comma device, used for mobile data uploads.",
+    tips: [
+      "Obtain the APN from your carrier (e.g., 'internet', 'broadband').",
+      "Leave blank when using Wi-Fi only — this setting is only needed for SIM-based data.",
+    ],
+    tradeoffs: ["Incorrect APN will prevent mobile data from working."],
+    defaultNote: "(blank)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  GsmRoaming: {
+    summary:
+      "Allows the device to use mobile data while roaming on a foreign carrier network.",
+    tips: [
+      "Enable only when travelling internationally and you want uploads to continue.",
+      "Check your carrier plan for roaming data rates before enabling.",
+    ],
+    tradeoffs: [
+      "Roaming data can be significantly more expensive than domestic data.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
   // ── Advanced ─────────────────────────────────────────────────────────────
 
   QuickBootToggle: {
@@ -809,6 +977,110 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     summary: "Switches the entire interface from mph to km/h.",
     tips: ["Enable if you're in a country that uses the metric system."],
     defaultNote: "OFF (mph)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  // ── Advanced: device management ───────────────────────────────────────────
+
+  MaxTimeOffroad: {
+    summary:
+      "Maximum time (in seconds) the device stays powered after the car is turned off before it shuts itself down.",
+    tips: [
+      "0 = no automatic shutdown (device stays on until manually powered off).",
+      "Use 1–2 hours to balance dashcam recording with battery preservation.",
+    ],
+    tradeoffs: [
+      "Longer times drain the car battery when parked for extended periods.",
+    ],
+    defaultNote: "0 (no limit)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  DisablePowerDown: {
+    summary:
+      "Prevents the comma device from automatically powering off when the vehicle is parked.",
+    tips: [
+      "Useful when running a permanent dashcam setup.",
+      "Combine with an always-on USB power supply to prevent battery drain.",
+    ],
+    tradeoffs: [
+      "Will drain the 12 V car battery if enabled without a dedicated power source.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  WakeupBehavior: {
+    summary: "Determines when the device wakes up from sleep automatically.",
+    tips: [
+      "'On cable connection' is the most common option — wakes when 12 V power connects to USB.",
+      "'Always on' keeps the device running even when parked.",
+    ],
+    tradeoffs: [
+      "'Always on' will drain the car battery over time if no dedicated power is provided.",
+    ],
+    defaultNote: "0 (manual only)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  DisableUpdates: {
+    summary:
+      "Prevents automatic over-the-air updates, locking the device to the currently installed version.",
+    tips: [
+      "Required before enabling Quick Boot on some versions.",
+      "Use when you want to stay on a specific tested build before updating manually.",
+    ],
+    tradeoffs: [
+      "You will miss bug fixes and safety improvements from newer versions.",
+      "Must be manually re-enabled whenever you want to update.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  // ── Vehicle-specific ────────────────────────────────────────────────────────
+
+  ModelManager_ActiveBundle: {
+    summary:
+      "The active driving model bundle name/path currently running on the device.",
+    tips: [
+      "Populated automatically when importing a config via SunnyLink.",
+      "Write the full bundle path from your device's model list to switch models.",
+    ],
+    defaultNote: "(device default)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  TeslaCoopSteering: {
+    summary:
+      "Enables cooperative/coaxial steering mode for Tesla vehicles, allowing sunnypilot to share steering torque with the factory EPS.",
+    tips: ["Tesla vehicles only. Has no effect on other makes."],
+    tradeoffs: [
+      "Improper use on unsupported Tesla models may cause unexpected steering behavior.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  SubaruStopAndGo: {
+    summary:
+      "Enables stop-and-go ACC functionality on supported Subaru models, allowing the car to come to a complete stop and resume with traffic.",
+    tips: [
+      "Subaru vehicles only. Check SP compatibility list for your model year.",
+      "stock Subaru ACC may not support stop-and-go without this toggle.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  ToyotaEnforceFactoryLong: {
+    summary:
+      "Forces Toyota/Lexus vehicles to use the factory longitudinal (ACC) controller instead of sunnypilot's override.",
+    tips: [
+      "Toyota/Lexus only. Useful when sunnypilot's longitudinal tuning feels worse than factory ACC.",
+      "SP lateral control still works normally — only ACC/braking reverts to factory.",
+    ],
+    defaultNote: "OFF",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 };

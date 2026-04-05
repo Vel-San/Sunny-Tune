@@ -6,7 +6,7 @@
 
 [![Live](https://img.shields.io/badge/Live-sunny--tune.vercel.app-black?logo=vercel&logoColor=white)](https://sunny-tune.vercel.app)
 [![API](https://img.shields.io/badge/API-Railway-7B2FBE?logo=railway&logoColor=white)](https://railway.app)
-[![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue)](CHANGELOG.md)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -41,7 +41,8 @@
     - [Prerequisites](#prerequisites)
   - [Environment Variables](#environment-variables)
   - [Authentication](#authentication)
-  - [Admin Panel](#admin-panel)
+    - [Moving to a new device](#moving-to-a-new-device)
+    - [Token revocation](#token-revocation)
   - [Adding New SunnyPilot / Comma AI Features](#adding-new-sunnypilot--comma-ai-features)
     - [Staying up to date with upstream](#staying-up-to-date-with-upstream)
     - [SunnyPilot vs Comma AI — the `source` field](#sunnypilot-vs-comma-ai--the-source-field)
@@ -55,7 +56,7 @@
   - [Security](#security)
     - [Admin secret — bcrypt hashing](#admin-secret--bcrypt-hashing)
     - [Admin IP allowlist](#admin-ip-allowlist)
-    - [Token revocation](#token-revocation)
+    - [Token revocation](#token-revocation-1)
   - [Config Import / Export](#config-import--export)
   - [QR Code Sharing](#qr-code-sharing)
   - [Verified Vehicle List](#verified-vehicle-list)
@@ -74,8 +75,6 @@
 A community web application for creating, storing, and sharing [SunnyPilot](https://www.sunnypilot.ai/) and [Comma AI](https://comma.ai/) openpilot configurations. Build fully-detailed configs through a structured UI covering all SunnyPilot parameters — lateral/longitudinal control, speed limiting, lane changes, navigation, UI settings, Comma AI core options, and advanced tuning.
 
 Configs can be shared via a unique public URL. After sharing you can continue editing and saving — each save increments the version counter so the community always sees your latest tune.
-
-**v2.1.0 highlights:** subsection headers in every section (editor + shared viewer), config comparison (diff any two shared configs or your own), token import from another device, changelog new-version glow, SP Docs sync badge in the header.
 
 > **Contributing?** See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — setup, code style, how to add SP parameters, PR process, and more.
 > **Security?** See [SECURITY.md](SECURITY.md) for the responsible disclosure process and architecture overview.

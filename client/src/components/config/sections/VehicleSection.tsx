@@ -5,6 +5,7 @@ import type { CommaHardware, SPBranch } from "../../../types/config";
 import { Input } from "../../ui/Input";
 import { NumberInput } from "../../ui/NumberInput";
 import { Select } from "../../ui/Select";
+import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow } from "../ConfigSection";
 
 const MAKES = [
@@ -81,10 +82,13 @@ export const VehicleSection: React.FC = () => {
   const { editingConfig, updateField } = useConfigStore();
   const v = editingConfig.vehicle;
   const m = editingConfig.metadata;
+  const vs = editingConfig.vehicleSpecific;
   const setV = <K extends keyof typeof v>(k: K, val: (typeof v)[K]) =>
     updateField("vehicle", k, val);
   const setM = <K extends keyof typeof m>(k: K, val: (typeof m)[K]) =>
     updateField("metadata", k, val);
+  const setVs = <K extends keyof typeof vs>(k: K, val: (typeof vs)[K]) =>
+    updateField("vehicleSpecific", k, val);
 
   const hw = m.hardware ?? "";
   const branchOptions = BRANCHES_BY_HW[hw] ?? BRANCHES_BY_HW[""];
@@ -181,6 +185,7 @@ export const VehicleSection: React.FC = () => {
 
       <ParamRow
         label="Driving Model"
+        spKey="ModelManager_ActiveBundle"
         description="ModelManager_ActiveBundle — active driving model name. Populated automatically when importing from SunnyLink. You can also type the model name/path from your device."
       >
         <Input
@@ -188,6 +193,48 @@ export const VehicleSection: React.FC = () => {
           onChange={(e) => setM("activeModel", e.target.value)}
           placeholder="e.g. sunnypilot-2025"
           className="font-mono"
+        />
+      </ParamRow>
+
+      <div className="divider" />
+      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        Make-specific Features
+      </p>
+      <p className="text-sm text-zinc-500 mb-2">
+        These settings only apply to specific vehicle makes. Applying them on an
+        unsupported vehicle has no effect.
+      </p>
+
+      <ParamRow
+        label="Tesla: Coop Steering"
+        spKey="TeslaCoopSteering"
+        description="TeslaCoopSteering — enable cooperative/coaxial steering mode for Tesla vehicles."
+      >
+        <Toggle
+          checked={vs.teslaCoopSteering}
+          onChange={(v) => setVs("teslaCoopSteering", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Subaru: Stop and Go"
+        spKey="SubaruStopAndGo"
+        description="SubaruStopAndGo — enable stop-and-go ACC functionality on supported Subaru models."
+      >
+        <Toggle
+          checked={vs.subaruStopAndGo}
+          onChange={(v) => setVs("subaruStopAndGo", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Toyota: Enforce Factory Long"
+        spKey="ToyotaEnforceFactoryLong"
+        description="ToyotaEnforceFactoryLong — force Toyota/Lexus vehicles to use factory longitudinal control instead of sunnypilot's override."
+      >
+        <Toggle
+          checked={vs.toyotaEnforceFactoryLong}
+          onChange={(v) => setVs("toyotaEnforceFactoryLong", v)}
         />
       </ParamRow>
     </ConfigSection>

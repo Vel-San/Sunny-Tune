@@ -1,6 +1,7 @@
 import { Cpu } from "lucide-react";
 import React from "react";
 import { useConfigStore } from "../../../store/configStore";
+import { Input } from "../../ui/Input";
 import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow } from "../ConfigSection";
 
@@ -26,6 +27,17 @@ export const CommaAISection: React.FC = () => {
       </p>
 
       <ParamRow
+        label="Enable sunnypilot"
+        spKey="SunnypilotEnabled"
+        description="SunnypilotEnabled — master toggle for all sunnypilot-specific features. Turning this off falls back to vanilla openpilot behaviour."
+      >
+        <Toggle
+          checked={ai.sunnypilotEnabled}
+          onChange={(v) => setAi("sunnypilotEnabled", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
         label="SunnyLink Connect"
         spKey="SunnylinkEnabled"
         description="SunnylinkEnabled — enable SunnyLink cloud connection for remote config import/export and drive sync."
@@ -33,6 +45,30 @@ export const CommaAISection: React.FC = () => {
         <Toggle
           checked={ai.connectEnabled}
           onChange={(v) => setAi("connectEnabled", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="GSM APN"
+        spKey="GsmApn"
+        description="GsmApn — carrier Access Point Name for SIM-based mobile data. Leave blank if using Wi-Fi only."
+      >
+        <Input
+          value={ai.gsmApn}
+          onChange={(e) => setAi("gsmApn", e.target.value)}
+          placeholder="e.g. internet"
+          className="font-mono"
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="GSM Roaming"
+        spKey="GsmRoaming"
+        description="GsmRoaming — allow mobile data uploads while roaming on a foreign carrier network."
+      >
+        <Toggle
+          checked={ai.gsmRoaming}
+          onChange={(v) => setAi("gsmRoaming", v)}
         />
       </ParamRow>
 
@@ -44,7 +80,19 @@ export const CommaAISection: React.FC = () => {
       </p>
 
       <ParamRow
+        label="Show Advanced Controls"
+        spKey="ShowAdvancedControls"
+        description="ShowAdvancedControls — reveal advanced / experimental settings inside sunnypilot's own settings menu."
+      >
+        <Toggle
+          checked={ifc.showAdvancedControls}
+          onChange={(v) => setIfc("showAdvancedControls", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
         label="Use Metric Units"
+        spKey="IsMetric"
         description="IsMetric — display speeds in km/h and distances in km across all UI elements."
       >
         <Toggle

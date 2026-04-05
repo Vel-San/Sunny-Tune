@@ -296,6 +296,7 @@ export default function ConfiguratorPage() {
                 size="sm"
                 leftIcon={<Save className="w-3.5 h-3.5" />}
                 loading={saveMutation.isPending}
+                disabled={!isDirty && !!editingId}
                 onClick={() => saveMutation.mutate()}
               >
                 Save
@@ -396,6 +397,9 @@ export default function ConfiguratorPage() {
           onClose={() => setShareOpen(false)}
           configId={editingId}
           configName={editingName}
+          existingShareToken={existingConfig?.shareToken ?? undefined}
+          existingTags={editingTags}
+          existingCategory={editingCategory}
         />
       )}
 
