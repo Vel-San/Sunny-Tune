@@ -17,9 +17,11 @@ import {
   LayoutList,
   LogIn,
   Menu,
+  Pencil,
   RotateCcw,
   Star,
   Tag,
+  User,
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -42,16 +44,32 @@ export const Header: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { user, token, rerolling, importing, rerollToken, importToken } =
-    useAuthStore();
+  const {
+    user,
+    token,
+    rerolling,
+    importing,
+    updatingUsername,
+    rerollToken,
+    importToken,
+    updateUsername,
+  } = useAuthStore();
   const [tokenModalOpen, setTokenModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rollConfirm, setRollConfirm] = useState(false);
   const [importMode, setImportMode] = useState(false);
   const [importValue, setImportValue] = useState("");
+  const [usernameValue, setUsernameValue] = useState("");
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [usernameSaved, setUsernameSaved] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Banner: show whenever the user is authenticated but has no username set yet
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => !!localStorage.getItem("sp_username_banner_dismissed"),
+  );
 
   // Changelog glow: show pulse dot when user hasn't seen the current version
   const [hasNewVersion, setHasNewVersion] = useState(
@@ -89,6 +107,14 @@ export const Header: React.FC = () => {
       );
     },
   });
+
+  // Clear the dismissed flag once the user actually saves a username
+  // so it never reappears after that
+  useEffect(() => {
+    if (user?.username) {
+      setBannerDismissed(true);
+    }
+  }, [user?.username]);
 
   // Close notification dropdown on outside click
   useEffect(() => {
@@ -149,6 +175,37 @@ export const Header: React.FC = () => {
   const handleReroll = async () => {
     await rerollToken();
     setRollConfirm(false);
+  };
+
+  const openUsernameEdit = () => {
+    setUsernameValue(user?.username ?? "");
+    setEditingUsername(true);
+    setUsernameSaved(false);
+  };
+
+  const handleSaveUsername = async () => {
+    const trimmed = usernameValue.trim();
+    await updateUsername(trimmed || null);
+    const err = useAuthStore.getState().error;
+    if (!err) {
+      setEditingUsername(false);
+      setUsernameSaved(true);
+      // Also sync the comment nickname localStorage so it auto-fills
+      if (trimmed) {
+        localStorage.setItem("sp_comment_name", trimmed);
+      }
+      setTimeout(() => setUsernameSaved(false), 2500);
+    }
+  };
+
+  const dismissUsernameBanner = () => {
+    localStorage.setItem("sp_username_banner_dismissed", "true");
+    setBannerDismissed(true);
+  };
+
+  const openTokenModalFromBanner = () => {
+    dismissUsernameBanner();
+    setTokenModalOpen(true);
   };
 
   const isActive = (path: string) =>
@@ -431,10 +488,41 @@ export const Header: React.FC = () => {
         )}
       </header>
 
+      {/* Username setup nudge — shown whenever logged-in user has no username yet */}
+      {token && !user?.username && !bannerDismissed && (
+        <div className="border-b border-zinc-800 py-1.5 px-4">
+          <div className="max-w-[1600px] mx-auto flex items-center gap-2">
+            <User className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+            <p className="text-[11px] text-zinc-400 flex-1">
+              <span className="font-medium text-zinc-300">Tip:</span> Set a
+              display name to appear on your shared configs.
+            </p>
+            <button
+              onClick={openTokenModalFromBanner}
+              className="text-[11px] font-medium text-blue-400 hover:text-blue-300 whitespace-nowrap"
+            >
+              Set name
+            </button>
+            <button
+              onClick={dismissUsernameBanner}
+              className="text-zinc-600 hover:text-zinc-400 flex-shrink-0"
+              aria-label="Dismiss"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Token modal */}
       <Modal
         open={tokenModalOpen}
-        onClose={() => setTokenModalOpen(false)}
+        onClose={() => {
+          setTokenModalOpen(false);
+          setEditingUsername(false);
+          setRollConfirm(false);
+          setImportMode(false);
+        }}
         title="Your Access Token"
       >
         <div className="space-y-4">
@@ -444,6 +532,81 @@ export const Header: React.FC = () => {
               This token is your only credential. Save it securely — you'll need
               it to access your configs from another device.
             </p>
+          </div>
+
+          {/* Username section */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-zinc-500">Display Name</p>
+              {!editingUsername && (
+                <button
+                  onClick={openUsernameEdit}
+                  className="inline-flex items-center gap-1 text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
+                >
+                  <Pencil className="w-3 h-3" />
+                  {user?.username ? "Edit" : "Set name"}
+                </button>
+              )}
+            </div>
+            {!editingUsername ? (
+              <div className="flex items-center gap-2 px-3 py-2 bg-zinc-950 border border-zinc-700 rounded-md min-h-[34px]">
+                {user?.username ? (
+                  <span className="text-sm text-zinc-200">{user.username}</span>
+                ) : (
+                  <span className="text-sm text-zinc-600 italic">
+                    No display name set
+                  </span>
+                )}
+                {usernameSaved && (
+                  <span className="ml-auto text-xs text-green-400 flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Saved
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Input
+                  value={usernameValue}
+                  onChange={(e) =>
+                    setUsernameValue(e.target.value.slice(0, 50))
+                  }
+                  placeholder="e.g. SunnyDriver42"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveUsername();
+                    if (e.key === "Escape") setEditingUsername(false);
+                  }}
+                />
+                <p className="text-[11px] text-zinc-600">
+                  Shown on your shared configs and auto-filled in comments.
+                  Letters, numbers, spaces, underscores, hyphens, dots — max 50
+                  chars.
+                </p>
+                {useAuthStore.getState().error && (
+                  <p className="text-xs text-red-400">
+                    {useAuthStore.getState().error}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={updatingUsername}
+                    onClick={handleSaveUsername}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={updatingUsername}
+                    onClick={() => setEditingUsername(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

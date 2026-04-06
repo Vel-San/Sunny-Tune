@@ -13,6 +13,7 @@ datasource db {
 model User {
   id             String          @id @default(uuid()) @db.Uuid
   token          String          @unique @db.VarChar(128)
+  username       String?         @map("username") @db.VarChar(50)
   createdAt      DateTime        @default(now()) @map("created_at")
   lastSeenAt     DateTime        @default(now()) @updatedAt @map("last_seen_at")
   configurations Configuration[]

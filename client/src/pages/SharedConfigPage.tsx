@@ -390,6 +390,14 @@ export default function SharedConfigPage() {
 
         {/* Stats row */}
         <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-600 pt-1 border-t border-zinc-800">
+          {config.authorUsername && (
+            <span className="inline-flex items-center gap-1 text-zinc-500">
+              <span className="text-zinc-600">by</span>
+              <span className="font-medium text-zinc-400">
+                {config.authorUsername}
+              </span>
+            </span>
+          )}
           <span className="inline-flex items-center gap-1">
             <Eye className="w-3.5 h-3.5" /> {config.viewCount} views
           </span>

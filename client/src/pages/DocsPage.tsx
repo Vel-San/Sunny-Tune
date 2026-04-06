@@ -616,11 +616,28 @@ const CONTENT: Record<string, DocBlock[]> = {
               "Your configs are associated with this token — keep it safe.",
             ]}
           />
+          <H3>Setting a display name</H3>
+          <P>
+            You can set a personal display name (username) in the Token modal
+            (key icon in the header). Once set, it:
+          </P>
+          <UL
+            items={[
+              "Appears on all your shared configs so others can see who created them.",
+              "Auto-fills the comment nickname field on shared config pages.",
+              "Can be changed or cleared at any time from the same Token modal.",
+            ]}
+          />
+          <P>
+            On your first visit after display names were introduced, a
+            dismissable banner will appear below the header inviting you to set
+            one. It shows only once.
+          </P>
           <H3>Viewing your token</H3>
           <P>
             Click the key icon (token pill) in the header to open the Token
-            modal. It shows your full token, user ID, config count, and
-            member-since date.
+            modal. It shows your display name, full token, user ID, config
+            count, and member-since date.
           </P>
           <H3>Importing a token from another device</H3>
           <P>

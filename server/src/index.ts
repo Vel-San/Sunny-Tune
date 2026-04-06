@@ -32,7 +32,7 @@ app.use(
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Secret"],
     credentials: false,
   }),

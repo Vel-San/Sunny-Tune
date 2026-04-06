@@ -91,6 +91,16 @@ export async function revokeToken(): Promise<{ token: string }> {
   return data;
 }
 
+export async function updateUsername(
+  username: string | null,
+): Promise<{ id: string; username: string | null }> {
+  const { data } = await apiClient.patch<{
+    id: string;
+    username: string | null;
+  }>("/users/me", { username });
+  return data;
+}
+
 // ─── Configs ──────────────────────────────────────────────────────────────────
 
 export async function fetchConfigs(page = 1, limit = 24): Promise<ConfigsPage> {

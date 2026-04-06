@@ -5,25 +5,34 @@ export type SPBranch = "stable-sp" | "dev-sp" | "staging-sp" | "nightly";
 export type CommaHardware = "comma4" | "comma3x" | "comma3";
 
 export type CarMake =
-  | "toyota"
-  | "lexus"
-  | "honda"
   | "acura"
-  | "hyundai"
-  | "kia"
-  | "genesis"
-  | "gm"
-  | "ford"
-  | "lincoln"
-  | "chrysler"
-  | "jeep"
-  | "ram"
-  | "volkswagen"
   | "audi"
-  | "subaru"
+  | "chevrolet"
+  | "chrysler"
+  | "comma"
+  | "cupra"
+  | "dodge"
+  | "ford"
+  | "genesis"
+  | "gmc"
+  | "honda"
+  | "hyundai"
+  | "jeep"
+  | "kia"
+  | "lexus"
+  | "lincoln"
+  | "man"
   | "mazda"
   | "nissan"
-  | "infiniti"
+  | "ram"
+  | "rivian"
+  | "seat"
+  | "subaru"
+  | "skoda"
+  | "tesla"
+  | "toyota"
+  | "volkswagen"
+  // Legacy — no longer selectable in the editor but kept so existing configs display correctly
   | "other";
 
 /**
@@ -431,6 +440,8 @@ export interface ConfigRecord {
   commentCount?: number;
   /** True when the authenticated viewer is the owner of this config */
   isOwn?: boolean;
+  /** Username of the config's author, if they have set one */
+  authorUsername?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -438,6 +449,7 @@ export interface ConfigRecord {
 export interface UserRecord {
   id: string;
   token: string;
+  username?: string | null;
   createdAt: string;
   lastSeenAt: string;
   _count: { configurations: number };

@@ -329,6 +329,12 @@ SunnyTune uses **anonymous UUID tokens** — no sign-up or password required.
 - The token is stored in `localStorage` under `sp_user_token` and sent as `Authorization: Bearer sp_...` on every request.
 - To view your token: click the key icon in the header to open the Token modal.
 
+### Display name
+
+Users can set an optional display name in the Token modal. Once set it appears on all shared configs (visible to others on the shared config page and explore cards) and auto-fills the comment nickname field. The name can be changed or cleared at any time.
+
+On first visit after v2.2.1, a one-time dismissable banner below the header prompts users to set their name.
+
 ### Moving to a new device
 
 If you open SunnyTune on a new device it will generate a fresh token (disconnecting you from your existing configs). To restore access:

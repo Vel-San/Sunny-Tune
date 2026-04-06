@@ -15,6 +15,7 @@ import {
   postComment,
   submitReport,
 } from "../../api";
+import { useAuthStore } from "../../store/authStore";
 import type { CommentRecord } from "../../types/config";
 import { Button } from "../ui/Button";
 
@@ -61,13 +62,24 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   isOwner,
 }) => {
   const qc = useQueryClient();
+  const authUser = useAuthStore((s) => s.user);
   const [body, setBody] = useState("");
-  const [nickname, setNickname] = useState(
-    () => localStorage.getItem("sp_comment_name") ?? "",
-  );
+  const [nickname, setNickname] = useState(() => {
+    // Prefer explicit localStorage value, then user's stored username
+    const stored = localStorage.getItem("sp_comment_name");
+    if (stored) return stored;
+    return authUser?.username ?? "";
+  });
   const [replyTo, setReplyTo] = useState<CommentRecord | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const MAX = 2000;
+
+  // Keep nickname in sync if the user sets a username after mounting
+  useEffect(() => {
+    if (authUser?.username && !localStorage.getItem("sp_comment_name")) {
+      setNickname(authUser.username);
+    }
+  }, [authUser?.username]);
 
   const handleNicknameChange = (val: string) => {
     setNickname(val);

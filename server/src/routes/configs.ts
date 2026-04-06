@@ -4,17 +4,17 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { prisma } from "../config/database";
 import {
-    checkConfigCap,
-    pruneNotificationsIfNeeded,
-    validateUuidParams,
+  checkConfigCap,
+  pruneNotificationsIfNeeded,
+  validateUuidParams,
 } from "../lib/guards";
 import { logger } from "../lib/logger";
 import { configsQuerySchema } from "../lib/querySchemas";
 import { stripControlChars } from "../lib/sanitize";
 import {
-    authenticate,
-    AuthRequest,
-    optionalAuthenticate,
+  authenticate,
+  AuthRequest,
+  optionalAuthenticate,
 } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
 
@@ -566,6 +566,7 @@ sharedConfigRouter.get(
           clonedFrom: { select: { id: true, name: true, shareToken: true } },
           createdAt: true,
           updatedAt: true,
+          user: { select: { username: true } },
         },
       });
       if (!config || !config.isShared) {
@@ -580,8 +581,12 @@ sharedConfigRouter.get(
         });
       }
       // Strip internal userId; expose isOwn flag so the client can hide self-rating
-      const { userId, ...rest } = config;
-      res.json({ ...rest, isOwn: req.userId === userId });
+      const { userId, user, ...rest } = config;
+      res.json({
+        ...rest,
+        isOwn: req.userId === userId,
+        authorUsername: user.username ?? null,
+      });
     } catch (err) {
       logger.error("Failed to fetch shared configuration", {
         err: String(err),

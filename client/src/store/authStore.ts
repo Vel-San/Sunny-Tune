@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { ApiError, fetchMe, registerUser, revokeToken } from "../api";
+import {
+  ApiError,
+  fetchMe,
+  registerUser,
+  revokeToken,
+  updateUsername,
+} from "../api";
 import { log } from "../lib/logger";
 import type { UserRecord } from "../types/config";
 
@@ -10,11 +16,13 @@ interface AuthState {
   loading: boolean;
   rerolling: boolean;
   importing: boolean;
+  updatingUsername: boolean;
   error: string | null;
   init: () => Promise<void>;
   logout: () => void;
   rerollToken: () => Promise<void>;
   importToken: (pastedToken: string) => Promise<void>;
+  updateUsername: (username: string | null) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -24,6 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
   rerolling: false,
   importing: false,
+  updatingUsername: false,
   error: null,
 
   init: async () => {
@@ -109,6 +118,25 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (old !== trimmed) localStorage.setItem("sp_user_token", old ?? "");
       else localStorage.removeItem("sp_user_token");
       set({ importing: false, error: `Invalid token: ${msg}` });
+    }
+  },
+
+  updateUsername: async (username: string | null) => {
+    set({ updatingUsername: true, error: null });
+    try {
+      const result = await updateUsername(username);
+      set((state) => ({
+        user: state.user
+          ? { ...state.user, username: result.username }
+          : state.user,
+        updatingUsername: false,
+      }));
+      log.info("Username updated");
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to update username";
+      log.error("Username update failed", { err: msg });
+      set({ error: msg, updatingUsername: false });
     }
   },
 }));

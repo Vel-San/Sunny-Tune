@@ -4,6 +4,19 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.2.1] — 2026-04-06
+
+### Added
+
+- **Display name (username)** — users can now set a personal display name in the Access Token modal (key icon in the header). The name appears on shared configs (visible to everyone on the shared config page and explore cards) and auto-fills the comment nickname field so you don't have to retype it each time
+- **One-time setup banner** — on first visit after this update, a dismissable blue info banner appears below the header prompting users to set their display name; it is suppressed once dismissed or once a username is already set
+
+### Changed
+
+- **Vehicle makes list** updated from 19 to 27 brands: **Acura, Audi, Chevrolet, Chrysler, comma (body), CUPRA, Dodge, Ford, Genesis, GMC, Honda, Hyundai, Jeep, Kia, Lexus, Lincoln, MAN, Mazda, Nissan, Ram, Rivian, SEAT, Subaru, Škoda, Tesla, Toyota, Volkswagen** — removed: GM (superseded by Chevrolet/GMC), Infiniti, Other; legacy configs using old values continue to display correctly
+
+---
+
 ## [2.2.0] — 2026-04-05
 
 ### Added

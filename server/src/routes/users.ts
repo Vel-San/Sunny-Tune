@@ -1,9 +1,15 @@
 import { Request, Response, Router } from "express";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import { prisma } from "../config/database";
-import { authenticate, AuthRequest } from "../middleware/auth";
-import { destructiveLimiter, registerLimiter } from "../middleware/rateLimiter";
 import { logger } from "../lib/logger";
+import { stripControlChars } from "../lib/sanitize";
+import { authenticate, AuthRequest } from "../middleware/auth";
+import {
+  destructiveLimiter,
+  registerLimiter,
+  writeLimiter,
+} from "../middleware/rateLimiter";
 
 export const usersRouter = Router();
 
@@ -59,6 +65,7 @@ usersRouter.get(
         select: {
           id: true,
           token: true,
+          username: true,
           createdAt: true,
           lastSeenAt: true,
           _count: { select: { configurations: true } },
@@ -72,6 +79,51 @@ usersRouter.get(
     } catch (err) {
       logger.error("Failed to fetch user", { err: String(err) });
       res.status(500).json({ error: "Failed to fetch user" });
+    }
+  },
+);
+
+const usernameSchema = z.object({
+  username: z
+    .string()
+    .max(50)
+    .trim()
+    .transform(stripControlChars)
+    .nullable()
+    .optional(),
+});
+
+// PATCH /api/users/me — update username
+usersRouter.patch(
+  "/me",
+  authenticate,
+  writeLimiter,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const parsed = usernameSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid username" });
+      return;
+    }
+    const username = parsed.data.username ?? null;
+    // Basic printable-characters check — no control chars; allow letters,
+    // numbers, spaces, underscores, hyphens, dots.
+    if (username !== null && !/^[\w\s.\-]{1,50}$/u.test(username)) {
+      res.status(400).json({
+        error:
+          "Username may only contain letters, numbers, spaces, underscores, hyphens, and dots",
+      });
+      return;
+    }
+    try {
+      const user = await prisma.user.update({
+        where: { id: req.userId },
+        data: { username },
+        select: { id: true, username: true },
+      });
+      res.json(user);
+    } catch (err) {
+      logger.error("Failed to update username", { err: String(err) });
+      res.status(500).json({ error: "Failed to update username" });
     }
   },
 );

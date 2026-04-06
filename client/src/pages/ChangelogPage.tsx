@@ -11,6 +11,25 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.2.1",
+    date: "2026-04-06",
+    tags: ["feature", "ux"],
+    changes: [
+      {
+        type: "added",
+        text: "Display name (username) — set a personal name in the Access Token modal (key icon in header); it appears on your shared configs and auto-fills the comment nickname field across all shared config pages",
+      },
+      {
+        type: "added",
+        text: "One-time setup banner — on your first visit after this update, a dismissable blue banner prompts you to set your display name; it won't appear again once dismissed or a username is saved",
+      },
+      {
+        type: "changed",
+        text: "Vehicle makes list updated to 27 brands: Acura, Audi, Chevrolet, Chrysler, comma (body), CUPRA, Dodge, Ford, Genesis, GMC, Honda, Hyundai, Jeep, Kia, Lexus, Lincoln, MAN, Mazda, Nissan, Ram, Rivian, SEAT, Subaru, Škoda, Tesla, Toyota, Volkswagen — replaces the previous 19-make list",
+      },
+    ],
+  },
+  {
     version: "2.2.0",
     date: "2026-04-05",
     tags: ["feature", "fix", "ux"],

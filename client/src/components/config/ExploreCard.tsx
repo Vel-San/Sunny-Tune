@@ -8,6 +8,7 @@ import {
   Heart,
   MessageSquare,
   Tag,
+  User,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -263,9 +264,18 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
             <Calendar className="w-3 h-3" />
             {timeAgo(config.sharedAt ?? config.createdAt)}
           </span>
-          <span className="inline-flex items-center gap-0.5 text-[11px] text-zinc-600 group-hover:text-blue-400 transition-colors">
-            View <ChevronRight className="w-3 h-3" />
-          </span>
+          {config.authorUsername ? (
+            <span className="inline-flex items-center gap-1 text-[11px] text-zinc-500 truncate max-w-[140px]">
+              <User className="w-3 h-3 flex-shrink-0 text-zinc-600" />
+              <span className="font-medium text-zinc-300 truncate">
+                {config.authorUsername}
+              </span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-0.5 text-[11px] text-zinc-600 group-hover:text-blue-400 transition-colors">
+              View <ChevronRight className="w-3 h-3" />
+            </span>
+          )}
         </div>
       </Link>
     </div>
