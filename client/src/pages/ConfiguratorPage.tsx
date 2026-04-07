@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
   AlertCircle,
+  ArrowRight,
   ArrowUpDown,
   Car,
   CheckCircle2,
@@ -17,7 +18,7 @@ import {
   Upload,
   Wrench,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { createConfig, fetchConfig, updateConfig } from "../api";
 import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
@@ -35,10 +36,12 @@ import { VehicleSection } from "../components/config/sections/VehicleSection";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
+import { computeConfigDiff } from "../lib/configDiff";
 import {
   exportConfigAsJson,
   ImportValidationError,
   parseImportFile,
+  type SunnyTuneExport,
 } from "../lib/configExport";
 import { unmarkSeen } from "../lib/seenConfigs";
 import { useConfigStore } from "../store/configStore";
@@ -82,11 +85,18 @@ export default function ConfiguratorPage() {
   const [sunnyLinkExportOpen, setSunnyLinkExportOpen] = useState(false);
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [saveConfirmDiffOpen, setSaveConfirmDiffOpen] = useState(false);
+  const [pendingImport, setPendingImport] = useState<SunnyTuneExport | null>(
+    null,
+  );
 
-  // Block in-app SPA navigation when there are unsaved changes
+  // Block in-app SPA navigation when there are unsaved changes.
+  // Use getState() to read the live Zustand value, not the stale React-closure
+  // value — this prevents the blocker from firing right after loadConfig() sets
+  // isDirty=false but before the component has re-rendered.
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isDirty && currentLocation.pathname !== nextLocation.pathname,
+      useConfigStore.getState().isDirty &&
+      currentLocation.pathname !== nextLocation.pathname,
   );
 
   // Warn on browser refresh / tab close
@@ -179,6 +189,21 @@ export default function ConfiguratorPage() {
     exportConfigAsJson(existingConfig);
   };
 
+  /** Perform the actual import once confirmed (or immediately if no existing config). */
+  const doImport = (imported: SunnyTuneExport) => {
+    loadConfig(
+      "", // no id — treat as a new config
+      imported.name,
+      imported.description ?? "",
+      imported.config as import("../types/config").SPConfig,
+      imported.tags ?? [],
+      imported.category ?? "",
+    );
+    // Navigate away from any existing /configure/:id URL so Save creates a new DB row.
+    // isDirty is already false after loadConfig(), so useBlocker won't fire.
+    navigate("/configure", { replace: true });
+  };
+
   const handleImportClick = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -189,17 +214,13 @@ export default function ConfiguratorPage() {
       setImportError(null);
       try {
         const imported = await parseImportFile(file);
-        // Load the imported config into the editor — it starts as a new unsaved config
-        loadConfig(
-          "", // no id — treat as a new config
-          imported.name,
-          imported.description ?? "",
-          imported.config as import("../types/config").SPConfig,
-          imported.tags ?? [],
-          imported.category ?? "",
-        );
-        // Clear the editing id so Save creates a new DB row
-        navigate("/configure", { replace: true });
+        // If there's already a saved config loaded or unsaved changes, ask the
+        // user to confirm before overwriting anything.
+        if (editingId || isDirty) {
+          setPendingImport(imported);
+        } else {
+          doImport(imported);
+        }
       } catch (err) {
         setImportError(
           err instanceof ImportValidationError
@@ -210,6 +231,25 @@ export default function ConfiguratorPage() {
     };
     input.click();
   };
+
+  // Diff between the currently-loaded config and the pending import.
+  const importDiff = useMemo(
+    () =>
+      pendingImport
+        ? computeConfigDiff(
+            editingConfig,
+            pendingImport.config as import("../types/config").SPConfig,
+          )
+        : [],
+    [pendingImport, editingConfig],
+  );
+  const importDiffGrouped = useMemo(() => {
+    const map: Record<string, typeof importDiff> = {};
+    for (const entry of importDiff) {
+      (map[entry.sectionLabel] ??= []).push(entry);
+    }
+    return map;
+  }, [importDiff]);
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
@@ -277,15 +317,17 @@ export default function ConfiguratorPage() {
               {isDirty && !saved && (
                 <span className="text-xs text-zinc-600">Unsaved changes</span>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                leftIcon={<Upload className="w-3.5 h-3.5" />}
-                onClick={handleImportClick}
-                title="Import config from JSON file"
-              >
-                <span className="hidden md:inline">Import</span>
-              </Button>
+              {!editingId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={<Upload className="w-3.5 h-3.5" />}
+                  onClick={handleImportClick}
+                  title="Import config from JSON file"
+                >
+                  <span className="hidden md:inline">Import</span>
+                </Button>
+              )}
               {editingId && (
                 <Button
                   variant="ghost"
@@ -440,6 +482,112 @@ export default function ConfiguratorPage() {
           onClose={() => setSunnyLinkExportOpen(false)}
         />
       )}
+
+      {/* Import overwrite confirmation modal */}
+      <Modal
+        open={!!pendingImport}
+        onClose={() => setPendingImport(null)}
+        title="Replace current config?"
+        width="lg"
+      >
+        {pendingImport && (
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              You are about to replace{" "}
+              <span className="font-medium text-zinc-100">{editingName}</span>{" "}
+              with the imported config{" "}
+              <span className="font-medium text-zinc-100">
+                {pendingImport.name}
+              </span>
+              . Your current config will be discarded unless you have already
+              saved it.
+            </p>
+
+            {/* Inline diff */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-4 text-xs text-zinc-500 border-b border-zinc-800 pb-3">
+                <span className="font-medium text-zinc-400">
+                  {importDiff.length} change
+                  {importDiff.length !== 1 ? "s" : ""}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="text-zinc-500">{editingName}</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-700" />
+                  <span className="text-zinc-300">{pendingImport.name}</span>
+                </span>
+              </div>
+
+              {importDiff.length === 0 && (
+                <p className="text-xs text-zinc-500 text-center py-4">
+                  No parameter differences between the two configs.
+                </p>
+              )}
+
+              <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-1 pt-2">
+                {Object.entries(importDiffGrouped).map(
+                  ([sectionLabel, entries]) => (
+                    <div key={sectionLabel}>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mb-2">
+                        {sectionLabel}
+                      </p>
+                      <div className="rounded-lg border border-zinc-800 overflow-hidden divide-y divide-zinc-800">
+                        {entries.map((entry) => (
+                          <div
+                            key={entry.field}
+                            className="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-3 py-2 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+                          >
+                            <span className="text-xs text-zinc-400 truncate">
+                              {entry.label}
+                            </span>
+                            <span
+                              className={clsx(
+                                "text-xs font-mono px-1.5 py-0.5 rounded",
+                                "bg-red-500/10 text-red-400 border border-red-500/20",
+                                "line-through decoration-red-400/50",
+                              )}
+                            >
+                              {entry.oldValue}
+                            </span>
+                            <span
+                              className={clsx(
+                                "text-xs font-mono px-1.5 py-0.5 rounded",
+                                "bg-green-500/10 text-green-400 border border-green-500/20",
+                              )}
+                            >
+                              {entry.newValue}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPendingImport(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Upload className="w-3.5 h-3.5" />}
+                onClick={() => {
+                  doImport(pendingImport);
+                  setPendingImport(null);
+                }}
+              >
+                Yes, import
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Save confirmation modal */}
       <Modal
