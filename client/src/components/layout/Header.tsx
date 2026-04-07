@@ -396,7 +396,7 @@ export const Header: React.FC = () => {
             >
               <KeyRound className="w-3 h-3" />
               {user?.username && (
-                <span className="font-sans text-zinc-300 font-medium mr-0.5">
+                <span className="font-sans text-zinc-300 font-medium mr-0.5 max-w-[8rem] truncate">
                   {user.username}
                 </span>
               )}

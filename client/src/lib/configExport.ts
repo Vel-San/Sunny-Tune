@@ -447,6 +447,7 @@ export function parseSunnyLinkExportObject(
   cfg.interface.useMetric = slBool(s["IsMetric"], false);
   cfg.interface.standstillTimer = slBool(s["StandstillTimer"], false);
   cfg.interface.screenBrightness = slInt(s["Brightness"], 0);
+  cfg.interface.screenBrightnessDelay = slInt(s["OnroadBrightnessDelay"], 0);
   cfg.interface.screenOffTimer = slInt(s["OnroadScreenOffTimer"], 15);
   cfg.interface.devUI = slBool(s["DevUIInfo"], false);
   cfg.interface.disableOnroadUploads = !slBool(s["OnroadUploads"], true);
@@ -649,6 +650,7 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     IsMetric: c.interface.useMetric ? "True" : "False",
     StandstillTimer: c.interface.standstillTimer ? "True" : "False",
     Brightness: String(c.interface.screenBrightness),
+    OnroadBrightnessDelay: String(c.interface.screenBrightnessDelay),
     OnroadScreenOffTimer: String(c.interface.screenOffTimer),
     DevUIInfo: c.interface.devUI ? "1" : "0",
     OnroadUploads: c.interface.disableOnroadUploads ? "False" : "True",

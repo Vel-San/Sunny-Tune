@@ -419,6 +419,22 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     defaultNote: "0 (always active)",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
+
+  LaneTurnDesire: {
+    summary:
+      "Uses sunnypilot's desired-path planner on curves and turns to hug the intended lane path more closely.",
+    tips: [
+      "Enable for smoother cornering on curved roads and freeway on/off-ramps.",
+      "Works best in combination with Adjust Lane Turn Speed to limit activation to lower speeds.",
+      "Most noticeable on tighter curves where the model would otherwise cut the apex.",
+    ],
+    tradeoffs: [
+      "Can cause slightly more aggressive steering inputs on gradual highway curves.",
+      "May not behave as expected on poorly mapped or unusual road geometries.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
   // ── Speed Control ────────────────────────────────────────────────────────
 
   IntelligentCruiseButtonManagement: {
@@ -557,6 +573,18 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     ],
     defaultNote: "100%",
     recommended: "50–70%",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  OnroadBrightnessDelay: {
+    summary:
+      "Sets how long to wait after the brightness trigger condition is met before the screen brightness actually changes.",
+    tips: [
+      '"Immediate" (0 s) applies the brightness change instantly.',
+      "A short delay (1–5 s) prevents rapid flicker when driving through alternating shade and sun.",
+      "Increase this if your brightness changes feel jarring.",
+    ],
+    defaultNote: "Immediate (0 s)",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 

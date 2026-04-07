@@ -40,6 +40,7 @@ const SECTION_LABELS: Record<string, string> = {
   interface: "Visuals",
   commaAI: "Device",
   advanced: "Developer",
+  vehicleSpecific: "Vehicle Specific",
 };
 
 /** Build a quick lookup: "section.field" → registry label */

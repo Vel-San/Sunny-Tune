@@ -15,6 +15,16 @@ const SCREEN_OFF_OPTS = [
   { value: "300", label: "5 minutes" },
 ];
 
+const BRIGHTNESS_DELAY_OPTS = [
+  { value: "0", label: "Immediate (default)" },
+  { value: "1", label: "1 second" },
+  { value: "2", label: "2 seconds" },
+  { value: "5", label: "5 seconds" },
+  { value: "10", label: "10 seconds" },
+  { value: "20", label: "20 seconds" },
+  { value: "30", label: "30 seconds" },
+];
+
 const LANG_OPTS = [
   { value: "main_en", label: "English" },
   { value: "main_ko", label: "Korean" },
@@ -212,6 +222,18 @@ export const InterfaceSection: React.FC = () => {
           step={5}
           decimals={0}
           unit="%"
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Brightness Delay"
+        spKey="OnroadBrightnessDelay"
+        description="OnroadBrightnessDelay — delay before the onroad brightness change takes effect."
+      >
+        <Select
+          value={String(ui.screenBrightnessDelay)}
+          onChange={(v) => set("screenBrightnessDelay", parseInt(v))}
+          options={BRIGHTNESS_DELAY_OPTS}
         />
       </ParamRow>
 

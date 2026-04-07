@@ -402,46 +402,6 @@ describe("rule: SpeedLimitOffsetType", () => {
   });
 });
 
-// ─── Rule: NNModel + EnforceTorque conflict ───────────────────────────────────
-
-describe("rule: EnforceTorqueControl + NNModel conflict", () => {
-  it("warns when both useNNModel and enforceTorqueControl are true", () => {
-    const c = makeConfig((cfg) => {
-      cfg.lateral.useNNModel = true;
-      cfg.lateral.enforceTorqueControl = true;
-    });
-    const issue = validateForSunnyLinkExport(c).find(
-      (i) => i.field === "EnforceTorqueControl",
-    );
-    expect(issue).toBeDefined();
-    expect(issue!.severity).toBe("warning");
-  });
-
-  it("does NOT warn when only NNModel is true", () => {
-    const c = makeConfig((cfg) => {
-      cfg.lateral.useNNModel = true;
-      cfg.lateral.enforceTorqueControl = false;
-    });
-    expect(
-      validateForSunnyLinkExport(c).find(
-        (i) => i.field === "EnforceTorqueControl",
-      ),
-    ).toBeUndefined();
-  });
-
-  it("does NOT warn when only EnforceTorque is true", () => {
-    const c = makeConfig((cfg) => {
-      cfg.lateral.useNNModel = false;
-      cfg.lateral.enforceTorqueControl = true;
-    });
-    expect(
-      validateForSunnyLinkExport(c).find(
-        (i) => i.field === "EnforceTorqueControl",
-      ),
-    ).toBeUndefined();
-  });
-});
-
 // ─── Multiple issues can fire together ────────────────────────────────────────
 
 describe("validateForSunnyLinkExport — multiple issues", () => {
@@ -482,6 +442,104 @@ describe("validateForSunnyLinkExport — multiple issues", () => {
     expect(withUrl.length).toBeGreaterThan(0);
     for (const issue of withUrl) {
       expect(issue.docsUrl!.startsWith("https://")).toBe(true);
+    }
+  });
+});
+
+// ─── Rule: Speed Limit offset type = none ────────────────────────────────────
+
+describe("rule: SpeedLimitOffsetType none when SLC active", () => {
+  it("returns info when SLC mode > 0 and offsetType = 'none'", () => {
+    const c = makeConfig((cfg) => {
+      cfg.speedControl.speedLimitControl.mode = 3; // Assist
+      cfg.speedControl.speedLimitControl.offsetType = "none";
+    });
+    const issue = validateForSunnyLinkExport(c).find(
+      (i) => i.field === "SpeedLimitOffsetType",
+    );
+    expect(issue).toBeDefined();
+    expect(issue!.severity).toBe("info");
+  });
+
+  it("does NOT fire when SLC mode = 0 (disabled)", () => {
+    const c = makeConfig((cfg) => {
+      cfg.speedControl.speedLimitControl.mode = 0;
+      cfg.speedControl.speedLimitControl.offsetType = "none";
+    });
+    expect(
+      validateForSunnyLinkExport(c).find(
+        (i) => i.field === "SpeedLimitOffsetType",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does NOT fire when offsetType is 'fixed' even with mode > 0", () => {
+    const c = makeConfig((cfg) => {
+      cfg.speedControl.speedLimitControl.mode = 2;
+      cfg.speedControl.speedLimitControl.offsetType = "fixed";
+    });
+    expect(
+      validateForSunnyLinkExport(c).find(
+        (i) => i.field === "SpeedLimitOffsetType",
+      ),
+    ).toBeUndefined();
+  });
+});
+
+// ─── Rule: NNModel + EnforceTorque conflict ───────────────────────────────────
+
+describe("rule: NNModel + EnforceTorqueControl conflict", () => {
+  it("warns when both useNNModel and enforceTorqueControl are true", () => {
+    const c = makeConfig((cfg) => {
+      cfg.lateral.useNNModel = true;
+      cfg.lateral.enforceTorqueControl = true;
+    });
+    const issue = validateForSunnyLinkExport(c).find(
+      (i) => i.field === "EnforceTorqueControl",
+    );
+    expect(issue).toBeDefined();
+    expect(issue!.severity).toBe("warning");
+    expect(issue!.message).toMatch(/conflict/i);
+  });
+
+  it("does NOT warn when only NNModel is true", () => {
+    const c = makeConfig((cfg) => {
+      cfg.lateral.useNNModel = true;
+      cfg.lateral.enforceTorqueControl = false;
+    });
+    expect(
+      validateForSunnyLinkExport(c).find(
+        (i) => i.field === "EnforceTorqueControl",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does NOT warn when only EnforceTorque is true", () => {
+    const c = makeConfig((cfg) => {
+      cfg.lateral.useNNModel = false;
+      cfg.lateral.enforceTorqueControl = true;
+    });
+    expect(
+      validateForSunnyLinkExport(c).find(
+        (i) => i.field === "EnforceTorqueControl",
+      ),
+    ).toBeUndefined();
+  });
+});
+
+// ─── Severity ordering ────────────────────────────────────────────────────────
+
+describe("validateForSunnyLinkExport — severity ordering", () => {
+  it("returns all severity values only from the expected set", () => {
+    const c = makeConfig((cfg) => {
+      cfg.longitudinal.alphaLongEnabled = true;
+      cfg.longitudinal.planplusEnabled = true;
+      cfg.lateral.useNNModel = true;
+    });
+    const issues = validateForSunnyLinkExport(c);
+    const validSeverities = new Set(["error", "warning", "info"]);
+    for (const issue of issues) {
+      expect(validSeverities.has(issue.severity)).toBe(true);
     }
   });
 });

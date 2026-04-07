@@ -412,6 +412,12 @@ const OFFICIAL_DOCS: ReadonlyArray<{
     section: "Visuals",
     docsPath: "settings/visuals/",
   },
+  {
+    id: "TorqueBar",
+    label: "Torque Bar",
+    section: "Visuals",
+    docsPath: "settings/visuals/",
+  },
 
   // ── Display ───────────────────────────────────────────────────────────
   {
@@ -423,6 +429,12 @@ const OFFICIAL_DOCS: ReadonlyArray<{
   {
     id: "OnroadBrightnessDelay",
     label: "Onroad Brightness Delay",
+    section: "Display",
+    docsPath: "settings/display/",
+  },
+  {
+    id: "OnroadScreenOffTimer",
+    label: "Onroad Screen Off Timer",
     section: "Display",
     docsPath: "settings/display/",
   },
@@ -743,6 +755,11 @@ const OUR_SPKEYS: ReadonlyArray<{
   { spKey: "StandstillTimer", section: "interface", field: "standstillTimer" },
   { spKey: "Brightness", section: "interface", field: "screenBrightness" },
   {
+    spKey: "OnroadBrightnessDelay",
+    section: "interface",
+    field: "screenBrightnessDelay",
+  },
+  {
     spKey: "OnroadScreenOffTimer",
     section: "interface",
     field: "screenOffTimer",
@@ -801,6 +818,82 @@ const OUR_SPKEYS: ReadonlyArray<{
   },
   // Advanced
   { spKey: "QuickBootToggle", section: "advanced", field: "quickBoot" },
+
+  // ── Params present in the UI but previously unlisted ──────────────────────
+
+  // Interface / Display
+  {
+    spKey: "ShowAdvancedControls",
+    section: "interface",
+    field: "showAdvancedControls",
+  },
+  {
+    spKey: "InteractivityTimer",
+    section: "interface",
+    field: "interactivityTimeout",
+  },
+  {
+    spKey: "RealTimeAccelBar",
+    section: "interface",
+    field: "realTimeAccelBar",
+  },
+  { spKey: "LanguageSetting", section: "interface", field: "language" },
+  // Lane Change (turn-desire / lane-turn speed live here per config schema)
+  { spKey: "LaneTurnDesire", section: "laneChange", field: "laneTurnDesire" },
+  {
+    spKey: "AdjustLaneTurnSpeed",
+    section: "laneChange",
+    field: "adjustLaneTurnSpeed",
+  },
+  // Speed Control
+  {
+    spKey: "SpeedLimitMapAdvisory",
+    section: "speedControl",
+    field: "mapAdvisorySpeedLimit",
+  },
+  // Comma AI
+  { spKey: "GsmApn", section: "commaAI", field: "gsmApn" },
+  { spKey: "GsmRoaming", section: "commaAI", field: "gsmRoaming" },
+  {
+    spKey: "SunnypilotEnabled",
+    section: "commaAI",
+    field: "sunnypilotEnabled",
+  },
+  // Advanced (device management)
+  { spKey: "MaxTimeOffroad", section: "advanced", field: "maxTimeOffroad" },
+  { spKey: "DisablePowerDown", section: "advanced", field: "disablePowerDown" },
+  { spKey: "WakeupBehavior", section: "advanced", field: "wakeupBehavior" },
+  { spKey: "DisableUpdates", section: "advanced", field: "disableUpdates" },
+  // Vehicle-specific
+  {
+    spKey: "TeslaCoopSteering",
+    section: "vehicleSpecific",
+    field: "teslaCoopSteering",
+  },
+  {
+    spKey: "SubaruStopAndGo",
+    section: "vehicleSpecific",
+    field: "subaruStopAndGo",
+  },
+  {
+    spKey: "ToyotaEnforceFactoryLong",
+    section: "vehicleSpecific",
+    field: "toyotaEnforceFactoryLong",
+  },
+  // Metadata
+  {
+    spKey: "ModelManager_ActiveBundle",
+    section: "metadata",
+    field: "activeModel",
+  },
+  // Aliases — same underlying field as an existing spKey but listed under a
+  // different ID in the official docs (Device section vs Toggles section).
+  { spKey: "UseMetricSystem", section: "interface", field: "useMetric" },
+  {
+    spKey: "RecordUploadDriverCamera",
+    section: "commaAI",
+    field: "recordDrives",
+  },
 ];
 
 /**
@@ -816,6 +909,7 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "EnforceTorqueControl",
   "TorqueParamsOverrideEnabled",
   "ManualTuneFriction",
+  "TorqueParamsOverrideLatAccelFactor",
   "ExperimentalMode",
   "DynamicExperimentalControl",
   "AlphaLongitudinalEnabled",
@@ -825,10 +919,14 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "CustomAccShortPressIncrement",
   "CustomAccLongPressIncrement",
   "DrivingPersonality",
+  "AutoLaneChangeEnabled",
   "AutoLaneChangeTimer",
   "BlindSpot",
   "BlinkerMinLateralControlSpeed",
   "BlinkerPauseLateralControl",
+  "BlinkerLateralReengageDelay",
+  "LaneTurnDesire",
+  "AdjustLaneTurnSpeed",
   "SmartCruiseControlVision",
   "SmartCruiseControlMap",
   "IntelligentCruiseButtonManagement",
@@ -836,6 +934,7 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "SpeedLimitSource",
   "SpeedLimitOffsetType",
   "SpeedLimitValueOffset",
+  "SpeedLimitMapAdvisory",
   "StandstillTimer",
   "GreenLightAlert",
   "LeadDepartAlert",
@@ -846,6 +945,13 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "DevUIInfo",
   "RoadNameToggle",
   "OnroadUploads",
+  "ShowAdvancedControls",
+  "LanguageSetting",
+  "InteractivityTimer",
+  "RealTimeAccelBar",
+  "Brightness",
+  "OnroadBrightnessDelay",
+  "OnroadScreenOffTimer",
   "Mads",
   "MadsMainCruiseAllowed",
   "MadsSteeringMode",
@@ -853,15 +959,33 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "IsLdwEnabled",
   "DisengageOnAccelerator",
   "GsmMetered",
+  "GsmApn",
+  "GsmRoaming",
+  "SunnylinkEnabled",
+  "SunnypilotEnabled",
+  "RecordFront",
+  "RecordAudioFeedback",
   "IsMetric",
+  "UseMetricSystem",
+  "RecordUploadDriverCamera",
   "OsmLocal",
   "QuickBootToggle",
+  "MaxTimeOffroad",
+  "DisablePowerDown",
+  "WakeupBehavior",
+  "DisableUpdates",
+  "ModelManager_ActiveBundle",
+  "TeslaCoopSteering",
+  "SubaruStopAndGo",
+  "ToyotaEnforceFactoryLong",
   "BlindSpotDetection",
   "SteeringArc",
   "TrueVEgoUI",
   "ChevronInfo",
   "RainbowMode",
   "TorqueBar",
+  "LiveTorqueParamsToggle",
+  "LiveTorqueParamsRelaxedToggle",
 ]);
 
 // ─── Known mapping: our spKey → official docs id ─────────────────────────────
@@ -879,6 +1003,7 @@ const SPKEY_TO_DOCS_ID: Record<string, string> = {
   SpeedLimitMode: "SpeedLimitMode",
   SpeedLimitSource: "SpeedLimitSource",
   SpeedLimitValueOffset: "SpeedLimitValueOffset",
+  SpeedLimitMapAdvisory: "MapAdvisorySpeedLimit",
   IsMetric: "UseMetricUnits",
   AlwaysOnDM: "AlwaysOnDriverMonitor",
   RoadNameToggle: "DisplayRoadName",
@@ -886,6 +1011,26 @@ const SPKEY_TO_DOCS_ID: Record<string, string> = {
   IsLdwEnabled: "LaneDepartureWarnings",
   Mads: "MadsEnabled",
   QuickBootToggle: "QuickBoot",
+  // spKey names that differ from the official docs param ID
+  LiveTorqueParamsToggle: "SelfTune",
+  LiveTorqueParamsRelaxedToggle: "LessRestrictSettingsForSelfTune",
+  TorqueParamsOverrideEnabled: "EnableCustomTorqueTuning",
+  Brightness: "OnroadBrightness",
+  RecordFront: "RecordFrontLock",
+  RecordAudioFeedback: "RecordUploadMicAudio",
+  LanguageSetting: "Language",
+  WakeupBehavior: "DeviceBootMode",
+  InteractivityTimer: "InteractivityTimeout",
+  ModelManager_ActiveBundle: "DrivingModel",
+  SunnypilotEnabled: "EnableSunnypilot",
+  ToyotaEnforceFactoryLong: "ToyotaEnforceFactoryLongitudinalControl",
+  RealTimeAccelBar: "DisplayRocketFuelBar",
+  // Alias entries that share a field with an existing spKey
+  UseMetricSystem: "UseMetricSystem", // same field as IsMetric; Device-section docs entry
+  RecordUploadDriverCamera: "RecordUploadDriverCamera", // same field as RecordFront; Device-section docs entry
+  // Direct matches (listed explicitly for completeness)
+  OnroadScreenOffTimer: "OnroadScreenOffTimer",
+  TorqueBar: "TorqueBar",
 };
 
 // ─── Audit logic ──────────────────────────────────────────────────────────────

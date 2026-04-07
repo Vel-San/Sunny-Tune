@@ -505,15 +505,19 @@ export default function ConfiguratorPage() {
 
             {/* Inline diff */}
             <div className="space-y-1">
-              <div className="flex items-center gap-4 text-xs text-zinc-500 border-b border-zinc-800 pb-3">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 border-b border-zinc-800 pb-3">
                 <span className="font-medium text-zinc-400">
                   {importDiff.length} change
                   {importDiff.length !== 1 ? "s" : ""}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-zinc-500">{editingName}</span>
-                  <ArrowRight className="w-3 h-3 text-zinc-700" />
-                  <span className="text-zinc-300">{pendingImport.name}</span>
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-zinc-500 truncate max-w-[8rem]">
+                    {editingName}
+                  </span>
+                  <ArrowRight className="w-3 h-3 text-zinc-700 flex-shrink-0" />
+                  <span className="text-zinc-300 truncate max-w-[8rem]">
+                    {pendingImport.name}
+                  </span>
                 </span>
               </div>
 
@@ -534,7 +538,7 @@ export default function ConfiguratorPage() {
                         {entries.map((entry) => (
                           <div
                             key={entry.field}
-                            className="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-3 py-2 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+                            className="flex flex-col gap-1 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center px-3 py-2 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
                           >
                             <span className="text-xs text-zinc-400 truncate">
                               {entry.label}

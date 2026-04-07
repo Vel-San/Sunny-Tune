@@ -10,11 +10,19 @@ All notable changes to SunnyTune are documented here.
 
 - **Save confirmation modal** — clicking Save now opens a confirmation dialog showing the config name, version, and a "View what will change" button that opens a full parameter-level diff of your pending edits against the last saved version; the save only fires once confirmed
 - **Username in token pill** — when a display name is set, it appears inside the token button in the top-right header (desktop and mobile) alongside the truncated token, so the active account is always visible at a glance
+- **Import confirmation modal with diff** — importing a config on top of an active (unsaved or previously saved) session now shows a confirmation dialog with a full parameter-level diff before applying the new config, preventing accidental overwrites
+- **Onroad Brightness Delay** (`OnroadBrightnessDelay`) — new Display setting that controls how long to wait after a brightness trigger before applying the screen brightness change; selector options range from Immediate (0 s) to 30 s; fully exported/imported via SunnyLink
 
 ### Fixed
 
-- **Version history 403 on shared config pages** — the History modal now correctly loads snapshots for all users when the config is publicly shared; previously non-owners always received a `403 Access Denied` even though the History button was visible
-- **False "Unsaved changes" dialog on first save** — navigating away immediately after saving a brand-new config no longer triggers the navigation guard; the URL update now waits until React has committed `isDirty: false` before changing the route
+- **Save/Discard navigation guard firing on import** — `useBlocker` was capturing a stale `isDirty` closure at render time; it now reads `useConfigStore.getState().isDirty` directly so the guard does not trigger during imports
+- **Import button hidden on saved/shared configs** — the Import button is no longer shown when editing an already-saved or shared config; it only appears on new unsaved configs
+- **`vehicleSpecific` diffs silently ignored** — `configDiff.ts` was missing a `vehicleSpecific` entry in `SECTION_LABELS`, so changes to vehicle-specific fields never appeared in diff views; now correctly labelled "Vehicle Specific"
+
+### Changed
+
+- **SP Docs audit fully clean** — all three remaining audit gaps resolved: `OnroadBrightnessDelay` implemented as a full feature; `TorqueBar` and `OnroadScreenOffTimer` added to the official docs tracking list with correct IDs; audit now reports 85/85 covered, 85/85 with field help, 0 missing, 0 undocumented
+- **Test suite expanded to 341 tests** (+77 net new vs. v2.2.1) — new tests cover all 17 params added in v2.2.0, import/export roundtrips for every new field, `configDiff` vehicle-specific and commaAI sections, `configStore` `syncTagsCategory`/`loadConfig`/`initNew` edge cases, `sunnyLinkValidation` `SpeedLimitOffsetType` rules and severity ordering, and server `configSchema` completeness guards for the interface and advanced sections
 
 ---
 

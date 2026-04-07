@@ -151,4 +151,64 @@ describe("configStore — loadConfig", () => {
     expect(s.editingCategory).toBe("performance");
     expect(s.isDirty).toBe(false);
   });
+
+  it("always sets isDirty to false regardless of prior dirty state", () => {
+    useConfigStore.getState().setName("Dirty before load");
+    expect(useConfigStore.getState().isDirty).toBe(true);
+
+    const cfg = useConfigStore.getState().editingConfig;
+    useConfigStore.getState().loadConfig("id-999", "Fresh", "", cfg);
+    expect(useConfigStore.getState().isDirty).toBe(false);
+  });
+
+  it("loads with empty id (new import pattern) — editingId is empty string", () => {
+    const cfg = useConfigStore.getState().editingConfig;
+    useConfigStore.getState().loadConfig("", "Imported", "", cfg);
+    const s = useConfigStore.getState();
+    // empty string editingId signals a new (unsaved) config
+    expect(s.editingId).toBe("");
+    expect(s.editingName).toBe("Imported");
+    expect(s.isDirty).toBe(false);
+  });
+
+  it("defaults tags + category to empty when not provided", () => {
+    const cfg = useConfigStore.getState().editingConfig;
+    useConfigStore.getState().loadConfig("x", "No tags", "", cfg);
+    expect(useConfigStore.getState().editingTags).toEqual([]);
+    expect(useConfigStore.getState().editingCategory).toBe("");
+  });
+});
+
+describe("configStore — syncTagsCategory", () => {
+  beforeEach(resetStore);
+
+  it("updates tags and category without marking dirty", () => {
+    // First make the store dirty with a real mutation
+    useConfigStore.getState().setName("Changed");
+    expect(useConfigStore.getState().isDirty).toBe(true);
+
+    // markClean, then call syncTagsCategory — should NOT flip dirty back on
+    useConfigStore.getState().markClean();
+    useConfigStore.getState().syncTagsCategory(["highway", "mads"], "daily");
+
+    const s = useConfigStore.getState();
+    expect(s.editingTags).toEqual(["highway", "mads"]);
+    expect(s.editingCategory).toBe("daily");
+    expect(s.isDirty).toBe(false);
+  });
+
+  it("does not require dirty state before calling", () => {
+    useConfigStore.getState().syncTagsCategory(["smooth"], "performance");
+    expect(useConfigStore.getState().isDirty).toBe(false);
+    expect(useConfigStore.getState().editingTags).toEqual(["smooth"]);
+  });
+});
+
+describe("configStore — initNew resets activeSection", () => {
+  it("resets activeSection to 'vehicle'", () => {
+    useConfigStore.getState().setActiveSection("steering");
+    expect(useConfigStore.getState().activeSection).toBe("steering");
+    useConfigStore.getState().initNew();
+    expect(useConfigStore.getState().activeSection).toBe("vehicle");
+  });
 });

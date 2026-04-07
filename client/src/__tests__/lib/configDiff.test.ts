@@ -234,4 +234,140 @@ describe("computeConfigDiff", () => {
     expect(entry).toBeDefined();
     expect(entry!.newValue).toBeDefined();
   });
+
+  // ── New sections: advanced, vehicleSpecific, interface new fields ──────────
+
+  it("detects a change in advanced.maxTimeOffroad (number)", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      advanced: { ...makeConfig().advanced, maxTimeOffroad: 3600 },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("maxTimeOffroad"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("0");
+    expect(entry!.newValue).toBe("3600");
+    expect(entry!.section).toBe("advanced");
+  });
+
+  it("detects a change in advanced.disablePowerDown (boolean)", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      advanced: { ...makeConfig().advanced, disablePowerDown: true },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("disablePowerDown"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("Off");
+    expect(entry!.newValue).toBe("On");
+  });
+
+  it("detects a change in vehicleSpecific.teslaCoopSteering", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      vehicleSpecific: {
+        ...makeConfig().vehicleSpecific,
+        teslaCoopSteering: true,
+      },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("teslaCoopSteering"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("Off");
+    expect(entry!.newValue).toBe("On");
+    expect(entry!.section).toBe("vehicleSpecific");
+  });
+
+  it("detects a change in laneChange.laneTurnDesire", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      laneChange: { ...makeConfig().laneChange, laneTurnDesire: true },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("laneTurnDesire"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("Off");
+    expect(entry!.newValue).toBe("On");
+  });
+
+  it("detects a change in laneChange.adjustLaneTurnSpeed (number)", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      laneChange: { ...makeConfig().laneChange, adjustLaneTurnSpeed: 50 },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("adjustLaneTurnSpeed"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("0");
+    expect(entry!.newValue).toBe("50");
+  });
+
+  it("detects a change in interface.showAdvancedControls", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      interface: {
+        ...makeConfig().interface,
+        showAdvancedControls: true,
+      },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("showAdvancedControls"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("Off");
+    expect(entry!.newValue).toBe("On");
+  });
+
+  it("detects a change in interface.realTimeAccelBar", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      interface: { ...makeConfig().interface, realTimeAccelBar: true },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("realTimeAccelBar"));
+    expect(entry).toBeDefined();
+    expect(entry!.newValue).toBe("On");
+  });
+
+  it("detects a change in commaAI.sunnypilotEnabled", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      commaAI: { ...makeConfig().commaAI, sunnypilotEnabled: false },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("sunnypilotEnabled"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("On");
+    expect(entry!.newValue).toBe("Off");
+  });
+
+  it("detects a change in commaAI.gsmApn (string)", () => {
+    const original = makeConfig();
+    const modified = makeConfig({
+      commaAI: { ...makeConfig().commaAI, gsmApn: "internet" },
+    });
+    const diff = computeConfigDiff(original, modified);
+    const entry = diff.find((d) => d.field.includes("gsmApn"));
+    expect(entry).toBeDefined();
+    expect(entry!.oldValue).toBe("");
+    expect(entry!.newValue).toBe("internet");
+  });
+
+  it("treats identical configs with no changes as empty diff (all new fields)", () => {
+    // Ensures no false-positive diffs are produced by adding new fields
+    const cfg = makeConfig({
+      advanced: {
+        quickBoot: false,
+        maxTimeOffroad: 0,
+        disablePowerDown: false,
+        wakeupBehavior: 0,
+        disableUpdates: false,
+      },
+      vehicleSpecific: {
+        teslaCoopSteering: false,
+        subaruStopAndGo: false,
+        toyotaEnforceFactoryLong: false,
+      },
+    });
+    expect(computeConfigDiff(cfg, cfg)).toEqual([]);
+  });
 });

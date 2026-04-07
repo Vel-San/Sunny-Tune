@@ -77,7 +77,7 @@ const CANONICAL_DEFAULT_CONFIG = {
   },
   speedControl: {
     speedLimitControl: {
-      enabled: false,
+      mode: 0,
       policy: 0,
       offsetType: "none",
       offsetValue: 0,
@@ -104,6 +104,7 @@ const CANONICAL_DEFAULT_CONFIG = {
     useMetric: false,
     standstillTimer: false,
     screenBrightness: 0,
+    screenBrightnessDelay: 0,
     screenOffTimer: 15,
     devUI: false,
     disableOnroadUploads: false,
@@ -391,6 +392,79 @@ describe("CANONICAL_DEFAULT_CONFIG — schema completeness", () => {
         `Field '${key}' is missing from CANONICAL_DEFAULT_CONFIG.vehicleSpecific`,
       ).toBe(true);
     }
+  });
+
+  it("interface section contains all registry-tracked fields", () => {
+    const expected = [
+      "useMetric",
+      "standstillTimer",
+      "screenBrightness",
+      "screenBrightnessDelay",
+      "screenOffTimer",
+      "devUI",
+      "disableOnroadUploads",
+      "greenLightAlert",
+      "leadDepartAlert",
+      "alwaysOnDM",
+      "showTurnSignals",
+      "roadNameDisplay",
+      "quietMode",
+      "hideVegoUI",
+      "torqueBar",
+      "trueVegoUI",
+      "blindSpotHUD",
+      "steeringArc",
+      "chevronInfo",
+      "rainbowMode",
+      "showAdvancedControls",
+      "language",
+      "interactivityTimeout",
+      "realTimeAccelBar",
+    ];
+    for (const key of expected) {
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          CANONICAL_DEFAULT_CONFIG.interface,
+          key,
+        ),
+        `Field '${key}' is missing from CANONICAL_DEFAULT_CONFIG.interface`,
+      ).toBe(true);
+    }
+  });
+
+  it("advanced section contains new device-management fields", () => {
+    const extra = [
+      "maxTimeOffroad",
+      "disablePowerDown",
+      "wakeupBehavior",
+      "disableUpdates",
+    ];
+    for (const key of extra) {
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          CANONICAL_DEFAULT_CONFIG.advanced,
+          key,
+        ),
+        `Field '${key}' is missing from CANONICAL_DEFAULT_CONFIG.advanced`,
+      ).toBe(true);
+    }
+  });
+
+  it("speedControl.speedLimitControl uses mode (not enabled) field", () => {
+    // The SLC was migrated from boolean `enabled` to integer `mode` (0–3).
+    // This test guards against accidentally reverting to the old schema.
+    expect(
+      Object.prototype.hasOwnProperty.call(
+        CANONICAL_DEFAULT_CONFIG.speedControl.speedLimitControl,
+        "mode",
+      ),
+    ).toBe(true);
+    expect(
+      Object.prototype.hasOwnProperty.call(
+        CANONICAL_DEFAULT_CONFIG.speedControl.speedLimitControl,
+        "enabled",
+      ),
+    ).toBe(false);
   });
 });
 

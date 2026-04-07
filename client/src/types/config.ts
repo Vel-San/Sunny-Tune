@@ -188,6 +188,8 @@ export interface SPConfig {
     standstillTimer: boolean;
     /** Screen brightness 0–100 — Brightness */
     screenBrightness: number;
+    /** Delay in seconds before brightness change is applied — OnroadBrightnessDelay */
+    screenBrightnessDelay: number;
     /** Screen off timer in seconds (0=never) — OnroadScreenOffTimer */
     screenOffTimer: number;
     /** Show extended developer data overlay — DevUIInfo */
@@ -362,6 +364,7 @@ export function createDefaultConfig(): SPConfig {
       useMetric: false,
       standstillTimer: false,
       screenBrightness: 0,
+      screenBrightnessDelay: 0,
       screenOffTimer: 15,
       devUI: false,
       disableOnroadUploads: false,

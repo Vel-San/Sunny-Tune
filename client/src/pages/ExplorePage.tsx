@@ -442,8 +442,8 @@ export default function ExplorePage() {
 
           {/* Popular tags (from facets — always global across all shared configs) */}
           {data?.facets.tags && data.facets.tags.length > 0 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              <Filter className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+            <div className="flex items-start gap-2 flex-wrap">
+              <Filter className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0 mt-0.5" />
               {data.facets.tags.slice(0, 20).map(({ tag, count }) => {
                 const isActive = activeTags.includes(tag);
                 const color = tagColor(tag);
@@ -452,7 +452,7 @@ export default function ExplorePage() {
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     className={clsx(
-                      "flex-shrink-0 inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded border transition-all",
+                      "inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded border transition-all",
                       isActive
                         ? [color, "opacity-100 ring-1 ring-current/40"]
                         : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300",

@@ -260,6 +260,172 @@ describe("parseSunnyLinkExportObject", () => {
     });
     expect(result.exportedAt).toBe("2025-06-01T12:00:00.000Z");
   });
+
+  it("parses LaneTurnDesire and AdjustLaneTurnSpeed", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { LaneTurnDesire: "True", AdjustLaneTurnSpeed: "50" },
+    });
+    expect(result.config.laneChange.laneTurnDesire).toBe(true);
+    expect(result.config.laneChange.adjustLaneTurnSpeed).toBe(50);
+  });
+
+  it("parses interface display fields (Brightness, OnroadScreenOffTimer)", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { Brightness: "75", OnroadScreenOffTimer: "30" },
+    });
+    expect(result.config.interface.screenBrightness).toBe(75);
+    expect(result.config.interface.screenOffTimer).toBe(30);
+  });
+
+  it("parses ShowAdvancedControls, LanguageSetting, InteractivityTimer, RealTimeAccelBar", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: {
+        ShowAdvancedControls: "True",
+        LanguageSetting: "main_ja",
+        InteractivityTimer: "120",
+        RealTimeAccelBar: "True",
+      },
+    });
+    expect(result.config.interface.showAdvancedControls).toBe(true);
+    expect(result.config.interface.language).toBe("main_ja");
+    expect(result.config.interface.interactivityTimeout).toBe(120);
+    expect(result.config.interface.realTimeAccelBar).toBe(true);
+  });
+
+  it("parses SpeedLimitMapAdvisory", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { SpeedLimitMapAdvisory: "True" },
+    });
+    expect(result.config.speedControl.mapAdvisorySpeedLimit).toBe(true);
+  });
+
+  it("parses SunnypilotEnabled, GsmApn, GsmRoaming", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: {
+        SunnypilotEnabled: "False",
+        GsmApn: "internet.carrier.net",
+        GsmRoaming: "True",
+      },
+    });
+    expect(result.config.commaAI.sunnypilotEnabled).toBe(false);
+    expect(result.config.commaAI.gsmApn).toBe("internet.carrier.net");
+    expect(result.config.commaAI.gsmRoaming).toBe(true);
+  });
+
+  it("parses RecordAudioFeedback", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { RecordAudioFeedback: "True" },
+    });
+    expect(result.config.commaAI.recordAudioFeedback).toBe(true);
+  });
+
+  it("parses advanced device management fields", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: {
+        MaxTimeOffroad: "3600",
+        DisablePowerDown: "True",
+        WakeupBehavior: "1",
+        DisableUpdates: "True",
+      },
+    });
+    expect(result.config.advanced.maxTimeOffroad).toBe(3600);
+    expect(result.config.advanced.disablePowerDown).toBe(true);
+    expect(result.config.advanced.wakeupBehavior).toBe(1);
+    expect(result.config.advanced.disableUpdates).toBe(true);
+  });
+
+  it("parses vehicle-specific toggles (Tesla, Subaru, Toyota)", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: {
+        TeslaCoopSteering: "True",
+        SubaruStopAndGo: "True",
+        ToyotaEnforceFactoryLongitudinal: "True",
+      },
+    });
+    expect(result.config.vehicleSpecific.teslaCoopSteering).toBe(true);
+    expect(result.config.vehicleSpecific.subaruStopAndGo).toBe(true);
+    expect(result.config.vehicleSpecific.toyotaEnforceFactoryLong).toBe(true);
+  });
+
+  it("defaults vehicle-specific fields to false when absent", () => {
+    const result = parseSunnyLinkExportObject(SUNNYLINK_BASE);
+    expect(result.config.vehicleSpecific.teslaCoopSteering).toBe(false);
+    expect(result.config.vehicleSpecific.subaruStopAndGo).toBe(false);
+    expect(result.config.vehicleSpecific.toyotaEnforceFactoryLong).toBe(false);
+  });
+
+  it("defaults advanced device fields to safe values when absent", () => {
+    const result = parseSunnyLinkExportObject(SUNNYLINK_BASE);
+    expect(result.config.advanced.maxTimeOffroad).toBe(0);
+    expect(result.config.advanced.disablePowerDown).toBe(false);
+    expect(result.config.advanced.wakeupBehavior).toBe(0);
+    expect(result.config.advanced.disableUpdates).toBe(false);
+  });
+
+  it("parses SpeedLimitMode clamped to 0–3", () => {
+    const clamped = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { SpeedLimitMode: "99" },
+    });
+    expect(clamped.config.speedControl.speedLimitControl.mode).toBe(3);
+
+    const valid = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { SpeedLimitMode: "2" },
+    });
+    expect(valid.config.speedControl.speedLimitControl.mode).toBe(2);
+  });
+
+  it("translates SpeedLimitOffsetType integer 0 → percentage, 1 → fixed, absent → none", () => {
+    const pct = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { SpeedLimitOffsetType: "0" },
+    });
+    expect(pct.config.speedControl.speedLimitControl.offsetType).toBe(
+      "percentage",
+    );
+
+    const fixed = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { SpeedLimitOffsetType: "1" },
+    });
+    expect(fixed.config.speedControl.speedLimitControl.offsetType).toBe(
+      "fixed",
+    );
+
+    const none = parseSunnyLinkExportObject(SUNNYLINK_BASE);
+    expect(none.config.speedControl.speedLimitControl.offsetType).toBe("none");
+  });
+
+  it("parses SunnyLink activeModel from ModelManager_ActiveBundle string JSON", () => {
+    const bundle = JSON.stringify({
+      displayName: "WMI V12 (January 13, 2026)",
+      internalName: "wmi_v12",
+    });
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { ModelManager_ActiveBundle: bundle },
+    });
+    expect(result.config.metadata.activeModel).toBe(
+      "WMI V12 (January 13, 2026)",
+    );
+  });
+
+  it("parses SunnyLink activeModel from plain string fallback", () => {
+    const result = parseSunnyLinkExportObject({
+      ...SUNNYLINK_BASE,
+      settings: { ModelManager_ActiveBundle: "custom-model-name" },
+    });
+    expect(result.config.metadata.activeModel).toBe("custom-model-name");
+  });
 });
 
 // ─── exportAsSunnyLink ─────────────────────────────────────────────────────────
@@ -435,5 +601,104 @@ describe("exportAsSunnyLink", () => {
     expect(reimported.config.drivingPersonality.longitudinalPersonality).toBe(
       "aggressive",
     );
+  });
+
+  it("exports interface display / HUD fields", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.interface.showAdvancedControls = true;
+    config.interface.language = "main_fr";
+    config.interface.interactivityTimeout = 60;
+    config.interface.realTimeAccelBar = true;
+    config.interface.screenBrightness = 80;
+    config.interface.screenOffTimer = 45;
+    exportAsSunnyLink(config);
+    const { settings } = JSON.parse(capturedJson);
+    expect(settings.ShowAdvancedControls).toBe("True");
+    expect(settings.LanguageSetting).toBe("main_fr");
+    expect(settings.InteractivityTimer).toBe("60");
+    expect(settings.RealTimeAccelBar).toBe("True");
+    expect(settings.Brightness).toBe("80");
+    expect(settings.OnroadScreenOffTimer).toBe("45");
+  });
+
+  it("exports advanced device management fields", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.advanced.maxTimeOffroad = 7200;
+    config.advanced.disablePowerDown = true;
+    config.advanced.wakeupBehavior = 2;
+    config.advanced.disableUpdates = true;
+    exportAsSunnyLink(config);
+    const { settings } = JSON.parse(capturedJson);
+    expect(settings.MaxTimeOffroad).toBe("7200");
+    expect(settings.DisablePowerDown).toBe("True");
+    expect(settings.WakeupBehavior).toBe("2");
+    expect(settings.DisableUpdates).toBe("True");
+  });
+
+  it("exports vehicle-specific toggles", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.vehicleSpecific.teslaCoopSteering = true;
+    config.vehicleSpecific.subaruStopAndGo = true;
+    config.vehicleSpecific.toyotaEnforceFactoryLong = true;
+    exportAsSunnyLink(config);
+    const { settings } = JSON.parse(capturedJson);
+    expect(settings.TeslaCoopSteering).toBe("True");
+    expect(settings.SubaruStopAndGo).toBe("True");
+    expect(settings.ToyotaEnforceFactoryLongitudinal).toBe("True");
+  });
+
+  it("exports commaAI extended fields (SunnypilotEnabled, GsmApn, GsmRoaming, RecordAudioFeedback)", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.commaAI.sunnypilotEnabled = false;
+    config.commaAI.gsmApn = "broadband";
+    config.commaAI.gsmRoaming = true;
+    config.commaAI.recordAudioFeedback = true;
+    exportAsSunnyLink(config);
+    const { settings } = JSON.parse(capturedJson);
+    expect(settings.SunnypilotEnabled).toBe("False");
+    expect(settings.GsmApn).toBe("broadband");
+    expect(settings.GsmRoaming).toBe("True");
+    expect(settings.RecordAudioFeedback).toBe("True");
+  });
+
+  it("exports lane turn desire fields", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.laneChange.laneTurnDesire = true;
+    config.laneChange.adjustLaneTurnSpeed = 50;
+    exportAsSunnyLink(config);
+    const { settings } = JSON.parse(capturedJson);
+    expect(settings.LaneTurnDesire).toBe("True");
+    expect(settings.AdjustLaneTurnSpeed).toBe("50");
+  });
+
+  it("roundtrip: advanced + vehicleSpecific fields survive export → import", () => {
+    const config = createDefaultConfig() as SPConfig;
+    config.advanced.maxTimeOffroad = 3600;
+    config.advanced.disablePowerDown = true;
+    config.advanced.wakeupBehavior = 1;
+    config.advanced.disableUpdates = true;
+    config.vehicleSpecific.teslaCoopSteering = true;
+    config.laneChange.laneTurnDesire = true;
+    config.laneChange.adjustLaneTurnSpeed = 40;
+    config.interface.showAdvancedControls = true;
+    config.interface.realTimeAccelBar = true;
+    config.commaAI.gsmApn = "test.apn";
+    config.commaAI.gsmRoaming = true;
+
+    exportAsSunnyLink(config, "rt-advanced");
+    const exported = JSON.parse(capturedJson);
+    const re = parseSunnyLinkExportObject(exported);
+
+    expect(re.config.advanced.maxTimeOffroad).toBe(3600);
+    expect(re.config.advanced.disablePowerDown).toBe(true);
+    expect(re.config.advanced.wakeupBehavior).toBe(1);
+    expect(re.config.advanced.disableUpdates).toBe(true);
+    expect(re.config.vehicleSpecific.teslaCoopSteering).toBe(true);
+    expect(re.config.laneChange.laneTurnDesire).toBe(true);
+    expect(re.config.laneChange.adjustLaneTurnSpeed).toBe(40);
+    expect(re.config.interface.showAdvancedControls).toBe(true);
+    expect(re.config.interface.realTimeAccelBar).toBe(true);
+    expect(re.config.commaAI.gsmApn).toBe("test.apn");
+    expect(re.config.commaAI.gsmRoaming).toBe(true);
   });
 });

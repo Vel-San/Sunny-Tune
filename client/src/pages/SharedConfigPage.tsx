@@ -775,15 +775,7 @@ export default function SharedConfigPage() {
             />
           </SectionBlock>
 
-          <SectionBlock
-            icon={ArrowUpDown}
-            title="Cruise"
-            badge={
-              <span className="inline-flex items-center px-1.5 py-px rounded text-[9px] font-bold uppercase tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/25 select-none">
-                SP
-              </span>
-            }
-          >
+          <SectionBlock icon={ArrowUpDown} title="Cruise">
             <SubH first>Longitudinal Control</SubH>
             <ROW
               label="Dynamic E2E"
@@ -943,6 +935,16 @@ export default function SharedConfigPage() {
             <ROW
               label="Screen Brightness"
               value={`${c.interface.screenBrightness}%`}
+              mono
+            />
+            <ROW
+              label="Brightness Delay"
+              spKey="OnroadBrightnessDelay"
+              value={
+                c.interface.screenBrightnessDelay === 0
+                  ? "Immediate"
+                  : `${c.interface.screenBrightnessDelay}s`
+              }
               mono
             />
             <ROW

@@ -106,11 +106,14 @@ describe("FIELD_HELP — critical SP keys are present", () => {
     // Lateral
     "CameraOffset",
     "LiveTorqueParamsToggle",
+    "LiveTorqueParamsRelaxedToggle",
     "NeuralNetworkLateralControl",
     "EnforceTorqueControl",
     "LagdToggle",
+    "LagdToggleDelay",
     "TorqueControlTune",
     "TorqueParamsOverrideEnabled",
+    "TorqueParamsOverrideLatAccelFactor",
     // Longitudinal
     "ExperimentalMode",
     "DynamicExperimentalControl",
@@ -118,21 +121,31 @@ describe("FIELD_HELP — critical SP keys are present", () => {
     "HyundaiLongitudinalTuning",
     "PlanplusControl",
     "CustomAccIncrementsEnabled",
-    // Speed control
-    "SpeedLimitMode",
-    "SpeedLimitPolicy",
-    "SpeedLimitOffsetType",
-    "SmartCruiseControlVision",
-    "SmartCruiseControlMap",
+    "CustomAccShortPressIncrement",
+    "CustomAccLongPressIncrement",
+    // Driving personality
+    "DrivingPersonality",
     // Lane change
+    "AutoLaneChangeEnabled",
     "AutoLaneChangeTimer",
     "BlindSpot",
     "BlinkerMinLateralControlSpeed",
     "BlinkerPauseLateralControl",
     "BlinkerLateralReengageDelay",
+    "LaneTurnDesire",
+    "AdjustLaneTurnSpeed",
+    // Speed control
+    "SpeedLimitMode",
+    "SpeedLimitPolicy",
+    "SpeedLimitOffsetType",
+    "SpeedLimitValueOffset",
+    "SpeedLimitMapAdvisory",
+    "SmartCruiseControlVision",
+    "SmartCruiseControlMap",
+    "IntelligentCruiseButtonManagement",
     // Navigation
     "OsmLocal",
-    // Interface
+    // Interface / Display
     "StandstillTimer",
     "GreenLightAlert",
     "LeadDepartAlert",
@@ -144,20 +157,42 @@ describe("FIELD_HELP — critical SP keys are present", () => {
     "TorqueBar",
     "DevUIInfo",
     "OnroadUploads",
+    "BlindSpotDetection",
+    "SteeringArc",
+    "TrueVEgoUI",
+    "ChevronInfo",
+    "RainbowMode",
+    "ShowAdvancedControls",
+    "LanguageSetting",
+    "InteractivityTimer",
+    "RealTimeAccelBar",
+    "Brightness",
+    "OnroadBrightnessDelay",
+    "OnroadScreenOffTimer",
     // Comma AI / MADS
     "RecordFront",
+    "RecordAudioFeedback",
     "GsmMetered",
+    "GsmApn",
+    "GsmRoaming",
     "DisengageOnAccelerator",
     "IsLdwEnabled",
     "SunnylinkEnabled",
+    "SunnypilotEnabled",
     "Mads",
     "MadsMainCruiseAllowed",
     "MadsSteeringMode",
     "MadsUnifiedEngagementMode",
-    // Advanced
+    // Advanced / Device
     "QuickBootToggle",
-    // Driving personality
-    "DrivingPersonality",
+    "MaxTimeOffroad",
+    "DisablePowerDown",
+    "WakeupBehavior",
+    "DisableUpdates",
+    // Vehicle-specific
+    "TeslaCoopSteering",
+    "SubaruStopAndGo",
+    "ToyotaEnforceFactoryLong",
   ];
 
   for (const key of requiredKeys) {

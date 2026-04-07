@@ -16,12 +16,12 @@ const RELEASES: Release[] = [
     tags: ["feature", "fix", "ux"],
     changes: [
       {
-        type: "fixed",
-        text: "Version history (History modal) now loads correctly for all users on shared config pages — previously returned 403 Access Denied for non-owners even when the config was publicly shared",
+        type: "added",
+        text: "Import confirmation modal with diff — importing a config while an active session is open now shows a confirmation dialog with a full parameter-level diff before applying the new config, preventing accidental overwrites",
       },
       {
-        type: "fixed",
-        text: "Saving a new config for the first time no longer immediately triggers the 'Unsaved changes' navigation guard — navigation now waits until React has committed the clean state before the URL changes",
+        type: "added",
+        text: "Onroad Brightness Delay — new Display setting controlling how long to wait before applying a screen brightness change (Immediate to 30 s); fully supported in SunnyLink import/export",
       },
       {
         type: "added",
@@ -30,6 +30,26 @@ const RELEASES: Release[] = [
       {
         type: "added",
         text: "Username shown in the token pill — when a display name is set, it appears inside the token button in the top-right header (both desktop and mobile) so you always know which account is active",
+      },
+      {
+        type: "fixed",
+        text: "Save/Discard navigation guard no longer fires when importing a config — the blocker was capturing a stale isDirty value; it now reads live store state",
+      },
+      {
+        type: "fixed",
+        text: "Import button is hidden on already-saved or shared configs — it only appears on new unsaved configs to prevent unintended overwrites",
+      },
+      {
+        type: "fixed",
+        text: "Vehicle-specific parameter changes now appear correctly in diff views — they were previously silently ignored due to a missing section label",
+      },
+      {
+        type: "fixed",
+        text: "Version history (History modal) now loads correctly for all users on shared config pages — previously returned 403 Access Denied for non-owners even when the config was publicly shared",
+      },
+      {
+        type: "fixed",
+        text: "Saving a new config for the first time no longer immediately triggers the 'Unsaved changes' navigation guard — navigation now waits until React has committed the clean state before the URL changes",
       },
     ],
   },

@@ -225,7 +225,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                       {entries.map((entry) => (
                         <div
                           key={entry.field}
-                          className="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-3 py-2 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
+                          className="flex flex-col gap-1 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center px-3 py-2 bg-zinc-900/50 hover:bg-zinc-900 transition-colors"
                         >
                           <span className="text-xs text-zinc-400 truncate">
                             {entry.label}
