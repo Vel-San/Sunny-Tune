@@ -4,6 +4,20 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.2.2] — 2026-04-07
+
+### Added
+
+- **Save confirmation modal** — clicking Save now opens a confirmation dialog showing the config name, version, and a "View what will change" button that opens a full parameter-level diff of your pending edits against the last saved version; the save only fires once confirmed
+- **Username in token pill** — when a display name is set, it appears inside the token button in the top-right header (desktop and mobile) alongside the truncated token, so the active account is always visible at a glance
+
+### Fixed
+
+- **Version history 403 on shared config pages** — the History modal now correctly loads snapshots for all users when the config is publicly shared; previously non-owners always received a `403 Access Denied` even though the History button was visible
+- **False "Unsaved changes" dialog on first save** — navigating away immediately after saving a brand-new config no longer triggers the navigation guard; the URL update now waits until React has committed `isDirty: false` before changing the route
+
+---
+
 ## [2.2.1] — 2026-04-06
 
 ### Added

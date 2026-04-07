@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftRight } from "lucide-react";
+import { AlertCircle, ArrowLeftRight } from "lucide-react";
 import React, { useState } from "react";
 import { fetchConfigHistory, fetchConfigSnapshot } from "../../api";
 import type { ConfigSnapshotMeta, SPConfig } from "../../types/config";
@@ -33,7 +33,7 @@ export const ConfigHistoryModal: React.FC<ConfigHistoryModalProps> = ({
     useState<ConfigSnapshotMeta | null>(null);
   const [diffOpen, setDiffOpen] = useState(false);
 
-  const { data: historyList = [] } = useQuery({
+  const { data: historyList = [], isError: historyError } = useQuery({
     queryKey: ["config-history", configId],
     queryFn: () => fetchConfigHistory(configId),
     enabled: open,
@@ -60,7 +60,14 @@ export const ConfigHistoryModal: React.FC<ConfigHistoryModalProps> = ({
         width="md"
       >
         <div className="space-y-2">
-          {historyList.length === 0 && (
+          {historyError && (
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              Failed to load version history. Make sure you are logged in as the
+              config owner or that the config is shared publicly.
+            </div>
+          )}
+          {!historyError && historyList.length === 0 && (
             <p className="text-sm text-zinc-500 py-4 text-center">
               No snapshots yet. Snapshots are saved automatically each time you
               save the config.

@@ -477,13 +477,14 @@ configsRouter.get(
     try {
       const existing = await prisma.configuration.findUnique({
         where: { id: req.params.id },
-        select: { userId: true },
+        select: { userId: true, isShared: true },
       });
       if (!existing) {
         res.status(404).json({ error: "Configuration not found" });
         return;
       }
-      if (existing.userId !== req.userId) {
+      // Allow access for the owner OR for any authenticated user if the config is publicly shared
+      if (existing.userId !== req.userId && !existing.isShared) {
         res.status(403).json({ error: "Access denied" });
         return;
       }
@@ -508,13 +509,14 @@ configsRouter.get(
     try {
       const existing = await prisma.configuration.findUnique({
         where: { id: req.params.id },
-        select: { userId: true },
+        select: { userId: true, isShared: true },
       });
       if (!existing) {
         res.status(404).json({ error: "Configuration not found" });
         return;
       }
-      if (existing.userId !== req.userId) {
+      // Allow access for the owner OR for any authenticated user if the config is publicly shared
+      if (existing.userId !== req.userId && !existing.isShared) {
         res.status(403).json({ error: "Access denied" });
         return;
       }

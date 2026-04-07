@@ -395,6 +395,11 @@ export const Header: React.FC = () => {
                          px-2.5 py-1.5 rounded-md transition-colors"
             >
               <KeyRound className="w-3 h-3" />
+              {user?.username && (
+                <span className="font-sans text-zinc-300 font-medium mr-0.5">
+                  {user.username}
+                </span>
+              )}
               {token ? token.slice(0, 14) + "…" : "No token"}
               <ChevronDown className="w-3 h-3 text-zinc-600" />
             </button>
@@ -479,8 +484,15 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 transition-colors"
               >
                 <KeyRound className="w-4 h-4 flex-shrink-0" />
-                <span className="font-mono text-xs truncate">
-                  {token ? token.slice(0, 20) + "…" : "No token"}
+                <span className="flex items-center gap-1.5 min-w-0">
+                  {user?.username && (
+                    <span className="font-sans font-medium text-zinc-300 text-xs truncate">
+                      {user.username}
+                    </span>
+                  )}
+                  <span className="font-mono text-xs truncate">
+                    {token ? token.slice(0, 20) + "…" : "No token"}
+                  </span>
                 </span>
               </button>
             </div>

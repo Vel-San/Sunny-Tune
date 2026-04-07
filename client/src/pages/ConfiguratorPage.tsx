@@ -20,6 +20,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { createConfig, fetchConfig, updateConfig } from "../api";
+import { ConfigDiffModal } from "../components/config/ConfigDiffModal";
 import { ConfigHistoryModal } from "../components/config/ConfigHistoryModal";
 import { ShareModal } from "../components/config/ShareModal";
 import { SunnyLinkExportModal } from "../components/config/SunnyLinkExportModal";
@@ -79,6 +80,8 @@ export default function ConfiguratorPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sunnyLinkExportOpen, setSunnyLinkExportOpen] = useState(false);
+  const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
+  const [saveConfirmDiffOpen, setSaveConfirmDiffOpen] = useState(false);
 
   // Block in-app SPA navigation when there are unsaved changes
   const blocker = useBlocker(
@@ -161,7 +164,12 @@ export default function ConfiguratorPage() {
         // My Configs page now that the version has (potentially) bumped.
         unmarkSeen(editingId);
       } else {
-        navigate(`/configure/${data.id}`, { replace: true });
+        // Defer navigation until after React re-renders with isDirty=false so
+        // the useBlocker closure sees the clean state and does not fire.
+        setTimeout(
+          () => navigate(`/configure/${data.id}`, { replace: true }),
+          0,
+        );
       }
     },
   });
@@ -315,7 +323,7 @@ export default function ConfiguratorPage() {
                 leftIcon={<Save className="w-3.5 h-3.5" />}
                 loading={saveMutation.isPending}
                 disabled={!isDirty && !!editingId}
-                onClick={() => saveMutation.mutate()}
+                onClick={() => setSaveConfirmOpen(true)}
               >
                 Save
               </Button>
@@ -430,6 +438,90 @@ export default function ConfiguratorPage() {
           config={editingConfig}
           name={editingName}
           onClose={() => setSunnyLinkExportOpen(false)}
+        />
+      )}
+
+      {/* Save confirmation modal */}
+      <Modal
+        open={saveConfirmOpen}
+        onClose={() => {
+          setSaveConfirmOpen(false);
+          setSaveConfirmDiffOpen(false);
+        }}
+        title="Confirm save"
+        width="md"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1 text-sm text-zinc-300">
+            <p>
+              <span className="text-zinc-500">Config:</span>{" "}
+              <span className="font-medium">{editingName}</span>
+            </p>
+            {!editingId && (
+              <p className="text-xs text-zinc-500">
+                This will create a new config.
+              </p>
+            )}
+            {editingId && existingConfig && (
+              <p className="text-xs text-zinc-500">
+                This will overwrite version{" "}
+                <span className="font-mono text-zinc-400">
+                  v{existingConfig.version}
+                </span>{" "}
+                and save a new snapshot.
+              </p>
+            )}
+          </div>
+
+          {/* Show diff button if editing an existing config */}
+          {editingId && existingConfig && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSaveConfirmDiffOpen(true)}
+              className="w-full justify-center border border-zinc-800"
+            >
+              View what will change
+            </Button>
+          )}
+
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setSaveConfirmOpen(false);
+                setSaveConfirmDiffOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<Save className="w-3.5 h-3.5" />}
+              loading={saveMutation.isPending}
+              onClick={() => {
+                setSaveConfirmOpen(false);
+                setSaveConfirmDiffOpen(false);
+                saveMutation.mutate();
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Save diff preview — what will change vs. the server copy */}
+      {editingId && existingConfig && (
+        <ConfigDiffModal
+          open={saveConfirmDiffOpen}
+          onClose={() => setSaveConfirmDiffOpen(false)}
+          original={existingConfig.config}
+          modified={editingConfig}
+          originalName={`Saved (v${existingConfig.version})`}
+          modifiedName="Your changes"
         />
       )}
 
