@@ -72,8 +72,9 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
     interface: {
       devUI: false,
       standstillTimer: false,
-      screenOffTimer: 0,
       screenBrightness: 70,
+      screenBrightnessDelay: 0,
+      screenOffTimer: 0,
       disableOnroadUploads: false,
       useMetric: false,
       greenLightAlert: true,
