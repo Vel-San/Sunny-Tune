@@ -11,6 +11,29 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.2.2",
+    date: "2026-04-07",
+    tags: ["feature", "fix", "ux"],
+    changes: [
+      {
+        type: "fixed",
+        text: "Version history (History modal) now loads correctly for all users on shared config pages — previously returned 403 Access Denied for non-owners even when the config was publicly shared",
+      },
+      {
+        type: "fixed",
+        text: "Saving a new config for the first time no longer immediately triggers the 'Unsaved changes' navigation guard — navigation now waits until React has committed the clean state before the URL changes",
+      },
+      {
+        type: "added",
+        text: "Save confirmation modal — clicking Save now shows a confirmation dialog with the config name, version, and a 'View what will change' button that opens a full parameter diff against the last saved version before committing",
+      },
+      {
+        type: "added",
+        text: "Username shown in the token pill — when a display name is set, it appears inside the token button in the top-right header (both desktop and mobile) so you always know which account is active",
+      },
+    ],
+  },
+  {
     version: "2.2.1",
     date: "2026-04-06",
     tags: ["feature", "ux"],

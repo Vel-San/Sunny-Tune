@@ -277,6 +277,17 @@ const CONTENT: Record<string, DocBlock[]> = {
             If you navigate away before saving, a confirmation dialog will
             appear. Your browser will also warn you on tab close or refresh.
           </P>
+          <H3>Save confirmation & diff preview</H3>
+          <P>
+            Clicking <strong className="text-zinc-200">Save</strong> opens a
+            confirmation modal before any data is written. The modal shows the
+            config name and version, and a{" "}
+            <strong className="text-zinc-200">View what will change</strong>{" "}
+            button that opens a full parameter-level diff comparing your current
+            edits to the last saved version. The save only fires once you click{" "}
+            <strong className="text-zinc-200">Save</strong> in the confirmation
+            dialog.
+          </P>
           <H3>Import / Export</H3>
           <P>
             Use the <strong className="text-zinc-200">Import</strong> button to
@@ -533,8 +544,9 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             Click the <strong className="text-zinc-200">History</strong> button
             (clock icon) on any config card in My Configs, on the shared config
-            page (accessible by all users), or in the config editor top bar. A
-            modal lists all saved snapshots in reverse-version order.
+            page (accessible to all users — owner and visitors alike), or in the
+            config editor top bar. A modal lists all saved snapshots in
+            reverse-version order.
           </P>
           <H3>Comparing snapshots</H3>
           <P>
@@ -637,7 +649,9 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             Click the key icon (token pill) in the header to open the Token
             modal. It shows your display name, full token, user ID, config
-            count, and member-since date.
+            count, and member-since date. When a display name is set, it also
+            appears directly in the token pill button in the header so your
+            active account is always visible at a glance.
           </P>
           <H3>Importing a token from another device</H3>
           <P>
