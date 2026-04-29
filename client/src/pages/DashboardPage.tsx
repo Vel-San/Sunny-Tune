@@ -16,6 +16,7 @@ import {
   Share2,
   Star,
   Tag,
+  ThumbsUp,
   TrendingUp,
   Users,
   Wrench,
@@ -355,7 +356,8 @@ export default function DashboardPage() {
           ratedConfigs.length
         : null;
     const versioned = myConfigs.filter((c) => (c.version ?? 1) > 1).length;
-    const totalTags = new Set(myConfigs.flatMap((c) => c.tags)).size;
+    const totalTags = new Set(myConfigs.flatMap((c) => c.tags ?? [])).size;
+    const totalLikes = myConfigs.reduce((s, c) => s + (c.likeCount ?? 0), 0);
     const sharedPct = myConfigs.length
       ? Math.round((shared.length / myConfigs.length) * 100)
       : 0;
@@ -367,6 +369,7 @@ export default function DashboardPage() {
       totalViews,
       totalClones,
       totalRatings,
+      totalLikes,
       avgRating,
       versioned,
       totalTags,
@@ -443,7 +446,7 @@ export default function DashboardPage() {
   const tagDist = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const c of myConfigs) {
-      for (const t of c.tags) {
+      for (const t of c.tags ?? []) {
         counts[t] = (counts[t] ?? 0) + 1;
       }
     }
@@ -468,6 +471,14 @@ export default function DashboardPage() {
         .sort((a, b) => (b.cloneCount ?? 0) - (a.cloneCount ?? 0))
         .slice(0, 6)
         .map((c) => ({ label: c.name, value: c.cloneCount ?? 0 })),
+    [myConfigs],
+  );
+  const myTopByLikes = useMemo(
+    () =>
+      [...myConfigs]
+        .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+        .slice(0, 6)
+        .map((c) => ({ label: c.name, value: c.likeCount ?? 0 })),
     [myConfigs],
   );
 
@@ -505,7 +516,8 @@ export default function DashboardPage() {
     const numerator =
       personalStats.totalViews +
       personalStats.totalClones * 3 +
-      personalStats.totalRatings * 5;
+      personalStats.totalRatings * 5 +
+      personalStats.totalLikes * 2;
     if (personalStats.shared === 0) return null;
     return Math.round(numerator / personalStats.shared);
   }, [personalStats]);
@@ -562,7 +574,7 @@ export default function DashboardPage() {
           title="Your Account"
           sub="Aggregated stats across all your configs"
         />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           <StatCard
             label="Configs"
             value={myConfigs.length}
@@ -595,6 +607,13 @@ export default function DashboardPage() {
             icon={Star}
             accent="amber"
             sub="community ratings received"
+          />
+          <StatCard
+            label="Likes"
+            value={personalStats.totalLikes}
+            icon={ThumbsUp}
+            accent="blue"
+            sub="likes across your configs"
           />
           <StatCard
             label="Avg Rating"
@@ -778,6 +797,13 @@ export default function DashboardPage() {
                 <HBar data={myTopByClones} colorFn={paletteColor} />
               )}
             </ChartCard>
+            <ChartCard title="Top by Likes" icon={ThumbsUp}>
+              {myTopByLikes.every((d) => d.value === 0) ? (
+                <Empty msg="No likes recorded yet." />
+              ) : (
+                <HBar data={myTopByLikes} colorFn={paletteColor} />
+              )}
+            </ChartCard>
           </div>
         </section>
       )}
@@ -813,6 +839,12 @@ export default function DashboardPage() {
               value={communityStats.totalRatings.toLocaleString()}
               icon={Star}
               accent="amber"
+            />
+            <StatCard
+              label="Likes"
+              value={(communityStats.totalLikes ?? 0).toLocaleString()}
+              icon={ThumbsUp}
+              accent="blue"
             />
             <StatCard
               label="Comments"

@@ -6,7 +6,7 @@
 
 [![Live](https://img.shields.io/badge/Live-sunny--tune.vercel.app-black?logo=vercel&logoColor=white)](https://sunny-tune.vercel.app)
 [![API](https://img.shields.io/badge/API-Railway-7B2FBE?logo=railway&logoColor=white)](https://railway.app)
-[![Version](https://img.shields.io/badge/version-2.2.2-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.3-blue)](CHANGELOG.md)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -41,6 +41,7 @@
     - [Prerequisites](#prerequisites)
   - [Environment Variables](#environment-variables)
   - [Authentication](#authentication)
+    - [Display name](#display-name)
     - [Moving to a new device](#moving-to-a-new-device)
     - [Token revocation](#token-revocation)
   - [Adding New SunnyPilot / Comma AI Features](#adding-new-sunnypilot--comma-ai-features)
@@ -106,7 +107,7 @@ Configs can be shared via a unique public URL. After sharing you can continue ed
 
 Key things Prisma handles for this project:
 
-- **Schema** — `schema.prisma` is the single source of truth for the database structure (users, configurations, ratings, comments, page views)
+- **Schema** — `schema.prisma` is the single source of truth for the database structure (users, configurations, ratings, comments, likes, favorites, collections, notifications, reports, page views)
 - **Migrations** — `npx prisma migrate dev` auto-generates and applies SQL migrations when the schema changes
 - **Client** — `npx prisma generate` builds the TypeScript client used in `server/src/config/database.ts`
 - **Prisma Studio** — a visual database browser, accessible via the `docker:*:studio` npm scripts
@@ -353,7 +354,7 @@ The secret is stored only in `sessionStorage` (cleared automatically when the br
 
 Admin panel features:
 
-- **Dashboard** — total users, configs, collections, ratings, comments, pending reports, page views, engagement trends
+- **Dashboard** — total users, configs, collections, ratings, comments, likes, pending reports, page views, engagement trends
 - **Users** — list all users with config counts, view details, delete accounts
 - **Configurations** — browse all configs, filter by shared, force-unshare, delete
 - **Analytics** — page view analytics broken down by path and day
@@ -580,11 +581,28 @@ The Explore page has a **Min SP Version** filter. Enter a version string (e.g. `
 
 ---
 
+## Community Features
+
+Every shared config supports a set of social and community interactions:
+
+| Feature         | Who can use                        | Visible to        | Notes                                                                       |
+| --------------- | ---------------------------------- | ----------------- | --------------------------------------------------------------------------- |
+| **Likes**       | Any authenticated user             | Everyone          | One like per user per config; count updates in real-time                    |
+| **Ratings**     | Any authenticated user (not owner) | Everyone          | 1–5 stars; upsert — you can change your rating                              |
+| **Comments**    | Any authenticated user             | Everyone          | Threaded replies up to 2 levels; owner can delete any comment on own config |
+| **Favorites**   | Any authenticated user             | Only you          | Private bookmark; stored per user                                           |
+| **Collections** | Any authenticated user             | Public or private | Named groups of configs; toggle public/private                              |
+| **Reports**     | Any authenticated user             | Admins only       | Flag a config or comment for moderation review                              |
+
+All social counts (`likeCount`, `ratingCount`, `commentCount`, `cloneCount`, `viewCount`) are returned on every config record from the explore, configs, and favorites endpoints.
+
+---
+
 ## Configuration Sharing
 
 1. Open any saved config and click **Share**.
 2. A unique share link is generated: `/shared/<token>`.
-3. Anyone with the link can view the config and leave ratings/comments.
+3. Anyone with the link can view the config and leave ratings, comments, and likes.
 4. Click **Clone** to create your own editable copy of any shared config.
 5. After sharing you can continue editing and saving — each save increments the version counter. The public share URL always reflects the latest version.
 
@@ -726,6 +744,7 @@ sunny-tune/
 │   │   │   ├── configs.ts          # Config CRUD
 │   │   │   ├── explore.ts          # Public explore/search
 │   │   │   ├── community.ts        # Ratings & comments
+│   │   │   ├── likes.ts            # Likes
 │   │   │   ├── collections.ts      # Collections CRUD
 │   │   │   ├── favorites.ts        # Favorites
 │   │   │   ├── notifications.ts    # In-app notifications

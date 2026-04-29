@@ -112,7 +112,9 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
             ? { cloneCount: "desc" as const }
             : sort === "comments"
               ? { comments: { _count: "desc" as const } }
-              : { sharedAt: "desc" as const }; // rating/trending sort done in JS
+              : sort === "likes"
+                ? { likes: { _count: "desc" as const } }
+                : { sharedAt: "desc" as const }; // rating/trending sort done in JS
 
     const [total, configs] = await Promise.all([
       prisma.configuration.count({ where }),
@@ -140,7 +142,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
           updatedAt: true,
           ratings: { select: { value: true, createdAt: true } },
           clones: { select: { createdAt: true } },
-          _count: { select: { comments: true } },
+          _count: { select: { comments: true, likes: true } },
           user: { select: { username: true } },
         },
         take: isSortedInJS ? undefined : take,
@@ -176,6 +178,7 @@ exploreRouter.get("/", async (req: Request, res: Response): Promise<void> => {
         avgRating,
         ratingCount: c.ratings.length,
         commentCount: c._count.comments,
+        likeCount: c._count.likes,
         trendingScore,
         _count: undefined,
       };
@@ -249,6 +252,7 @@ exploreRouter.get(
         configCount,
         ratingCount,
         commentCount,
+        likeCount,
         draftCount,
         viewsAgg,
         clonesAgg,
@@ -259,6 +263,7 @@ exploreRouter.get(
         prisma.configuration.count({ where: { isShared: true } }),
         prisma.rating.count(),
         prisma.comment.count(),
+        prisma.like.count(),
         prisma.configuration.count({ where: { isShared: false } }),
         prisma.configuration.aggregate({
           where: { isShared: true },
@@ -304,6 +309,7 @@ exploreRouter.get(
         sharedConfigs: configCount,
         totalRatings: ratingCount,
         totalComments: commentCount,
+        totalLikes: likeCount,
         totalDrafts: draftCount,
         supportedMakes: makeGroups.length,
         totalViews: viewsAgg._sum.viewCount ?? 0,

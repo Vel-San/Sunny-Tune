@@ -14,6 +14,7 @@ import {
   Share2,
   Star,
   Tag,
+  ThumbsUp,
   Trash2,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -215,6 +216,11 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ config }) => {
                 {config.commentCount != null && config.commentCount > 0 && (
                   <span className="inline-flex items-center gap-1">
                     <MessageSquare className="w-3 h-3" /> {config.commentCount}
+                  </span>
+                )}
+                {config.likeCount != null && config.likeCount > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <ThumbsUp className="w-3 h-3" /> {config.likeCount}
                   </span>
                 )}
               </>

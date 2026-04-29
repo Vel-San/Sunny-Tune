@@ -16,6 +16,8 @@
 import { describe, expect, it } from "vitest";
 import type {
   CollectionRecord,
+  CommunityStats,
+  ConfigRecord,
   ConfigSnapshot,
   ConfigSnapshotMeta,
   ConfigsPage,
@@ -144,5 +146,50 @@ describe("VehicleEntry interface", () => {
 
   it("models is an array", () => {
     expect(Array.isArray(entry.models)).toBe(true);
+  });
+});
+
+// ─── ConfigRecord — likeCount ─────────────────────────────────────────────────
+
+describe("ConfigRecord — likeCount field", () => {
+  it("likeCount is optional and defaults to undefined", () => {
+    const rec = {} as Partial<ConfigRecord>;
+    expect(rec.likeCount).toBeUndefined();
+  });
+
+  it("likeCount accepts a number when provided", () => {
+    const rec = { likeCount: 42 } as Partial<ConfigRecord>;
+    expect(rec.likeCount).toBe(42);
+  });
+
+  it("likeCount coerces to 0 via ?? operator (null-safety pattern)", () => {
+    const rec = { likeCount: undefined } as Partial<ConfigRecord>;
+    expect(rec.likeCount ?? 0).toBe(0);
+  });
+});
+
+// ─── CommunityStats — totalLikes ──────────────────────────────────────────────
+
+describe("CommunityStats — totalLikes field", () => {
+  const stats: CommunityStats = {
+    sharedConfigs: 100,
+    totalDrafts: 20,
+    totalRatings: 80,
+    totalComments: 120,
+    totalLikes: 350,
+    totalViews: 5000,
+    totalClones: 200,
+    supportedMakes: 15,
+    topMakes: [],
+    topCategories: [],
+    topTags: [],
+  };
+
+  it("totalLikes is a number", () => {
+    expect(typeof stats.totalLikes).toBe("number");
+  });
+
+  it("totalLikes reflects the assigned value", () => {
+    expect(stats.totalLikes).toBe(350);
   });
 });

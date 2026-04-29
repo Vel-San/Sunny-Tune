@@ -38,7 +38,15 @@ export const exploreQuerySchema = z.object({
   tags: z.string().max(500).optional(),
   category: z.string().max(50).optional(),
   sort: z
-    .enum(["rating", "recent", "views", "clones", "comments", "trending"])
+    .enum([
+      "rating",
+      "recent",
+      "views",
+      "clones",
+      "comments",
+      "trending",
+      "likes",
+    ])
     .default("rating"),
   page: coercedPage,
   /** Max 50 results per page on the public explore endpoint */

@@ -29,7 +29,7 @@ describe("exploreQuerySchema", () => {
     expect(result.data.limit).toBe(15);
   });
 
-  it("accepts all valid sort values including trending", () => {
+  it("accepts all valid sort values including trending and likes", () => {
     const sorts = [
       "rating",
       "recent",
@@ -37,6 +37,7 @@ describe("exploreQuerySchema", () => {
       "clones",
       "comments",
       "trending",
+      "likes",
     ] as const;
     for (const sort of sorts) {
       const result = exploreQuerySchema.safeParse({ sort });

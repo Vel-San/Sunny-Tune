@@ -15,6 +15,7 @@ import {
   SlidersHorizontal,
   Star,
   Tag,
+  ThumbsUp,
   TrendingUp,
   X,
 } from "lucide-react";
@@ -42,6 +43,7 @@ const SORT_OPTIONS = [
   { value: "views", label: "Most Viewed", icon: Eye },
   { value: "clones", label: "Most Cloned", icon: Copy },
   { value: "comments", label: "Most Discussed", icon: MessageSquare },
+  { value: "likes", label: "Most Liked", icon: ThumbsUp },
 ];
 
 const ALL_MAKES = [
@@ -95,7 +97,7 @@ export default function ExplorePage() {
   const [debouncedSpVersion, setDebouncedSpVersion] = useState("");
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [sort, setSort] = useState<
-    "trending" | "rating" | "recent" | "views" | "clones" | "comments"
+    "trending" | "rating" | "recent" | "views" | "clones" | "comments" | "likes"
   >("trending");
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);

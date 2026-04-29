@@ -26,6 +26,7 @@ import {
   Share2,
   Star,
   Tag,
+  ThumbsUp,
   Wrench,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -49,6 +50,7 @@ import { SunnyLinkExportModal } from "../components/config/SunnyLinkExportModal"
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { HelpTooltip } from "../components/ui/HelpTooltip";
+import { LikeButton } from "../components/ui/LikeButton";
 import { RatingDisplay, RatingStars } from "../components/ui/RatingStars";
 import { MAKE_LABELS, categoryColor, tagColor } from "../lib/colorUtils";
 import { exportConfigAsJson } from "../lib/configExport";
@@ -404,6 +406,11 @@ export default function SharedConfigPage() {
           <span className="inline-flex items-center gap-1">
             <Copy className="w-3.5 h-3.5" /> {config.cloneCount} clones
           </span>
+          {(config.likeCount ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <ThumbsUp className="w-3.5 h-3.5" /> {config.likeCount} likes
+            </span>
+          )}
           <span className="inline-flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" /> Shared{" "}
             {timeAgo(config.sharedAt ?? config.createdAt)}
@@ -437,6 +444,12 @@ export default function SharedConfigPage() {
           >
             Copy link
           </Button>
+          <LikeButton
+            configId={config.id}
+            likeCount={config.likeCount ?? 0}
+            isOwn={config.isOwn}
+            variant="full"
+          />
           <Button
             variant={isFavorited ? "primary" : "outline"}
             size="sm"

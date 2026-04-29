@@ -308,6 +308,23 @@ export async function fetchFavoriteStatus(configId: string): Promise<boolean> {
   return data.isFavorited;
 }
 
+// ─── Likes ────────────────────────────────────────────────────────────────────
+
+export async function addLike(configId: string): Promise<void> {
+  await apiClient.post(`/likes/${configId}`);
+}
+
+export async function removeLike(configId: string): Promise<void> {
+  await apiClient.delete(`/likes/${configId}`);
+}
+
+export async function fetchLikeStatus(configId: string): Promise<boolean> {
+  const { data } = await apiClient.get<{ isLiked: boolean }>(
+    `/likes/status/${configId}`,
+  );
+  return data.isLiked;
+}
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 export async function fetchNotifications(): Promise<NotificationRecord[]> {

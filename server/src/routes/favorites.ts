@@ -12,9 +12,9 @@
 import { Response, Router } from "express";
 import { prisma } from "../config/database";
 import { validateUuidParams } from "../lib/guards";
+import { logger } from "../lib/logger";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
-import { logger } from "../lib/logger";
 
 export const favoritesRouter = Router();
 
@@ -106,7 +106,7 @@ favoritesRouter.get(
               createdAt: true,
               updatedAt: true,
               ratings: { select: { value: true } },
-              _count: { select: { comments: true } },
+              _count: { select: { comments: true, likes: true } },
             },
           },
         },
@@ -129,6 +129,7 @@ favoritesRouter.get(
             avgRating,
             ratingCount: ratings.length,
             commentCount: _count.comments,
+            likeCount: _count.likes,
           };
         }),
       );

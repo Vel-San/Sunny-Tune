@@ -4,6 +4,7 @@ import {
   BookOpen,
   ChevronRight,
   Code2,
+  ExternalLink,
   GitBranch,
   GitCompare,
   Globe,
@@ -44,6 +45,7 @@ const SECTIONS: Section[] = [
   { id: "authentication", label: "Authentication", icon: KeyRound },
   { id: "api", label: "API Reference", icon: Code2 },
   { id: "faq", label: "FAQ", icon: HelpCircle },
+  { id: "resources", label: "Resources", icon: ExternalLink },
 ];
 
 // ─── Inline helpers ────────────────────────────────────────────────────────────
@@ -469,6 +471,11 @@ const CONTENT: Record<string, DocBlock[]> = {
                 <strong className="text-zinc-200">Most Discussed</strong> —
                 highest comment count
               </>,
+              <>
+                <strong className="text-zinc-200">Most Liked</strong> — highest
+                total like count
+              </>,
+              ,
             ]}
           />
           <H3>Filters</H3>
@@ -582,6 +589,13 @@ const CONTENT: Record<string, DocBlock[]> = {
           <P>
             Give shared configs a rating from 1 to 5 stars. You can update your
             rating at any time. You cannot rate your own config.
+          </P>
+          <H3>Likes</H3>
+          <P>
+            Click the thumbs-up icon on any shared config to like it — a simple
+            public signal of appreciation visible to everyone. Likes appear on
+            Explore cards, the shared config page, your own config cards, and
+            the Dashboard stats. You cannot like your own config.
           </P>
           <H3>Comments</H3>
           <P>
@@ -805,6 +819,29 @@ const CONTENT: Record<string, DocBlock[]> = {
               </>,
             ]}
           />
+          <H3>Favorites</H3>
+          <UL
+            items={[
+              <>
+                <Code>GET /api/favorites</Code>
+                <LockedBadge /> — list your favorited configs (full card data
+                including likeCount)
+              </>,
+              <>
+                <Code>POST /api/favorites/:configId</Code>
+                <LockedBadge /> — add a shared config to favorites (idempotent)
+              </>,
+              <>
+                <Code>DELETE /api/favorites/:configId</Code>
+                <LockedBadge /> — remove from favorites
+              </>,
+              <>
+                <Code>GET /api/favorites/status/:configId</Code>
+                <LockedBadge /> — check if a config is favorited by the current
+                user
+              </>,
+            ]}
+          />
           <H3>Community</H3>
           <UL
             items={[
@@ -821,6 +858,18 @@ const CONTENT: Record<string, DocBlock[]> = {
                 <LockedBadge /> — fetch current user's rating
               </>,
               <>
+                <Code>POST /api/likes/:configId</Code>
+                <LockedBadge /> — like a shared config (idempotent)
+              </>,
+              <>
+                <Code>DELETE /api/likes/:configId</Code>
+                <LockedBadge /> — remove own like
+              </>,
+              <>
+                <Code>GET /api/likes/status/:configId</Code>
+                <LockedBadge /> — check if current user has liked
+              </>,
+              <>
                 <Code>POST /api/community/configs/:id/comments</Code>
                 <LockedBadge /> — post comment (
                 {"{ body, authorName?, parentId? }"})
@@ -828,6 +877,41 @@ const CONTENT: Record<string, DocBlock[]> = {
               <>
                 <Code>DELETE /api/community/comments/:id</Code>
                 <LockedBadge /> — delete own comment
+              </>,
+            ]}
+          />
+          <H3>Reports</H3>
+          <UL
+            items={[
+              <>
+                <Code>POST /api/reports</Code>
+                <LockedBadge /> — submit a report for a config or comment (
+                {"{ targetType, targetId, reason }"})
+              </>,
+            ]}
+          />
+          <H3>Users</H3>
+          <UL
+            items={[
+              <>
+                <Code>POST /api/users/register</Code> — create a new anonymous
+                user; returns <Code>token</Code>, <Code>userId</Code>,{" "}
+                <Code>createdAt</Code>
+              </>,
+              <>
+                <Code>GET /api/users/me</Code>
+                <LockedBadge /> — get current user info (id, token, username,
+                configCount, createdAt)
+              </>,
+              <>
+                <Code>PATCH /api/users/me</Code>
+                <LockedBadge /> — update display name (
+                {"{ username: string | null }"})
+              </>,
+              <>
+                <Code>POST /api/users/revoke-token</Code>
+                <LockedBadge /> — invalidate current token and issue a fresh one
+                (signs out all other devices)
               </>,
             ]}
           />
@@ -919,6 +1003,44 @@ const CONTENT: Record<string, DocBlock[]> = {
             <strong className="text-zinc-200">Changelog</strong> to read what
             changed — the dot disappears once you visit the page.
           </P>
+        </>
+      ),
+    },
+  ],
+  resources: [
+    {
+      title: "External Resources",
+      content: (
+        <>
+          <H3>SunnyLink Wiki</H3>
+          <P>
+            The community-maintained wiki covering every sunnypilot parameter,
+            recommended values, and real-world tuning guides. SunnyTune's in-app
+            parameter help tooltips are sourced from this wiki.
+          </P>
+          <a
+            href="https://sunnylink.wiki/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 text-blue-400" />
+            sunnylink.wiki
+          </a>
+          <H3>sunnypilot Documentation</H3>
+          <P>
+            Official sunnypilot user documentation — release notes, feature
+            explanations, and hardware compatibility.
+          </P>
+          <a
+            href="https://docs.sunnypilot.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 hover:bg-zinc-700 hover:border-zinc-600 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 text-blue-400" />
+            docs.sunnypilot.ai
+          </a>
         </>
       ),
     },

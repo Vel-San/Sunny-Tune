@@ -11,4 +11,6 @@ RUN npm test
 EXPOSE 3001
 # Use migrate deploy (not migrate dev) so the container applies existing
 # migration files without trying to create new ones interactively.
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+# prisma generate runs here (not just at build time) so the client always
+# reflects the live-mounted schema from the host volume.
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run dev"]

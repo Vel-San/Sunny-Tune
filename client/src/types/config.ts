@@ -441,6 +441,7 @@ export interface ConfigRecord {
   avgRating?: number | null;
   ratingCount?: number;
   commentCount?: number;
+  likeCount?: number;
   /** True when the authenticated viewer is the owner of this config */
   isOwn?: boolean;
   /** Username of the config's author, if they have set one */
@@ -502,6 +503,7 @@ export interface CommunityStats {
   sharedConfigs: number;
   totalRatings: number;
   totalComments: number;
+  totalLikes: number;
   totalDrafts: number;
   supportedMakes: number;
   totalViews: number;

@@ -149,7 +149,7 @@ configsRouter.get(
             clonedFrom: { select: { id: true, name: true, shareToken: true } },
             createdAt: true,
             updatedAt: true,
-            _count: { select: { ratings: true, comments: true } },
+            _count: { select: { ratings: true, comments: true, likes: true } },
           },
           orderBy: { updatedAt: "desc" },
           skip,
@@ -160,6 +160,7 @@ configsRouter.get(
         ...c,
         ratingCount: _count.ratings,
         commentCount: _count.comments,
+        likeCount: _count.likes,
       }));
       res.json({
         configs: mapped,
@@ -569,6 +570,7 @@ sharedConfigRouter.get(
           createdAt: true,
           updatedAt: true,
           user: { select: { username: true } },
+          _count: { select: { likes: true } },
         },
       });
       if (!config || !config.isShared) {
@@ -583,11 +585,12 @@ sharedConfigRouter.get(
         });
       }
       // Strip internal userId; expose isOwn flag so the client can hide self-rating
-      const { userId, user, ...rest } = config;
+      const { userId, user, _count, ...rest } = config;
       res.json({
         ...rest,
         isOwn: req.userId === userId,
         authorUsername: user.username ?? null,
+        likeCount: _count.likes,
       });
     } catch (err) {
       logger.error("Failed to fetch shared configuration", {

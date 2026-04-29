@@ -20,6 +20,7 @@ model User {
   ratings        Rating[]
   comments       Comment[]
   favorites      Favorite[]
+  likes          Like[]
   notifications  Notification[]
   reports        Report[]
   collections    Collection[]
@@ -54,6 +55,7 @@ model Configuration {
   ratings      Rating[]
   comments     Comment[]
   favorites    Favorite[]
+  likes        Like[]
   notifications Notification[]
   snapshots    ConfigSnapshot[]
   collectionItems CollectionItem[]
@@ -129,6 +131,22 @@ model Favorite {
   @@index([configId])
   @@map("favorites")
 }
+
+/// A simple thumbs-up "like" on a public shared config.
+model Like {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  configId  String        @map("config_id") @db.Uuid
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config    Configuration @relation(fields: [configId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@unique([userId, configId])
+  @@index([userId])
+  @@index([configId])
+  @@map("likes")
+}
+
 /// In-app notification: clone or rating event on one of the user's configs.
 model Notification {
   id        String         @id @default(uuid()) @db.Uuid

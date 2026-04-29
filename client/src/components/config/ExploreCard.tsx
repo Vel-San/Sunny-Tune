@@ -17,6 +17,7 @@ import { MAKE_LABELS, categoryColor, tagColor } from "../../lib/colorUtils";
 import { useConfigSeen } from "../../lib/seenConfigs";
 import type { ConfigRecord } from "../../types/config";
 import { CATEGORIES } from "../../types/config";
+import { LikeButton } from "../ui/LikeButton";
 import { RatingDisplay } from "../ui/RatingStars";
 
 function timeAgo(iso: string | undefined | null): string {
@@ -191,23 +192,24 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
 
         {/* Tags — always rendered to keep height uniform */}
         <div className="flex flex-wrap gap-1 items-center min-h-[1.5rem]">
-          {config.tags.length > 0 && (
+          {(config.tags ?? []).length > 0 && (
             <>
-              {(showAllTags ? config.tags : config.tags.slice(0, 3)).map(
-                (tag) => (
-                  <span
-                    key={tag}
-                    className={clsx(
-                      "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
-                      tagColor(tag),
-                    )}
-                  >
-                    <Tag className="w-2 h-2" />
-                    {tag}
-                  </span>
-                ),
-              )}
-              {!showAllTags && config.tags.length > 3 && (
+              {(showAllTags
+                ? config.tags
+                : (config.tags ?? []).slice(0, 3)
+              ).map((tag) => (
+                <span
+                  key={tag}
+                  className={clsx(
+                    "inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                    tagColor(tag),
+                  )}
+                >
+                  <Tag className="w-2 h-2" />
+                  {tag}
+                </span>
+              ))}
+              {!showAllTags && (config.tags ?? []).length > 3 && (
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -216,10 +218,10 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
                   }}
                   className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
                 >
-                  +{config.tags.length - 3} more
+                  +{(config.tags ?? []).length - 3} more
                 </button>
               )}
-              {showAllTags && config.tags.length > 3 && (
+              {showAllTags && (config.tags ?? []).length > 3 && (
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -255,6 +257,12 @@ export const ExploreCard: React.FC<ExploreCardProps> = ({
             <span className="inline-flex items-center gap-1 text-xs">
               <MessageSquare className="w-3 h-3" /> {config.commentCount ?? 0}
             </span>
+            <LikeButton
+              configId={config.id}
+              likeCount={config.likeCount ?? 0}
+              isOwn={config.isOwn}
+              variant="compact"
+            />
           </div>
         </div>
 

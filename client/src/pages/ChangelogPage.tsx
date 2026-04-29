@@ -11,6 +11,45 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.2.3",
+    date: "2026-04-30",
+    tags: ["feature", "ux"],
+    changes: [
+      {
+        type: "added",
+        text: "Likes — thumbs-up social signal on every shared config; any user (including the owner) can like a config once; like count updates in real-time with optimistic UI",
+      },
+      {
+        type: "added",
+        text: "Like button on Explore cards — compact thumbs-up icon in the stats row (next to views, clones, and comments); turns blue when liked and reflects the live count immediately",
+      },
+      {
+        type: "added",
+        text: "Like button on shared config page — full-size button in the action row; shows the running count and updates optimistically on click",
+      },
+      {
+        type: "added",
+        text: "Like count on personal config cards (My Configs) — when a shared config has received likes the thumbs-up count appears in the stats row",
+      },
+      {
+        type: "added",
+        text: "Dashboard — Likes column in both personal (Your Account) and platform-wide (Platform Overview) stat grids; new 'Top by Likes' bar chart under Your Top Performers; likes contribute 2 points each to the Engagement score",
+      },
+      {
+        type: "added",
+        text: "Most Liked sort on Explore page — sort all shared configs by total like count descending",
+      },
+      {
+        type: "added",
+        text: "SunnyLink Wiki and sunnypilot Docs links added to the new Resources section in the Docs page",
+      },
+      {
+        type: "fixed",
+        text: "Dev Docker container: Prisma client is now regenerated on every container start so schema changes take effect without rebuilding the image",
+      },
+    ],
+  },
+  {
     version: "2.2.2",
     date: "2026-04-07",
     tags: ["feature", "fix", "ux"],

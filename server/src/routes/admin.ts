@@ -54,6 +54,7 @@ adminRouter.get(
         totalComments,
         totalPageViews,
         totalFavorites,
+        totalLikes,
         totalCollections,
         totalReports,
         recentUsers,
@@ -66,6 +67,7 @@ adminRouter.get(
         prisma.comment.count(),
         prisma.pageView.count(),
         prisma.favorite.count(),
+        prisma.like.count(),
         prisma.collection.count(),
         prisma.report.count(),
         // Users registered in the last 30 days
@@ -86,6 +88,7 @@ adminRouter.get(
         totalComments,
         totalPageViews,
         totalFavorites,
+        totalLikes,
         totalCollections,
         totalReports,
         recentUsers,

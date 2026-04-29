@@ -4,6 +4,24 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.2.3] — 2026-04-30
+
+### Added
+
+- **Likes** — thumbs-up social signal on every shared config; any user (including the owner) can like a config once; like count is public, visible everywhere, and updates in real-time with optimistic UI
+- **Like button on Explore cards** — compact thumbs-up icon in the stats row (next to views, clones, and comments); turns blue when liked and reflects the updated count immediately
+- **Like button on shared config page** — full-size button in the action row; shows the running count, updates optimistically on click
+- **Like count on personal config cards** — when a shared config has received likes the count appears in the stats row of My Configs cards
+- **Dashboard Likes stats** — "Likes" column in both the personal (Your Account) and platform-wide (Platform Overview) stat grids; new "Top by Likes" bar chart under Your Top Performers; likes now contribute 2 points each to the Engagement score formula
+- **Most Liked sort on Explore** — new sort option that orders all shared configs by total like count descending
+- **Resources section in Docs** — links to the [SunnyLink Wiki](https://sunnylink.wiki/) and [sunnypilot Docs](https://docs.sunnypilot.ai)
+
+### Fixed
+
+- **Dev Docker container** — Prisma client is now regenerated on every container start (`prisma generate` added to the CMD) so schema changes applied via volume-mounted migrations take effect without rebuilding the image
+
+---
+
 ## [2.2.2] — 2026-04-07
 
 ### Added
