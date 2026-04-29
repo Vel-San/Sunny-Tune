@@ -2,21 +2,21 @@
 import axios from "axios";
 import { log } from "../lib/logger";
 import type {
-  CollectionRecord,
-  CommentRecord,
-  CommunityStats,
-  ConfigRecord,
-  ConfigSnapshot,
-  ConfigSnapshotMeta,
-  ConfigsPage,
-  ExploreResponse,
-  FavoriteRecord,
-  NotificationRecord,
-  RatingRecord,
-  RatingSummary,
-  SPConfig,
-  UserRecord,
-  VehicleEntry,
+    CollectionRecord,
+    CommentRecord,
+    CommunityStats,
+    ConfigRecord,
+    ConfigSnapshot,
+    ConfigSnapshotMeta,
+    ConfigsPage,
+    ExploreResponse,
+    FavoriteRecord,
+    NotificationRecord,
+    RatingRecord,
+    RatingSummary,
+    SPConfig,
+    UserRecord,
+    VehicleEntry,
 } from "../types/config";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
@@ -191,7 +191,7 @@ export async function fetchExplore(params: {
   tags?: string[];
   category?: string;
   branch?: string;
-  sort?: "trending" | "rating" | "recent" | "views" | "clones" | "comments";
+  sort?: "trending" | "rating" | "recent" | "views" | "clones" | "comments" | "likes";
   page?: number;
   limit?: number;
   spVersion?: string;
