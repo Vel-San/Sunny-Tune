@@ -14,10 +14,12 @@ All notable changes to SunnyTune are documented here.
 - **Like count on personal config cards** — when a shared config has received likes the count appears in the stats row of My Configs cards
 - **Dashboard Likes stats** — "Likes" column in both the personal (Your Account) and platform-wide (Platform Overview) stat grids; new "Top by Likes" bar chart under Your Top Performers; likes now contribute 2 points each to the Engagement score formula
 - **Most Liked sort on Explore** — new sort option that orders all shared configs by total like count descending
+- **Like notification** — config owners receive an in-app notification when someone else likes their config (notification type `like`)
 - **Resources section in Docs** — links to the [SunnyLink Wiki](https://sunnylink.wiki/) and [sunnypilot Docs](https://docs.sunnypilot.ai)
 
 ### Fixed
 
+- **Like persistence** — fixed a React closure race condition where the optimistic `setLocalIsLiked(true)` in `onMutate` triggered a re-render that updated the `mutationFn` closure mid-flight, causing every "like" click to send a `DELETE` (unlike) instead of a `POST` (like); the intended action is now passed as a mutation variable so it is immune to re-renders between `onMutate` and `mutationFn`
 - **Dev Docker container** — Prisma client is now regenerated on every container start (`prisma generate` added to the CMD) so schema changes applied via volume-mounted migrations take effect without rebuilding the image
 
 ---

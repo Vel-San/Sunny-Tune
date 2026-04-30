@@ -153,6 +153,8 @@ export const Header: React.FC = () => {
       return `Your config "${n.config?.name ?? ""}" received a ${v ?? "new"}-star rating`;
     }
     if (n.type === "comment_reply") return `Someone replied to your comment`;
+    if (n.type === "like")
+      return `Someone liked your config "${n.config?.name ?? ""}"`;
     return "New notification";
   };
 

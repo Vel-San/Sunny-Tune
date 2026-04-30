@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../config/database";
 import { logger } from "../lib/logger";
@@ -19,7 +19,7 @@ usersRouter.post(
   registerLimiter,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const token = `sp_${uuidv4().replace(/-/g, "")}`;
+      const token = `sp_${randomUUID().replace(/-/g, "")}`;
       const user = await prisma.user.create({ data: { token } });
       res.status(201).json({
         token: user.token,
@@ -41,7 +41,7 @@ usersRouter.post(
   destructiveLimiter,
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const newToken = `sp_${uuidv4().replace(/-/g, "")}`;
+      const newToken = `sp_${randomUUID().replace(/-/g, "")}`;
       const user = await prisma.user.update({
         where: { id: req.userId },
         data: { token: newToken },

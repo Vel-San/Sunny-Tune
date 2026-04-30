@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main, dev, master]
 
+# Least-privilege permissions — only what each step actually needs.
+# contents:read  — checkout
+# actions:write  — upload-artifact
+permissions:
+  contents: read
+  actions: write
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

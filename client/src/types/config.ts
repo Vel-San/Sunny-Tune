@@ -521,7 +521,7 @@ export interface FavoriteRecord extends ConfigRecord {
 /** An in-app notification (clone, rating, comment_reply). */
 export interface NotificationRecord {
   id: string;
-  type: "clone" | "rating" | "comment_reply";
+  type: "clone" | "rating" | "comment_reply" | "like";
   configId: string | null;
   config: { id: string; name: string; shareToken: string | null } | null;
   payload: Record<string, unknown> | null;

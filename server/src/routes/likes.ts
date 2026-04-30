@@ -15,7 +15,7 @@
 
 import { Response, Router } from "express";
 import { prisma } from "../config/database";
-import { validateUuidParams } from "../lib/guards";
+import { pruneNotificationsIfNeeded, validateUuidParams } from "../lib/guards";
 import { logger } from "../lib/logger";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { destructiveLimiter, writeLimiter } from "../middleware/rateLimiter";
@@ -51,6 +51,25 @@ likesRouter.post(
         create: { userId: req.userId!, configId: req.params.configId },
         update: {}, // already exists — no-op
       });
+
+      // Notify the config owner when someone else likes their config
+      if (config.userId !== req.userId) {
+        await pruneNotificationsIfNeeded(config.userId);
+        await prisma.notification
+          .create({
+            data: {
+              userId: config.userId,
+              type: "like",
+              configId: req.params.configId,
+              payload: {},
+            },
+          })
+          .catch((notifErr: unknown) => {
+            logger.warn("Background like-notification failed", {
+              err: String(notifErr),
+            });
+          });
+      }
 
       res.status(201).json(like);
     } catch (err) {
@@ -92,6 +111,7 @@ likesRouter.get(
           },
         },
       });
+      res.set("Cache-Control", "no-store");
       res.json({ isLiked: !!like });
     } catch (err) {
       logger.error("Failed to check like status", { err: String(err) });

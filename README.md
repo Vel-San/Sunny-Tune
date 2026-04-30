@@ -585,14 +585,14 @@ The Explore page has a **Min SP Version** filter. Enter a version string (e.g. `
 
 Every shared config supports a set of social and community interactions:
 
-| Feature         | Who can use                        | Visible to        | Notes                                                                       |
-| --------------- | ---------------------------------- | ----------------- | --------------------------------------------------------------------------- |
-| **Likes**       | Any authenticated user             | Everyone          | One like per user per config; count updates in real-time                    |
-| **Ratings**     | Any authenticated user (not owner) | Everyone          | 1–5 stars; upsert — you can change your rating                              |
-| **Comments**    | Any authenticated user             | Everyone          | Threaded replies up to 2 levels; owner can delete any comment on own config |
-| **Favorites**   | Any authenticated user             | Only you          | Private bookmark; stored per user                                           |
-| **Collections** | Any authenticated user             | Public or private | Named groups of configs; toggle public/private                              |
-| **Reports**     | Any authenticated user             | Admins only       | Flag a config or comment for moderation review                              |
+| Feature         | Who can use                        | Visible to        | Notes                                                                               |
+| --------------- | ---------------------------------- | ----------------- | ----------------------------------------------------------------------------------- |
+| **Likes**       | Any authenticated user             | Everyone          | One like per user per config; count updates in real-time; owner gets a notification |
+| **Ratings**     | Any authenticated user (not owner) | Everyone          | 1–5 stars; upsert — you can change your rating                                      |
+| **Comments**    | Any authenticated user             | Everyone          | Threaded replies up to 2 levels; owner can delete any comment on own config         |
+| **Favorites**   | Any authenticated user             | Only you          | Private bookmark; stored per user                                                   |
+| **Collections** | Any authenticated user             | Public or private | Named groups of configs; toggle public/private                                      |
+| **Reports**     | Any authenticated user             | Admins only       | Flag a config or comment for moderation review                                      |
 
 All social counts (`likeCount`, `ratingCount`, `commentCount`, `cloneCount`, `viewCount`) are returned on every config record from the explore, configs, and favorites endpoints.
 

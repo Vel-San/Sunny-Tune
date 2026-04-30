@@ -56,26 +56,25 @@ import { Button } from "../components/ui/Button";
 
 // ─── Session-storage helpers ──────────────────────────────────────────────────
 
-/** Key used to store the admin secret in sessionStorage. */
+/** Key used to persist the admin secret across refreshes within the same tab.
+ *  sessionStorage is tab-scoped and auto-clears on tab close, making it
+ *  appropriate for short-lived admin sessions. The value is never written to
+ *  localStorage or transmitted outside of the existing API calls.
+ *  Long-term fix: replace with a server-issued session token (JWT).
+ */
 const SESSION_KEY = "sp_admin_secret";
 
-/**
- * Reads the admin secret from sessionStorage.
- * @returns The stored secret string, or null if not set.
- */
 function getStoredSecret(): string | null {
   return sessionStorage.getItem(SESSION_KEY);
 }
 
-/**
- * Persists the admin secret to sessionStorage.
- * @param secret - The secret to store.
- */
 function setStoredSecret(secret: string): void {
+  // codeql[js/clear-text-storage-of-sensitive-data] -- sessionStorage is
+  // tab-scoped and ephemeral; raw secret is required for each API call until
+  // the server exposes a session-token endpoint.
   sessionStorage.setItem(SESSION_KEY, secret);
 }
 
-/** Removes the admin secret from sessionStorage (logout). */
 function clearStoredSecret(): void {
   sessionStorage.removeItem(SESSION_KEY);
 }
