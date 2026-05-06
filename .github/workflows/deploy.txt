@@ -1,0 +1,25 @@
+# name: Deploy
+
+# ─── How deployments work ─────────────────────────────────────────────────────
+#
+# Both services deploy automatically via their native GitHub integrations —
+# no secrets or CLI steps required in this workflow.
+#
+# SERVER (Vercel Serverless)
+#   Trigger:  push to main that touches server/**
+#   Config:   server/vercel.json (routes all traffic to src/index.ts via @vercel/node)
+#   Runtime:  Node.js serverless function (TypeScript, no compile step needed)
+#   Migrations: run manually via `DATABASE_URL=... npx prisma migrate deploy`
+#
+# CLIENT (Vercel)
+#   Trigger:  push to main that touches client/**
+#   Config:   client/vercel.json
+#   Builder:  Vite (auto-detected, rootDirectory = client)
+#   Domain:   https://sunny-tune.vercel.app
+#
+# This file is kept as documentation. To trigger a manual redeploy:
+#   - Vercel (server): dashboard → project → Deployments → Redeploy
+#   - Vercel (client): dashboard → project → Deployments → Redeploy
+
+# on:
+# workflow_dispatch: # manual trigger only — actual deploys are handled natively
