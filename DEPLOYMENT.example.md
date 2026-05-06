@@ -10,7 +10,7 @@
 | Service               | URL                                        |
 | --------------------- | ------------------------------------------ |
 | **Frontend (Vercel)** | https://YOUR_APP.vercel.app                |
-| **API (Railway)**     | https://YOUR_APP-production.up.railway.app |
+| **API (Render)**      | https://YOUR_SERVICE_NAME.onrender.com     |
 | **Database**          | your-neon-or-postgres-host.example.com     |
 
 ---
@@ -26,29 +26,27 @@
 | Host     | your-host.neon.tech                                  |
 | Full URL | `postgresql://USER:PASSWORD@HOST/DB?sslmode=require` |
 
-> The actual password is set directly in Railway as `DATABASE_URL`. Never commit it.
+> The actual password is set in Render's Environment Variables as `DATABASE_URL`. Never commit it.
 
 ---
 
-## 2. Railway (API Server)
+## 2. Render (API Server)
 
 | Field           | Value                                      |
 | --------------- | ------------------------------------------ |
-| Project Name    | YOUR_PROJECT_NAME                          |
-| Project ID      | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
 | Service Name    | YOUR_SERVICE_NAME                          |
-| Service ID      | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
-| Environment     | production                                 |
-| Environment ID  | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
-| Public URL      | https://YOUR_APP-production.up.railway.app |
-| Builder         | Dockerfile                                 |
-| Root Directory  | `/server`                                  |
-| Dockerfile path | `/server/Dockerfile`                       |
-| GitHub source   | `YOUR_USERNAME/YOUR_REPO` → branch `main`  |
+| Public URL      | https://YOUR_SERVICE_NAME.onrender.com     |
+| Runtime         | Docker                                     |
+| Dockerfile path | `./server/Dockerfile`                      |
+| Docker context  | `./server`                                 |
+| Branch          | `main`                                     |
+| GitHub source   | `YOUR_USERNAME/YOUR_REPO`                  |
 
-### Railway Environment Variables
+> The repo root contains `render.yaml` which pre-fills most settings when using the Render Blueprint flow.
 
-Set these in Railway → Service → Variables:
+### Render Environment Variables
+
+Set these in Render → Service → Environment:
 
 | Variable            | Value                                                                   |
 | ------------------- | ----------------------------------------------------------------------- |
@@ -82,10 +80,10 @@ Set these in Railway → Service → Variables:
 ### Rewrites (client/vercel.json)
 
 ```
-/api/(.*) → https://YOUR_RAILWAY_URL.up.railway.app/api/$1
+/api/(.*) → https://YOUR_SERVICE_NAME.onrender.com/api/$1
 ```
 
-Update `client/vercel.json` with your Railway URL before deploying.
+Update `client/vercel.json` with your Render service URL before deploying.
 
 ---
 
@@ -103,9 +101,11 @@ If using CLI-based GitHub Actions deploys (the default uses native integrations 
 
 ## 5. Manual Redeploy
 
-### Railway (server)
+### Render (server)
 
-Via dashboard: Railway → Project → Service → Deployments → Redeploy
+Via dashboard: Render → Service → Manual Deploy → Deploy latest commit
+
+Or push to `main` — Render auto-deploys on every push.
 
 ### Vercel (client)
 
@@ -133,8 +133,8 @@ npx prisma migrate deploy
 
 | File                           | Purpose                                      |
 | ------------------------------ | -------------------------------------------- |
-| `server/Dockerfile`            | Production Docker image (Railway)            |
-| `server/railway.toml`          | Railway build/deploy config                  |
+| `server/Dockerfile`            | Production Docker image (Render)             |
+| `render.yaml`                  | Render Blueprint config (repo root)          |
 | `client/vercel.json`           | Vercel config: rewrites, headers, output dir |
 | `server/prisma/schema.prisma`  | Database schema                              |
 | `server/prisma/migrations/`    | Migration history                            |

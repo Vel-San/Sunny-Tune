@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://sunny-tune-backend-production.up.railway.app/api/$1"
+      "destination": "https://st-backend-prd.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/).*)",
