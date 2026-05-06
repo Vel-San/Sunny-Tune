@@ -64,8 +64,6 @@
   - [SP Version Compatibility Filter](#sp-version-compatibility-filter)
   - [Configuration Sharing](#configuration-sharing)
   - [Deploying Online (Vercel — Frontend \& Backend)](#deploying-online-vercel--frontend--backend)
-    - [One-time setup](#one-time-setup)
-    - [Manual deployment (without GitHub Actions)](#manual-deployment-without-github-actions)
   - [GitHub Actions Workflows](#github-actions-workflows)
   - [Project Structure](#project-structure)
 
@@ -642,26 +640,22 @@ Browser → Vercel (client/) → /api/* rewrite → Vercel (server/) → Neon Po
 **2. Update the frontend rewrite**
 
 Update the `/api` rewrite destination in `client/vercel.json` to your backend URL:
+
 ```json
 {
   "source": "/api/(.*)",
   "destination": "https://your-backend.vercel.app/api/$1"
 }
 ```
+
 Push to `main` — the frontend auto-redeploys.
 
-**3. Add GitHub secrets for auto-deploy**
+**3. Auto-deploy is already active**
 
-In your repo: **Settings → Secrets and variables → Actions**
+Both Vercel projects are connected to this GitHub repo via native integration. Every push to `main` automatically triggers a production deploy — no GitHub Actions secrets or workflow files needed. You can see deployment status in:
 
-| Type   | Name                         | Value                                          |
-| ------ | ---------------------------- | ---------------------------------------------- |
-| Secret | `VERCEL_TOKEN`               | Vercel personal access token                   |
-| Secret | `VERCEL_ORG_ID`              | Team ID from `server/.vercel/project.json`     |
-| Secret | `VERCEL_BACKEND_PROJECT_ID`  | Project ID from `server/.vercel/project.json`  |
-| Secret | `VERCEL_FRONTEND_PROJECT_ID` | Project ID from `client/.vercel/project.json`  |
-
-Once set, every push to `main` triggers the `deploy.yml` workflow automatically — smart path filtering means it only deploys the backend if `server/**` changed, and only the frontend if `client/**` changed. You can also trigger a manual deploy of either or both from the GitHub Actions tab.
+- Vercel Dashboard → Project → Deployments
+- GitHub repo → commits → the green ✔ / Vercel bot check
 
 ### Database migrations
 
@@ -675,6 +669,10 @@ npx prisma migrate deploy
 
 ### Manual redeploy
 
+Vercel Dashboard → Project → Deployments → Redeploy (works for both projects).
+
+Or via CLI:
+
 ```bash
 # Backend
 cd server && vercel --prod
@@ -682,25 +680,25 @@ cd server && vercel --prod
 # Frontend
 cd client && vercel --prod
 ```
-Or: GitHub → Actions → **Deploy** → Run workflow → choose `backend`, `frontend`, or `both`.
 
 ---
 
 ## GitHub Actions Workflows
 
-Nine workflows live in `.github/workflows/`:
+Eight workflows live in `.github/workflows/`:
 
 | Workflow              | File                    | Trigger                      | What it does                                                                           |
 | --------------------- | ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
 | **CI**                | `ci.yml`                | Push / PR to `main`          | Installs deps, runs all tests (server + client), type-checks, builds both packages     |
 | **CodeQL**            | `codeql.yml`            | Push / PR / weekly           | GitHub code scanning — static analysis for JS/TS security vulnerabilities              |
-| **Deploy**            | `deploy.yml`            | Push to `main` / manual      | Smart path-based deploy: backend → Vercel when `server/**` changes; frontend → Vercel when `client/**` changes. Manual trigger deploys either or both. Requires 4 GitHub secrets (see below). |
 | **Lighthouse**        | `lighthouse.yml`        | PR to `main`                 | Runs Lighthouse CI against the PR preview; posts performance scores as a status check  |
 | **Dependency Review** | `dependency-review.yml` | PR to `main`                 | Blocks PRs that introduce dependencies with known CVEs                                 |
 | **Secret Scan**       | `secret-scan.yml`       | Push / PR                    | Scans commit diff for accidentally committed secrets/tokens                            |
 | **PR Labeler**        | `pr-labeler.yml`        | PR opened / edited           | Automatically applies labels (`client`, `server`, `docs`, etc.) based on changed paths |
 | **Stale**             | `stale.yml`             | Daily schedule               | Marks issues and PRs stale after 60 days of inactivity; closes after 7 more days       |
 | **Create Labels**     | `create-labels.yml`     | Manual (`workflow_dispatch`) | Creates all standard labels used by the PR labeler — run once after making repo public |
+
+> **Deployments are handled by Vercel's native GitHub integration**, not by a workflow file. Both the frontend (`client/`) and backend (`server/`) Vercel projects are connected to this repo and auto-deploy on every push to `main`.
 
 ---
 

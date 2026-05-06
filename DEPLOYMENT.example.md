@@ -7,11 +7,11 @@
 
 ## Live URLs
 
-| Service               | URL                                        |
-| --------------------- | ------------------------------------------ |
-| **Frontend (Vercel)** | https://YOUR_APP.vercel.app                |
-| **API (Vercel)**      | https://YOUR_BACKEND_PROJECT.vercel.app    |
-| **Database**          | your-neon-or-postgres-host.example.com     |
+| Service               | URL                                     |
+| --------------------- | --------------------------------------- |
+| **Frontend (Vercel)** | https://YOUR_APP.vercel.app             |
+| **API (Vercel)**      | https://YOUR_BACKEND_PROJECT.vercel.app |
+| **Database**          | your-neon-or-postgres-host.example.com  |
 
 ---
 
@@ -32,14 +32,14 @@
 
 ## 2. Vercel (API / Backend Server)
 
-| Field           | Value                                           |
-| --------------- | ----------------------------------------------- |
-| Project Name    | YOUR_BACKEND_PROJECT_NAME                       |
-| Public URL      | https://YOUR_BACKEND_PROJECT.vercel.app         |
-| Root Directory  | `server`                                        |
-| Framework       | Other (Node.js, auto-detected)                  |
-| Branch          | `main`                                          |
-| GitHub source   | `YOUR_USERNAME/YOUR_REPO`                       |
+| Field          | Value                                   |
+| -------------- | --------------------------------------- |
+| Project Name   | YOUR_BACKEND_PROJECT_NAME               |
+| Public URL     | https://YOUR_BACKEND_PROJECT.vercel.app |
+| Root Directory | `server`                                |
+| Framework      | Other (Node.js, auto-detected)          |
+| Branch         | `main`                                  |
+| GitHub source  | `YOUR_USERNAME/YOUR_REPO`               |
 
 > `server/vercel.json` routes all requests to `src/index.ts` via `@vercel/node`. The `postinstall` script runs `prisma generate` automatically at build time.
 
@@ -86,26 +86,21 @@ Update `client/vercel.json` with your backend Vercel URL before deploying.
 
 ---
 
-## 4. GitHub Actions Secrets
+## 4. Auto-Deploy (Native Vercel GitHub Integration)
 
-Required for the `deploy.yml` workflow (auto-deploys both frontend and backend on push to `main`):
+Both Vercel projects (frontend and backend) are connected to this GitHub repo via Vercel's native GitHub integration — **no secrets or workflow files required**.
 
-| Type   | Name                        | Value                                            |
-| ------ | --------------------------- | ------------------------------------------------ |
-| Secret | `VERCEL_TOKEN`              | Vercel → Settings → Tokens                       |
-| Secret | `VERCEL_ORG_ID`             | Team/org ID from `server/.vercel/project.json`   |
-| Secret | `VERCEL_BACKEND_PROJECT_ID` | Project ID from `server/.vercel/project.json`    |
-| Secret | `VERCEL_FRONTEND_PROJECT_ID`| Project ID from `client/.vercel/project.json`   |
+Every push to `main` automatically triggers a production deploy for each project. Status appears as a commit check in GitHub (green ✔ from the Vercel bot).
+
+To connect a new project: Vercel → Project → Settings → Git → connect repository → set production branch to `main`.
 
 ---
 
 ## 5. Manual Redeploy
 
-### Via GitHub Actions (recommended)
+Vercel Dashboard → Project → Deployments → Redeploy (works for both projects).
 
-GitHub → Actions → **Deploy** → Run workflow → choose `backend`, `frontend`, or `both`.
-
-### Via Vercel CLI
+Or via CLI:
 
 ```bash
 # Backend
@@ -114,8 +109,6 @@ cd server && vercel --prod
 # Frontend
 cd client && vercel --prod
 ```
-
-Or: Vercel Dashboard → Project → Deployments → Redeploy.
 
 ---
 
@@ -131,11 +124,10 @@ npx prisma migrate deploy
 
 ## 7. Key File Locations
 
-| File                           | Purpose                                      |
-| ------------------------------ | -------------------------------------------- |
-| `server/Dockerfile`            | Production Docker image (local Docker deployments) |
-| `server/vercel.json`           | Vercel serverless config (backend)                 |
-| `client/vercel.json`           | Vercel config: rewrites, headers, output dir       |
-| `server/prisma/schema.prisma`  | Database schema                              |
-| `server/prisma/migrations/`    | Migration history                            |
-| `.github/workflows/deploy.yml` | Documents how deploys work (no active jobs)  |
+| File                          | Purpose                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `server/Dockerfile`           | Production Docker image (local Docker deployments) |
+| `server/vercel.json`          | Vercel serverless config (backend)                 |
+| `client/vercel.json`          | Vercel config: rewrites, headers, output dir       |
+| `server/prisma/schema.prisma` | Database schema                                    |
+| `server/prisma/migrations/`   | Migration history                                  |
