@@ -4,7 +4,7 @@
  * Logs one structured line per completed request containing:
  *   method, path, status code, duration (ms), and content-length.
  *
- * In production the line is emitted as JSON so Railway / Vercel Log Drains
+ * In production the line is emitted as JSON so Vercel Log Drains
  * and any other aggregator can filter on individual fields.
  *
  * In development the line is printed in colour with timing highlighted so

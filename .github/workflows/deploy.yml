@@ -1,0 +1,99 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which project to deploy"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - both
+          - backend
+          - frontend
+
+# Only one deploy at a time — cancel any in-flight deploy for the same ref
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Detect which parts of the repo changed ──────────────────────────────────
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'server/**'
+            frontend:
+              - 'client/**'
+
+  # ── Deploy backend (server/) → Vercel serverless ────────────────────────────
+  deploy-backend:
+    name: Backend → Vercel
+    needs: changes
+    # Run if server/** changed on push, OR if manually triggered for backend/both
+    if: |
+      (github.event_name == 'push' && needs.changes.outputs.backend == 'true') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'backend' || github.event.inputs.target == 'both'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy backend to Vercel (production)
+        run: vercel --prod --yes
+        working-directory: server
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+
+  # ── Deploy frontend (client/) → Vercel ──────────────────────────────────────
+  deploy-frontend:
+    name: Frontend → Vercel
+    needs: changes
+    # Run if client/** changed on push, OR if manually triggered for frontend/both
+    if: |
+      (github.event_name == 'push' && needs.changes.outputs.frontend == 'true') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'frontend' || github.event.inputs.target == 'both'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy frontend to Vercel (production)
+        run: vercel --prod --yes
+        working-directory: client
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}

@@ -10,7 +10,7 @@
 | Service               | URL                                        |
 | --------------------- | ------------------------------------------ |
 | **Frontend (Vercel)** | https://YOUR_APP.vercel.app                |
-| **API (Render)**      | https://YOUR_SERVICE_NAME.onrender.com     |
+| **API (Vercel)**      | https://YOUR_BACKEND_PROJECT.vercel.app    |
 | **Database**          | your-neon-or-postgres-host.example.com     |
 
 ---
@@ -26,27 +26,26 @@
 | Host     | your-host.neon.tech                                  |
 | Full URL | `postgresql://USER:PASSWORD@HOST/DB?sslmode=require` |
 
-> The actual password is set in Render's Environment Variables as `DATABASE_URL`. Never commit it.
+> The actual password is set in Vercel's Environment Variables as `DATABASE_URL`. Never commit it.
 
 ---
 
-## 2. Render (API Server)
+## 2. Vercel (API / Backend Server)
 
-| Field           | Value                                      |
-| --------------- | ------------------------------------------ |
-| Service Name    | YOUR_SERVICE_NAME                          |
-| Public URL      | https://YOUR_SERVICE_NAME.onrender.com     |
-| Runtime         | Docker                                     |
-| Dockerfile path | `./server/Dockerfile`                      |
-| Docker context  | `./server`                                 |
-| Branch          | `main`                                     |
-| GitHub source   | `YOUR_USERNAME/YOUR_REPO`                  |
+| Field           | Value                                           |
+| --------------- | ----------------------------------------------- |
+| Project Name    | YOUR_BACKEND_PROJECT_NAME                       |
+| Public URL      | https://YOUR_BACKEND_PROJECT.vercel.app         |
+| Root Directory  | `server`                                        |
+| Framework       | Other (Node.js, auto-detected)                  |
+| Branch          | `main`                                          |
+| GitHub source   | `YOUR_USERNAME/YOUR_REPO`                       |
 
-> The repo root contains `render.yaml` which pre-fills most settings when using the Render Blueprint flow.
+> `server/vercel.json` routes all requests to `src/index.ts` via `@vercel/node`. The `postinstall` script runs `prisma generate` automatically at build time.
 
-### Render Environment Variables
+### Backend Environment Variables
 
-Set these in Render → Service → Environment:
+Set these in Vercel → Project → Settings → Environment Variables:
 
 | Variable            | Value                                                                   |
 | ------------------- | ----------------------------------------------------------------------- |
@@ -55,7 +54,7 @@ Set these in Render → Service → Environment:
 | `PORT`              | `3001`                                                                  |
 | `TOKEN_SECRET`      | _(run `openssl rand -hex 32` to generate)_                              |
 | `ADMIN_SECRET_HASH` | _(run `cd server && npm run hash-secret -- "your-secret"` to generate)_ |
-| `CORS_ORIGIN`       | `https://YOUR_APP.vercel.app`                                           |
+| `CORS_ORIGIN`       | `https://YOUR_FRONTEND.vercel.app`                                      |
 
 ---
 
@@ -80,42 +79,43 @@ Set these in Render → Service → Environment:
 ### Rewrites (client/vercel.json)
 
 ```
-/api/(.*) → https://YOUR_SERVICE_NAME.onrender.com/api/$1
+/api/(.*) → https://YOUR_BACKEND_PROJECT.vercel.app/api/$1
 ```
 
-Update `client/vercel.json` with your Render service URL before deploying.
+Update `client/vercel.json` with your backend Vercel URL before deploying.
 
 ---
 
 ## 4. GitHub Actions Secrets
 
-If using CLI-based GitHub Actions deploys (the default uses native integrations — no secrets needed):
+Required for the `deploy.yml` workflow (auto-deploys both frontend and backend on push to `main`):
 
-| Type   | Name                | Notes                             |
-| ------ | ------------------- | --------------------------------- |
-| Secret | `VERCEL_TOKEN`      | Vercel → Settings → Tokens        |
-| Secret | `VERCEL_ORG_ID`     | From local `.vercel/project.json` |
-| Secret | `VERCEL_PROJECT_ID` | From local `.vercel/project.json` |
+| Type   | Name                        | Value                                            |
+| ------ | --------------------------- | ------------------------------------------------ |
+| Secret | `VERCEL_TOKEN`              | Vercel → Settings → Tokens                       |
+| Secret | `VERCEL_ORG_ID`             | Team/org ID from `server/.vercel/project.json`   |
+| Secret | `VERCEL_BACKEND_PROJECT_ID` | Project ID from `server/.vercel/project.json`    |
+| Secret | `VERCEL_FRONTEND_PROJECT_ID`| Project ID from `client/.vercel/project.json`   |
 
 ---
 
 ## 5. Manual Redeploy
 
-### Render (server)
+### Via GitHub Actions (recommended)
 
-Via dashboard: Render → Service → Manual Deploy → Deploy latest commit
+GitHub → Actions → **Deploy** → Run workflow → choose `backend`, `frontend`, or `both`.
 
-Or push to `main` — Render auto-deploys on every push.
-
-### Vercel (client)
+### Via Vercel CLI
 
 ```bash
-# From repo root, after running `npx vercel link` locally
-VERCEL_ORG_ID=<your-org-id> \
-VERCEL_PROJECT_ID=<your-project-id> \
-npx vercel build --prod --token=<VERCEL_TOKEN>
-npx vercel deploy --prebuilt --prod --token=<VERCEL_TOKEN>
+# Backend
+cd server && vercel --prod
+
+# Frontend
+cd client && vercel --prod
 ```
+
+Or: Vercel Dashboard → Project → Deployments → Redeploy.
 
 ---
 
@@ -133,9 +133,9 @@ npx prisma migrate deploy
 
 | File                           | Purpose                                      |
 | ------------------------------ | -------------------------------------------- |
-| `server/Dockerfile`            | Production Docker image (Render)             |
-| `render.yaml`                  | Render Blueprint config (repo root)          |
-| `client/vercel.json`           | Vercel config: rewrites, headers, output dir |
+| `server/Dockerfile`            | Production Docker image (local Docker deployments) |
+| `server/vercel.json`           | Vercel serverless config (backend)                 |
+| `client/vercel.json`           | Vercel config: rewrites, headers, output dir       |
 | `server/prisma/schema.prisma`  | Database schema                              |
 | `server/prisma/migrations/`    | Migration history                            |
 | `.github/workflows/deploy.yml` | Documents how deploys work (no active jobs)  |

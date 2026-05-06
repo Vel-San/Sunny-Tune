@@ -23,7 +23,7 @@ export const prisma =
   });
 
 // Forward Prisma error/warn events through our structured logger so they
-// appear in Railway / Vercel logs the same way as application errors.
+// appear in Vercel logs the same way as application errors.
 prisma.$on("error" as never, (e: { message: string; target: string }) => {
   logger.error("Prisma error", { message: e.message, target: e.target });
 });

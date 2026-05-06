@@ -6,8 +6,8 @@
  * | Environment      | Output format                                      |
  * |------------------|----------------------------------------------------|
  * | development      | Coloured, human-readable lines to stdout/stderr    |
- * | production/test  | Newline-delimited JSON — parseable by Railway,     |
- * |                  | Vercel Log Drains, Datadog, Loki, CloudWatch, etc. |
+ * | production/test  | Newline-delimited JSON — parseable by Vercel     |
+ *                  | Log Drains, Datadog, Loki, CloudWatch, etc.        |
  *
  * ## Log levels (lowest → highest)
  *   debug < info < warn < error

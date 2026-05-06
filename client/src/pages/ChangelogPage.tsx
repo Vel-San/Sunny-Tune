@@ -220,7 +220,7 @@ const RELEASES: Release[] = [
       },
       {
         type: "added",
-        text: "Structured server logging: every HTTP request now logged with method, path, status, and duration; slow requests (>500 ms) flagged automatically. Dev shows coloured human-readable output; production emits newline-delimited JSON parseable by Railway, Vercel Log Drains, Datadog, etc.",
+        text: "Structured server logging: every HTTP request now logged with method, path, status, and duration; slow requests (>500 ms) flagged automatically. Dev shows coloured human-readable output; production emits newline-delimited JSON parseable by Vercel Log Drains, Datadog, etc.",
       },
       {
         type: "added",
@@ -232,7 +232,7 @@ const RELEASES: Release[] = [
       },
       {
         type: "added",
-        text: "Prisma DB errors and warnings now forwarded through the structured logger so database issues appear in Railway / production logs alongside application errors",
+        text: "Prisma DB errors and warnings now forwarded through the structured logger so database issues appear in Vercel / production logs alongside application errors",
       },
     ],
   },
@@ -345,7 +345,7 @@ const RELEASES: Release[] = [
       },
       {
         type: "fixed",
-        text: "Production build was calling http://localhost:3001 instead of the Railway API — fixed via .env.production setting VITE_API_URL empty so Vercel rewrites proxy to Railway",
+        text: "Production build was calling http://localhost:3001 instead of the production API — fixed via .env.production setting VITE_API_URL empty so Vercel rewrites proxy to the backend",
       },
       {
         type: "changed",
@@ -364,7 +364,7 @@ const RELEASES: Release[] = [
     changes: [
       {
         type: "added",
-        text: "SunnyTune is now live at sunny-tune.vercel.app — deployed on Vercel (frontend) and Railway (API) with Neon PostgreSQL",
+        text: "SunnyTune is now live at sunny-tune.vercel.app — deployed on Vercel (frontend + API serverless) with Neon PostgreSQL",
       },
       {
         type: "added",
