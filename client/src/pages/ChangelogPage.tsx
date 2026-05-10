@@ -11,6 +11,85 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "2.3.0",
+    date: "2026-05-11",
+    tags: ["feature", "fix"],
+    changes: [
+      {
+        type: "changed",
+        text: "sunnypilot param overhaul — full device-file verified 1:1 alignment against a real sunnypilot export (2026.001.000 staging, Hyundai Ioniq 5 with HDA II); every import and export key now matches exactly what the device expects",
+      },
+      {
+        type: "changed",
+        text: "TorqueControlTune type fixed to \"\" | 0 | 1 (was 0 | 1 | 2); export now writes the raw number instead of a string",
+      },
+      {
+        type: "changed",
+        text: "autoLaneChangeBsmDelay replaces bsmMonitoring (SP key: AutoLaneChangeBsmDelay)",
+      },
+      {
+        type: "changed",
+        text: "laneTurnSpeed replaces adjustLaneTurnSpeed (SP key: LaneTurnValue)",
+      },
+      {
+        type: "changed",
+        text: "deviceBootMode replaces wakeupBehavior (SP key: DeviceBootMode); options: Standard / Always Offroad",
+      },
+      {
+        type: "changed",
+        text: "interactivityTimeout default corrected to 30 s (was 90); SP key corrected to InteractivityTimeout",
+      },
+      {
+        type: "changed",
+        text: "realTimeAccelBar SP key corrected to RocketFuel (was RealTimeAccelBar)",
+      },
+      {
+        type: "changed",
+        text: "blindSpotHUD SP key corrected to BlindSpot (device key); import also accepts BlindSpotDetection (docs alias)",
+      },
+      {
+        type: "changed",
+        text: "language default corrected to \"en\" (was \"main_en\")",
+      },
+      {
+        type: "changed",
+        text: "chevronInfo type widened to 0 | 1 | 2 | 3 | 4 integer (was boolean)",
+      },
+      {
+        type: "changed",
+        text: "ToyotaEnforceStockLongitudinal SP key corrected (was ToyotaEnforceFactoryLong)",
+      },
+      {
+        type: "changed",
+        text: "steeringArc removed — TorqueBar is the steering arc; label updated to \"Steering Arc (Torque Bar)\"",
+      },
+      {
+        type: "added",
+        text: "customTorqueParams (CustomTorqueParams) — parent gate to unlock custom torque tuning UI",
+      },
+      {
+        type: "added",
+        text: "displayMetricsPosition (DisplayMetricsPosition) — position of extended HUD metrics (0–3)",
+      },
+      {
+        type: "added",
+        text: "showDebugInfo (ShowDebugInfo) — developer debug overlay on HUD",
+      },
+      {
+        type: "added",
+        text: "recordAudio (RecordAudio) — record microphone audio with dashcam footage",
+      },
+      {
+        type: "added",
+        text: "toyotaStopAndGo (ToyotaStopAndGoHack) — Toyota stop-and-go ACC hack",
+      },
+      {
+        type: "fixed",
+        text: "Docs audit: corrected 5 wrong SP key → docs ID mappings; removed stale aliases; docs snapshot date updated to 2026-05-11; all 89/89 params now covered with tooltip help",
+      },
+    ],
+  },
+  {
     version: "2.2.3",
     date: "2026-04-30",
     tags: ["feature", "ux"],
