@@ -4,6 +4,34 @@ All notable changes to SunnyTune are documented here.
 
 ---
 
+## [2.3.0] — 2026-05-11
+
+### Changed
+
+- **sunnypilot param overhaul — full device-file verified 1:1 alignment** — all configurable parameter keys audited against a real sunnypilot device export (`2026.001.000` staging, Hyundai Ioniq 5 with HDA II); every import and export key now matches what the device expects:
+  - `TorqueControlTune`: fixed type to `"" | 0 | 1` (was `0 | 1 | 2`); export now writes the raw number, not a string
+  - `autoLaneChangeBsmDelay` replaces `bsmMonitoring` (SP key: `AutoLaneChangeBsmDelay`)
+  - `laneTurnSpeed` replaces `adjustLaneTurnSpeed` (SP key: `LaneTurnValue`)
+  - `deviceBootMode` replaces `wakeupBehavior` (SP key: `DeviceBootMode`); options: Standard / Always Offroad
+  - `interactivityTimeout` default corrected to `30` s (was `90`); SP key corrected to `InteractivityTimeout` (was `InteractivityTimer`)
+  - `realTimeAccelBar` SP key corrected to `RocketFuel` (was `RealTimeAccelBar`)
+  - `blindSpotHUD` SP key corrected to `BlindSpot` (device key); import also accepts `BlindSpotDetection` (docs alias)
+  - `language` default corrected to `"en"` (was `"main_en"`)
+  - `chevronInfo` type widened to `0 | 1 | 2 | 3 | 4` integer (was `boolean`)
+  - `ToyotaEnforceStockLongitudinal` SP key corrected (was `ToyotaEnforceFactoryLong`)
+  - `steeringArc` removed — `TorqueBar` is the steering arc; label updated to "Steering Arc (Torque Bar)"
+- **New params added** (all device-confirmed):
+  - `customTorqueParams` (`CustomTorqueParams`) — parent gate to unlock custom torque tuning UI
+  - `displayMetricsPosition` (`DisplayMetricsPosition`) — position of extended HUD metrics (0–3)
+  - `showDebugInfo` (`ShowDebugInfo`) — developer debug overlay on HUD
+  - `recordAudio` (`RecordAudio`) — record microphone audio with dashcam footage
+  - `toyotaStopAndGo` (`ToyotaStopAndGoHack`) — Toyota stop-and-go ACC hack
+- **Docs audit corrections** — fixed 5 wrong SPKEY_TO_DOCS_ID mappings (`BlindSpot → BlindSpotDetection`, `RocketFuel → DisplayRocketFuelBar`, `LaneTurnValue → AdjustLaneTurnSpeed`, `CustomTorqueParams → EnableCustomTorqueTuning`, `ToyotaEnforceStockLongitudinal → ToyotaEnforceFactoryLongitudinalControl`); removed stale aliases (`WakeupBehavior`, `InteractivityTimer`, `RealTimeAccelBar`); fixed wrong `BlindSpot → AutoLaneChangeBsmDelay` mapping; docs snapshot date updated to `2026-05-11`
+- **fieldHelp.ts** — added tooltip help entries for `CustomTorqueParams`, `DisplayMetricsPosition`, `ShowDebugInfo`, `RecordAudio`, `ToyotaStopAndGoHack`, `SmartCruiseControlVision` (already in fieldHelp but not tracked in audit)
+- **DB migration** — none required; Prisma stores configs as `Json`; `normalizeConfig()` deep-merges with defaults so all existing saved configs automatically gain new fields at their defaults on next load
+
+---
+
 ## [2.2.3] — 2026-04-30
 
 ### Added

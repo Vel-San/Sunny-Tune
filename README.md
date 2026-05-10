@@ -6,7 +6,7 @@
 
 [![Live](https://img.shields.io/badge/Live-sunny--tune.vercel.app-black?logo=vercel&logoColor=white)](https://sunny-tune.vercel.app)
 [![API](https://img.shields.io/badge/API-Vercel_Serverless-000000?logo=vercel&logoColor=white)](https://vercel.com)
-[![Version](https://img.shields.io/badge/version-2.2.3-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue)](CHANGELOG.md)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
