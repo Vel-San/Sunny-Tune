@@ -227,9 +227,9 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
             String(lc.autoTimer),
         },
         {
-          key: "BlindSpot",
-          label: "Blind Spot Monitoring",
-          value: formatValue(lc.bsmMonitoring),
+          key: "AutoLaneChangeBsmDelay",
+          label: "BSM Delay for Lane Change",
+          value: formatValue(lc.autoLaneChangeBsmDelay),
         },
       ],
     },
@@ -366,23 +366,20 @@ function buildExportGroups(c: SPConfig): ExportGroup[] {
         },
         {
           key: "TorqueBar",
-          label: "Torque Bar",
+          label: "Steering Arc (Torque Bar)",
           value: formatValue(ifc.torqueBar),
         },
         {
-          key: "BlindSpotDetection",
+          key: "BlindSpot",
           label: "Blind Spot HUD Warnings",
           value: formatValue(ifc.blindSpotHUD),
         },
         {
-          key: "SteeringArc",
-          label: "Steering Arc",
-          value: formatValue(ifc.steeringArc),
-        },
-        {
           key: "ChevronInfo",
           label: "Metrics Below Chevron",
-          value: formatValue(ifc.chevronInfo),
+          value:
+            ["Off", "Distance", "Speed", "Time", "All"][ifc.chevronInfo] ??
+            String(ifc.chevronInfo),
         },
         {
           key: "RainbowMode",

@@ -349,7 +349,17 @@ export function parseSunnyLinkExportObject(
     s["LiveTorqueParamsRelaxedToggle"],
     true,
   );
-  cfg.lateral.torqueControlTune = slInt(s["TorqueControlTune"], 1) as 0 | 1 | 2;
+  // TorqueControlTune stores "" | 0.0 | 1.0 as a string or number
+  const tctRaw = s["TorqueControlTune"];
+  if (tctRaw === "" || tctRaw == null) {
+    cfg.lateral.torqueControlTune = "";
+  } else {
+    const tctNum = slNum(tctRaw, -1);
+    cfg.lateral.torqueControlTune = (
+      tctNum === 0 ? 0 : tctNum === 1 ? 1 : ""
+    ) as "" | 0 | 1;
+  }
+  cfg.lateral.customTorqueParams = slBool(s["CustomTorqueParams"], false);
   cfg.lateral.lagdEnabled = slBool(s["LagdToggle"], true);
   cfg.lateral.lagdDelay = slNum(s["LagdToggleDelay"], 0.2);
   cfg.lateral.useNNModel = slBool(s["NeuralNetworkLateralControl"], false);
@@ -395,8 +405,10 @@ export function parseSunnyLinkExportObject(
   cfg.laneChange.autoTimer = (
     rawTimer >= -1 && rawTimer <= 5 ? rawTimer : 0
   ) as SPConfig["laneChange"]["autoTimer"];
-  cfg.laneChange.bsmMonitoring =
-    slBool(s["BlindSpot"], false) || slBool(s["AutoLaneChangeBsmDelay"], false);
+  cfg.laneChange.autoLaneChangeBsmDelay = slBool(
+    s["AutoLaneChangeBsmDelay"],
+    false,
+  );
   cfg.laneChange.minimumSpeed = slNum(s["BlinkerMinLateralControlSpeed"], 20);
   cfg.laneChange.blinkerPauseLateral = slBool(
     s["BlinkerPauseLateralControl"],
@@ -408,7 +420,7 @@ export function parseSunnyLinkExportObject(
   );
   cfg.laneChange.enabled = slBool(s["AutoLaneChangeEnabled"], true);
   cfg.laneChange.laneTurnDesire = slBool(s["LaneTurnDesire"], false);
-  cfg.laneChange.adjustLaneTurnSpeed = slNum(s["AdjustLaneTurnSpeed"], 0);
+  cfg.laneChange.laneTurnSpeed = slNum(s["LaneTurnValue"], 0);
 
   // ── speedControl ─────────────────────────────────────────────────────────
   const slcMode = Math.max(0, Math.min(3, slInt(s["SpeedLimitMode"], 0))) as
@@ -460,14 +472,25 @@ export function parseSunnyLinkExportObject(
   cfg.interface.hideVegoUI = slBool(s["HideVEgoUI"], false);
   cfg.interface.trueVegoUI = slBool(s["TrueVEgoUI"], false);
   cfg.interface.torqueBar = slBool(s["TorqueBar"], false);
-  cfg.interface.blindSpotHUD = slBool(s["BlindSpotDetection"], false);
-  cfg.interface.steeringArc = slBool(s["SteeringArc"], false);
-  cfg.interface.chevronInfo = slBool(s["ChevronInfo"], false);
+  cfg.interface.blindSpotHUD = slBool(
+    s["BlindSpotDetection"] ?? s["BlindSpot"],
+    false,
+  );
+  const chevronRaw = slInt(s["ChevronInfo"], 0);
+  cfg.interface.chevronInfo = (
+    chevronRaw >= 0 && chevronRaw <= 4 ? chevronRaw : 0
+  ) as 0 | 1 | 2 | 3 | 4;
   cfg.interface.rainbowMode = slBool(s["RainbowMode"], false);
   cfg.interface.showAdvancedControls = slBool(s["ShowAdvancedControls"], false);
-  cfg.interface.language = String(s["LanguageSetting"] ?? "main_en");
-  cfg.interface.interactivityTimeout = slInt(s["InteractivityTimer"], 90);
-  cfg.interface.realTimeAccelBar = slBool(s["RealTimeAccelBar"], false);
+  cfg.interface.language = String(s["LanguageSetting"] ?? "en");
+  cfg.interface.interactivityTimeout = slInt(s["InteractivityTimeout"], 30);
+  cfg.interface.realTimeAccelBar = slBool(s["RocketFuel"], false);
+  const dmpRaw = slInt(s["DisplayMetricsPosition"], 0);
+  cfg.interface.displayMetricsPosition = (
+    dmpRaw >= 0 && dmpRaw <= 3 ? dmpRaw : 0
+  ) as 0 | 1 | 2 | 3;
+  cfg.interface.showDebugInfo = slBool(s["ShowDebugInfo"], false);
+  cfg.interface.recordAudio = slBool(s["RecordAudio"], false);
 
   // ── commaAI ──────────────────────────────────────────────────────────────
   cfg.commaAI.recordDrives = slBool(s["RecordFront"], true);
@@ -494,16 +517,17 @@ export function parseSunnyLinkExportObject(
   cfg.advanced.quickBoot = slBool(s["QuickBootToggle"], false);
   cfg.advanced.maxTimeOffroad = slInt(s["MaxTimeOffroad"], 0);
   cfg.advanced.disablePowerDown = slBool(s["DisablePowerDown"], false);
-  cfg.advanced.wakeupBehavior = slInt(s["WakeupBehavior"], 0);
+  cfg.advanced.deviceBootMode = slInt(s["DeviceBootMode"], 0);
   cfg.advanced.disableUpdates = slBool(s["DisableUpdates"], false);
 
   // ── vehicleSpecific ──────────────────────────────────────────────────
   cfg.vehicleSpecific.teslaCoopSteering = slBool(s["TeslaCoopSteering"], false);
   cfg.vehicleSpecific.subaruStopAndGo = slBool(s["SubaruStopAndGo"], false);
   cfg.vehicleSpecific.toyotaEnforceFactoryLong = slBool(
-    s["ToyotaEnforceFactoryLongitudinal"],
+    s["ToyotaEnforceStockLongitudinal"],
     false,
   );
+  cfg.vehicleSpecific.toyotaStopAndGo = slBool(s["ToyotaStopAndGoHack"], false);
   // ── name / description ────────────────────────────────────────────────────
   const vehicleName = [cfg.vehicle.make, cfg.vehicle.model, cfg.vehicle.year]
     .filter(Boolean)
@@ -592,6 +616,7 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     LiveTorqueParamsToggle: c.lateral.liveTorque,
     LiveTorqueParamsRelaxedToggle: c.lateral.liveTorqueRelaxed,
     TorqueControlTune: c.lateral.torqueControlTune,
+    CustomTorqueParams: c.lateral.customTorqueParams,
     LagdToggle: c.lateral.lagdEnabled,
     LagdToggleDelay: c.lateral.lagdDelay,
     NeuralNetworkLateralControl: c.lateral.useNNModel,
@@ -621,13 +646,15 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     // lane change
     AutoLaneChangeEnabled: c.laneChange.enabled ? "True" : "False",
     AutoLaneChangeTimer: String(c.laneChange.autoTimer),
-    BlindSpot: c.laneChange.bsmMonitoring ? "True" : "False",
-    AutoLaneChangeBsmDelay: c.laneChange.bsmMonitoring ? "True" : "False",
+    BlindSpot: c.interface.blindSpotHUD ? "True" : "False",
+    AutoLaneChangeBsmDelay: c.laneChange.autoLaneChangeBsmDelay
+      ? "True"
+      : "False",
     BlinkerMinLateralControlSpeed: String(c.laneChange.minimumSpeed),
-    BlinkerPauseLateralControl: c.laneChange.blinkerPauseLateral ? "1" : "0",
+    BlinkerPauseLateralControl: c.laneChange.blinkerPauseLateral ? 1 : 0,
     BlinkerLateralReengageDelay: String(c.laneChange.blinkerReengageDelay),
     LaneTurnDesire: c.laneChange.laneTurnDesire ? "True" : "False",
-    AdjustLaneTurnSpeed: String(c.laneChange.adjustLaneTurnSpeed),
+    LaneTurnValue: String(c.laneChange.laneTurnSpeed),
 
     // speed control
     SpeedLimitMode: c.speedControl.speedLimitControl.mode,
@@ -664,13 +691,15 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     TrueVEgoUI: c.interface.trueVegoUI ? "True" : "False",
     TorqueBar: c.interface.torqueBar ? "True" : "False",
     BlindSpotDetection: c.interface.blindSpotHUD ? "True" : "False",
-    SteeringArc: c.interface.steeringArc ? "True" : "False",
-    ChevronInfo: c.interface.chevronInfo ? "True" : "False",
+    ChevronInfo: c.interface.chevronInfo,
     RainbowMode: c.interface.rainbowMode ? "True" : "False",
     ShowAdvancedControls: c.interface.showAdvancedControls ? "True" : "False",
     LanguageSetting: c.interface.language,
-    InteractivityTimer: String(c.interface.interactivityTimeout),
-    RealTimeAccelBar: c.interface.realTimeAccelBar ? "True" : "False",
+    InteractivityTimeout: String(c.interface.interactivityTimeout),
+    RocketFuel: c.interface.realTimeAccelBar ? "True" : "False",
+    DisplayMetricsPosition: c.interface.displayMetricsPosition,
+    ShowDebugInfo: c.interface.showDebugInfo ? "True" : "False",
+    RecordAudio: c.interface.recordAudio ? "True" : "False",
 
     // commaAI
     RecordFront: c.commaAI.recordDrives ? "True" : "False",
@@ -691,15 +720,16 @@ export function exportAsSunnyLink(config: SPConfig, name?: string): void {
     QuickBootToggle: c.advanced.quickBoot ? "True" : "False",
     MaxTimeOffroad: String(c.advanced.maxTimeOffroad),
     DisablePowerDown: c.advanced.disablePowerDown ? "True" : "False",
-    WakeupBehavior: String(c.advanced.wakeupBehavior),
+    DeviceBootMode: String(c.advanced.deviceBootMode),
     DisableUpdates: c.advanced.disableUpdates ? "True" : "False",
 
     // vehicleSpecific
     TeslaCoopSteering: c.vehicleSpecific.teslaCoopSteering ? "True" : "False",
     SubaruStopAndGo: c.vehicleSpecific.subaruStopAndGo ? "True" : "False",
-    ToyotaEnforceFactoryLongitudinal: c.vehicleSpecific.toyotaEnforceFactoryLong
+    ToyotaEnforceStockLongitudinal: c.vehicleSpecific.toyotaEnforceFactoryLong
       ? "True"
       : "False",
+    ToyotaStopAndGoHack: c.vehicleSpecific.toyotaStopAndGo ? "True" : "False",
   };
 
   const payload: SunnyLinkExportFile = {

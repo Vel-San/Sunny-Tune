@@ -596,6 +596,35 @@ const OFFICIAL_DOCS: ReadonlyArray<{
     docsPath: "settings/vehicle/",
     note: "Toyota only",
   },
+  {
+    id: "ToyotaStopAndGoHack",
+    label: "Toyota: Stop and Go",
+    section: "Vehicle",
+    docsPath: "settings/vehicle/",
+    note: "Toyota only",
+  },
+
+  // ── Recently added params (device-confirmed) ──────────────────────────
+  {
+    id: "RecordAudio",
+    label: "Record Drive Audio",
+    section: "Toggles",
+    docsPath: "settings/toggles/",
+    note: "records microphone audio to the dashcam clip; distinct from RecordAudioFeedback upload",
+  },
+  {
+    id: "ShowDebugInfo",
+    label: "Show Debug Info Overlay",
+    section: "Developer",
+    docsPath: "settings/developer/",
+  },
+  {
+    id: "DisplayMetricsPosition",
+    label: "Display Metrics Position",
+    section: "Visuals",
+    docsPath: "settings/visuals/",
+    note: "0=Off, 1=Bottom, 2=Right, 3=Right+Bottom",
+  },
 
   // ── Other ─────────────────────────────────────────────────────────────
   {
@@ -737,7 +766,11 @@ const OUR_SPKEYS: ReadonlyArray<{
     section: "laneChange",
     field: "minimumSpeed",
   },
-  { spKey: "BlindSpot", section: "laneChange", field: "bsmMonitoring" },
+  {
+    spKey: "AutoLaneChangeBsmDelay",
+    section: "laneChange",
+    field: "autoLaneChangeBsmDelay",
+  },
   {
     spKey: "BlinkerPauseLateralControl",
     section: "laneChange",
@@ -778,8 +811,7 @@ const OUR_SPKEYS: ReadonlyArray<{
   { spKey: "QuietMode", section: "interface", field: "quietMode" },
   { spKey: "HideVEgoUI", section: "interface", field: "hideVegoUI" },
   { spKey: "TorqueBar", section: "interface", field: "torqueBar" },
-  { spKey: "BlindSpotDetection", section: "interface", field: "blindSpotHUD" },
-  { spKey: "SteeringArc", section: "interface", field: "steeringArc" },
+  { spKey: "BlindSpot", section: "interface", field: "blindSpotHUD" },
   { spKey: "TrueVEgoUI", section: "interface", field: "trueVegoUI" },
   { spKey: "ChevronInfo", section: "interface", field: "chevronInfo" },
   { spKey: "RainbowMode", section: "interface", field: "rainbowMode" },
@@ -828,12 +860,12 @@ const OUR_SPKEYS: ReadonlyArray<{
     field: "showAdvancedControls",
   },
   {
-    spKey: "InteractivityTimer",
+    spKey: "InteractivityTimeout",
     section: "interface",
     field: "interactivityTimeout",
   },
   {
-    spKey: "RealTimeAccelBar",
+    spKey: "RocketFuel",
     section: "interface",
     field: "realTimeAccelBar",
   },
@@ -841,9 +873,9 @@ const OUR_SPKEYS: ReadonlyArray<{
   // Lane Change (turn-desire / lane-turn speed live here per config schema)
   { spKey: "LaneTurnDesire", section: "laneChange", field: "laneTurnDesire" },
   {
-    spKey: "AdjustLaneTurnSpeed",
+    spKey: "LaneTurnValue",
     section: "laneChange",
-    field: "adjustLaneTurnSpeed",
+    field: "laneTurnSpeed",
   },
   // Speed Control
   {
@@ -862,7 +894,7 @@ const OUR_SPKEYS: ReadonlyArray<{
   // Advanced (device management)
   { spKey: "MaxTimeOffroad", section: "advanced", field: "maxTimeOffroad" },
   { spKey: "DisablePowerDown", section: "advanced", field: "disablePowerDown" },
-  { spKey: "WakeupBehavior", section: "advanced", field: "wakeupBehavior" },
+  { spKey: "DeviceBootMode", section: "advanced", field: "deviceBootMode" },
   { spKey: "DisableUpdates", section: "advanced", field: "disableUpdates" },
   // Vehicle-specific
   {
@@ -876,9 +908,34 @@ const OUR_SPKEYS: ReadonlyArray<{
     field: "subaruStopAndGo",
   },
   {
-    spKey: "ToyotaEnforceFactoryLong",
+    spKey: "ToyotaEnforceStockLongitudinal",
     section: "vehicleSpecific",
     field: "toyotaEnforceFactoryLong",
+  },
+  {
+    spKey: "ToyotaStopAndGoHack",
+    section: "vehicleSpecific",
+    field: "toyotaStopAndGo",
+  },
+  {
+    spKey: "CustomTorqueParams",
+    section: "lateral",
+    field: "customTorqueParams",
+  },
+  {
+    spKey: "DisplayMetricsPosition",
+    section: "interface",
+    field: "displayMetricsPosition",
+  },
+  {
+    spKey: "ShowDebugInfo",
+    section: "interface",
+    field: "showDebugInfo",
+  },
+  {
+    spKey: "RecordAudio",
+    section: "interface",
+    field: "recordAudio",
   },
   // Metadata
   {
@@ -921,13 +978,12 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "DrivingPersonality",
   "AutoLaneChangeEnabled",
   "AutoLaneChangeTimer",
-  "BlindSpot",
+  "AutoLaneChangeBsmDelay",
+  "LaneTurnDesire",
+  "LaneTurnValue",
   "BlinkerMinLateralControlSpeed",
   "BlinkerPauseLateralControl",
   "BlinkerLateralReengageDelay",
-  "LaneTurnDesire",
-  "AdjustLaneTurnSpeed",
-  "SmartCruiseControlVision",
   "SmartCruiseControlMap",
   "IntelligentCruiseButtonManagement",
   "SpeedLimitMode",
@@ -947,8 +1003,8 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "OnroadUploads",
   "ShowAdvancedControls",
   "LanguageSetting",
-  "InteractivityTimer",
-  "RealTimeAccelBar",
+  "InteractivityTimeout",
+  "RocketFuel",
   "Brightness",
   "OnroadBrightnessDelay",
   "OnroadScreenOffTimer",
@@ -972,20 +1028,25 @@ const SPKEYS_WITH_DOCS_HELP = new Set([
   "QuickBootToggle",
   "MaxTimeOffroad",
   "DisablePowerDown",
-  "WakeupBehavior",
+  "DeviceBootMode",
   "DisableUpdates",
   "ModelManager_ActiveBundle",
   "TeslaCoopSteering",
   "SubaruStopAndGo",
-  "ToyotaEnforceFactoryLong",
-  "BlindSpotDetection",
-  "SteeringArc",
+  "ToyotaEnforceStockLongitudinal",
+  "ToyotaStopAndGoHack",
+  "BlindSpot",
   "TrueVEgoUI",
   "ChevronInfo",
   "RainbowMode",
   "TorqueBar",
   "LiveTorqueParamsToggle",
   "LiveTorqueParamsRelaxedToggle",
+  "SmartCruiseControlVision",
+  "CustomTorqueParams",
+  "DisplayMetricsPosition",
+  "ShowDebugInfo",
+  "RecordAudio",
 ]);
 
 // ─── Known mapping: our spKey → official docs id ─────────────────────────────
@@ -998,7 +1059,7 @@ const SPKEY_TO_DOCS_ID: Record<string, string> = {
   PlanplusControl: "PlanPlusControls",
   CustomAccIncrementsEnabled: "CustomAccIncrementsEnabled",
   AutoLaneChangeEnabled: "AutoLaneChangeTimer", // subsumed in timer (-1=off)
-  BlindSpot: "AutoLaneChangeBsmDelay",
+  BlindSpot: "BlindSpotDetection", // device param → docs entry
   SmartCruiseControlVision: "VisionBasedTurnSpeedControl",
   SpeedLimitMode: "SpeedLimitMode",
   SpeedLimitSource: "SpeedLimitSource",
@@ -1015,16 +1076,24 @@ const SPKEY_TO_DOCS_ID: Record<string, string> = {
   LiveTorqueParamsToggle: "SelfTune",
   LiveTorqueParamsRelaxedToggle: "LessRestrictSettingsForSelfTune",
   TorqueParamsOverrideEnabled: "EnableCustomTorqueTuning",
+  CustomTorqueParams: "EnableCustomTorqueTuning", // parent gate in device → same docs entry
   Brightness: "OnroadBrightness",
   RecordFront: "RecordFrontLock",
   RecordAudioFeedback: "RecordUploadMicAudio",
   LanguageSetting: "Language",
-  WakeupBehavior: "DeviceBootMode",
-  InteractivityTimer: "InteractivityTimeout",
+  // corrected key names (removed stale aliases: WakeupBehavior, InteractivityTimer, RealTimeAccelBar)
+  DeviceBootMode: "DeviceBootMode",
+  InteractivityTimeout: "InteractivityTimeout",
+  RocketFuel: "DisplayRocketFuelBar",
+  LaneTurnValue: "AdjustLaneTurnSpeed",
+  ToyotaEnforceStockLongitudinal: "ToyotaEnforceFactoryLongitudinalControl",
+  DisplayMetricsPosition: "DisplayMetricsPosition",
+  ShowDebugInfo: "ShowDebugInfo",
+  RecordAudio: "RecordAudio",
+  ToyotaStopAndGoHack: "ToyotaStopAndGoHack",
+  AutoLaneChangeBsmDelay: "AutoLaneChangeBsmDelay",
   ModelManager_ActiveBundle: "DrivingModel",
   SunnypilotEnabled: "EnableSunnypilot",
-  ToyotaEnforceFactoryLong: "ToyotaEnforceFactoryLongitudinalControl",
-  RealTimeAccelBar: "DisplayRocketFuelBar",
   // Alias entries that share a field with an existing spKey
   UseMetricSystem: "UseMetricSystem", // same field as IsMetric; Device-section docs entry
   RecordUploadDriverCamera: "RecordUploadDriverCamera", // same field as RecordFront; Device-section docs entry
@@ -1080,7 +1149,7 @@ console.log(
   `\n${BOLD}══════════════════════════════════════════════════════════${RESET}`,
 );
 console.log(
-  `${BOLD}  sunnypilot Official Docs Coverage Audit${RESET}   ${DIM}(docs snapshot: 2026-04-08)${RESET}`,
+  `${BOLD}  sunnypilot Official Docs Coverage Audit${RESET}   ${DIM}(docs snapshot: 2026-05-11)${RESET}`,
 );
 console.log(
   `${BOLD}  Source: github.com/sunnypilot/user-docs → docs.sunnypilot.ai${RESET}`,
