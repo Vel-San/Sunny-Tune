@@ -70,13 +70,13 @@ export const LaneChangeSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Blind Spot Monitoring"
-        spKey="BlindSpot"
-        description="BlindSpot — integrate BSM radar data to block the lane change when a vehicle is detected in the blind spot."
+        label="BSM Delay for Lane Change"
+        spKey="AutoLaneChangeBsmDelay"
+        description="AutoLaneChangeBsmDelay — delay the auto lane change when blind spot monitoring (BSM) detects a vehicle in your blind spot."
       >
         <Toggle
-          checked={lc.bsmMonitoring}
-          onChange={(v) => set("bsmMonitoring", v)}
+          checked={lc.autoLaneChangeBsmDelay}
+          onChange={(v) => set("autoLaneChangeBsmDelay", v)}
           disabled={!lc.enabled}
         />
       </ParamRow>

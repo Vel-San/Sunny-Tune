@@ -581,9 +581,14 @@ export default function SharedConfigPage() {
               value={c.vehicleSpecific.subaruStopAndGo ? "On" : "Off"}
             />
             <ROW
-              label="Toyota: Enforce Factory Long"
-              spKey="ToyotaEnforceFactoryLong"
+              label="Toyota: Enforce Stock Longitudinal"
+              spKey="ToyotaEnforceStockLongitudinal"
               value={c.vehicleSpecific.toyotaEnforceFactoryLong ? "On" : "Off"}
+            />
+            <ROW
+              label="Toyota: Stop and Go Hack"
+              spKey="ToyotaStopAndGoHack"
+              value={c.vehicleSpecific.toyotaStopAndGo ? "On" : "Off"}
             />
           </SectionBlock>
 
@@ -767,9 +772,9 @@ export default function SharedConfigPage() {
               mono
             />
             <ROW
-              label="BSM Integration"
-              spKey="BlindSpot"
-              value={c.laneChange.bsmMonitoring ? "On" : "Off"}
+              label="BSM Delay for Lane Change"
+              spKey="AutoLaneChangeBsmDelay"
+              value={c.laneChange.autoLaneChangeBsmDelay ? "On" : "Off"}
             />
             <ROW
               label="Lane Turn Desires"
@@ -777,12 +782,12 @@ export default function SharedConfigPage() {
               value={c.laneChange.laneTurnDesire ? "On" : "Off"}
             />
             <ROW
-              label="Adjust Lane Turn Speed"
-              spKey="AdjustLaneTurnSpeed"
+              label="Max Lane Turn Speed"
+              spKey="LaneTurnValue"
               value={
-                c.laneChange.adjustLaneTurnSpeed === 0
+                c.laneChange.laneTurnSpeed === 0
                   ? "Always active"
-                  : `${c.laneChange.adjustLaneTurnSpeed} kph`
+                  : `${c.laneChange.laneTurnSpeed} kph`
               }
               mono
             />
@@ -925,19 +930,23 @@ export default function SharedConfigPage() {
               value={c.interface.torqueBar ? "On" : "Off"}
             />
             <ROW
-              label="Blind Spot Warnings"
-              spKey="BlindSpotDetection"
-              value={c.interface.blindSpotHUD ? "On" : "Off"}
+              label="Steering Arc (Torque Bar)"
+              spKey="TorqueBar"
+              value={c.interface.torqueBar ? "On" : "Off"}
             />
             <ROW
-              label="Steering Arc"
-              spKey="SteeringArc"
-              value={c.interface.steeringArc ? "On" : "Off"}
+              label="Blind Spot Warnings"
+              spKey="BlindSpot"
+              value={c.interface.blindSpotHUD ? "On" : "Off"}
             />
             <ROW
               label="Metrics Below Chevron"
               spKey="ChevronInfo"
-              value={c.interface.chevronInfo ? "On" : "Off"}
+              value={
+                ["Off", "Distance", "Speed", "Time", "All"][
+                  c.interface.chevronInfo
+                ] ?? String(c.interface.chevronInfo)
+              }
             />
             <ROW
               label="Tesla Rainbow Mode"
@@ -971,7 +980,7 @@ export default function SharedConfigPage() {
             />
             <ROW
               label="Interactivity Timeout"
-              spKey="InteractivityTimer"
+              spKey="InteractivityTimeout"
               value={
                 c.interface.interactivityTimeout === 0
                   ? "Never"
@@ -981,13 +990,13 @@ export default function SharedConfigPage() {
             />
             <ROW
               label="Real-time Accel Bar"
-              spKey="RealTimeAccelBar"
+              spKey="RocketFuel"
               value={c.interface.realTimeAccelBar ? "On" : "Off"}
             />
             <ROW
               label="Language"
               spKey="LanguageSetting"
-              value={c.interface.language || "main_en"}
+              value={c.interface.language || "en"}
               mono
             />
           </SectionBlock>
@@ -1068,13 +1077,9 @@ export default function SharedConfigPage() {
             />
             <ROW
               label="Wake Up Behavior"
-              spKey="WakeupBehavior"
+              spKey="DeviceBootMode"
               value={
-                c.advanced.wakeupBehavior === 0
-                  ? "Manual only"
-                  : c.advanced.wakeupBehavior === 1
-                    ? "On cable"
-                    : "Always on"
+                c.advanced.deviceBootMode === 0 ? "Standard" : "Always Offroad"
               }
             />
             <ROW
