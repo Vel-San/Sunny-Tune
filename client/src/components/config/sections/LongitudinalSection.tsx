@@ -8,9 +8,9 @@ import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow } from "../ConfigSection";
 
 const HYUNDAI_TUNE_OPTS = [
-  { value: "0", label: "0 — Off (Default openpilot tuning)" },
-  { value: "1", label: "1 — Dynamic (Sportier acceleration & braking)" },
-  { value: "2", label: "2 — Predictive (Smooth, comfort-focused)" },
+  { value: "0", label: "Off — Default openpilot tuning" },
+  { value: "1", label: "Dynamic — Sportier acceleration & braking" },
+  { value: "2", label: "Predictive — Smooth, comfort-focused" },
 ];
 
 const SLC_MODE_OPTS = [
@@ -73,7 +73,7 @@ export const LongitudinalSection: React.FC = () => {
       <ParamRow
         label="Hyundai/Kia/Genesis Tune"
         spKey="HyundaiLongitudinalTuning"
-        description="HyundaiLongitudinalTuning — 0=Off (standard), 1=Dynamic (sportier), 2=Predictive (smooth)."
+        description="HyundaiLongitudinalTuning — Off: default openpilot tuning. Dynamic: sportier acceleration & braking. Predictive: smooth, comfort-focused."
       >
         <Select
           value={String(l.hyundaiLongTune)}

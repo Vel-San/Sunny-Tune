@@ -72,12 +72,19 @@ app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 // ─── Error handler ────────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  logger.info("Server started", {
-    port: PORT,
-    env: process.env.NODE_ENV ?? "development",
-    logLevel:
-      process.env.LOG_LEVEL ??
-      (process.env.NODE_ENV === "production" ? "info" : "debug"),
+// ─── Start server (local dev & Docker only) ─────────────────────────────────
+// Vercel sets VERCEL=1 automatically. In that environment the platform invokes
+// the exported `app` directly as a serverless handler — no listen() needed.
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    logger.info("Server started", {
+      port: PORT,
+      env: process.env.NODE_ENV ?? "development",
+      logLevel:
+        process.env.LOG_LEVEL ??
+        (process.env.NODE_ENV === "production" ? "info" : "debug"),
+    });
   });
-});
+}
+
+export default app;

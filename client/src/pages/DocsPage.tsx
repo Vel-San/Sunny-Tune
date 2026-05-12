@@ -1056,34 +1056,10 @@ export default function DocsPage() {
   const activeSection = SECTIONS.find((s) => s.id === active);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 flex gap-8 min-h-[calc(100vh-57px)]">
-      {/* Sidebar */}
-      <aside className="hidden lg:block w-52 flex-shrink-0">
-        <div className="sticky top-20 space-y-0.5">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 px-2 mb-2">
-            <Book className="w-3 h-3 inline-block mr-1 -mt-0.5" /> Documentation
-          </p>
-          {SECTIONS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActive(id)}
-              className={clsx(
-                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors",
-                active === id
-                  ? "bg-zinc-800 text-zinc-100"
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900",
-              )}
-            >
-              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-              {label}
-            </button>
-          ))}
-        </div>
-      </aside>
-
-      {/* Mobile top nav */}
-      <div className="lg:hidden w-full">
-        <div className="flex flex-wrap gap-1.5 mb-6">
+    <div className="max-w-6xl mx-auto px-4 py-8 min-h-[calc(100vh-57px)]">
+      {/* Mobile top nav — stacks above content on small screens */}
+      <div className="lg:hidden mb-5">
+        <div className="flex flex-wrap gap-1.5">
           {SECTIONS.map(({ id, label }) => (
             <button
               key={id}
@@ -1101,25 +1077,53 @@ export default function DocsPage() {
         </div>
       </div>
 
-      {/* Content */}
-      <main className="flex-1 min-w-0">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-xs text-zinc-600 mb-6">
-          <span>Docs</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-zinc-400">{activeSection?.label}</span>
-        </div>
+      {/* Desktop: sidebar + content side by side */}
+      <div className="flex gap-8">
+        {/* Sidebar — desktop only */}
+        <aside className="hidden lg:block w-52 flex-shrink-0">
+          <div className="sticky top-20 space-y-0.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 px-2 mb-2">
+              <Book className="w-3 h-3 inline-block mr-1 -mt-0.5" />{" "}
+              Documentation
+            </p>
+            {SECTIONS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActive(id)}
+                className={clsx(
+                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors",
+                  active === id
+                    ? "bg-zinc-800 text-zinc-100"
+                    : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900",
+                )}
+              >
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </aside>
 
-        {blocks.map((block) => (
-          <article key={block.title} className="mb-10">
-            <h2 className="text-xl font-bold text-zinc-100 mb-4">
-              {block.title}
-            </h2>
-            <hr className="border-zinc-800 mb-6" />
-            {block.content}
-          </article>
-        ))}
-      </main>
+        {/* Content */}
+        <main className="flex-1 min-w-0 w-full">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-xs text-zinc-600 mb-6">
+            <span>Docs</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-zinc-400">{activeSection?.label}</span>
+          </div>
+
+          {blocks.map((block) => (
+            <article key={block.title} className="mb-10">
+              <h2 className="text-xl font-bold text-zinc-100 mb-4">
+                {block.title}
+              </h2>
+              <hr className="border-zinc-800 mb-6" />
+              {block.content}
+            </article>
+          ))}
+        </main>
+      </div>
     </div>
   );
 }

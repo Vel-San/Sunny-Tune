@@ -60,7 +60,7 @@ const STACK = [
   { label: "Frontend", value: "React · TypeScript · Tailwind CSS · Vite" },
   { label: "Backend", value: "Node.js · Express · TypeScript · Prisma ORM" },
   { label: "Database", value: "PostgreSQL (Neon)" },
-  { label: "Hosting", value: "Vercel (frontend) · Railway (API)" },
+  { label: "Hosting", value: "Vercel (frontend + API serverless)" },
   { label: "Auth", value: "Anonymous UUID bearer tokens — no sign-up needed" },
 ];
 
