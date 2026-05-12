@@ -80,8 +80,13 @@ export interface SPConfig {
     liveTorque: boolean;
     /** Slower learning rate for live torque updates — LiveTorqueParamsRelaxedToggle */
     liveTorqueRelaxed: boolean;
-    /** Torque tuning preset: 0=Comma stock, 1=SP, 2=SP+ — TorqueControlTune */
-    torqueControlTune: 0 | 1 | 2;
+    /**
+     * Torque control tune version — TorqueControlTune.
+     * "" = Default (upstream), 1 = v1.0, 0 = v0.0
+     */
+    torqueControlTune: "" | 0 | 1;
+    /** Enable custom torque tuning (parent gate for overrides) — CustomTorqueParams */
+    customTorqueParams: boolean;
     /** Live Actuator Group Delay (LAGD) estimation — LagdToggle */
     lagdEnabled: boolean;
     /** LAGD manual delay offset in seconds — LagdToggleDelay */
@@ -96,7 +101,7 @@ export interface SPConfig {
       enabled: boolean;
       /** Friction override (0.01–0.5) — TorqueParamsOverrideFriction */
       friction: number;
-      /** Lat accel factor override (1.0–4.0) — TorqueParamsOverrideLatAccelFactor */
+      /** Lat accel factor override (0.1–5.0) — TorqueParamsOverrideLatAccelFactor */
       latAccelFactor: number;
     };
   };
@@ -109,9 +114,9 @@ export interface SPConfig {
     dynamicE2E: boolean;
     /** Alpha longitudinal: next-gen SP improvements — AlphaLongitudinalEnabled */
     alphaLongEnabled: boolean;
-    /** Hyundai/Kia/Genesis tuning preset: 0=stock, 1=SP, 2=SP+ — HyundaiLongitudinalTuning */
+    /** Hyundai/Kia/Genesis tuning preset: 0=Off, 1=Dynamic, 2=Predictive — HyundaiLongitudinalTuning */
     hyundaiLongTune: 0 | 1 | 2;
-    /** Planplus longitudinal planner — PlanplusControl */
+    /** Planplus longitudinal planner (legacy; removed in current SP) — PlanplusControl */
     planplusEnabled: boolean;
     /** Replace stock ACC increment steps — CustomAccIncrementsEnabled */
     customAccEnabled: boolean;
@@ -162,16 +167,16 @@ export interface SPConfig {
     autoTimer: -1 | 0 | 1 | 2 | 3 | 4 | 5;
     /** Minimum speed for assisted lane change (kph) — BlinkerMinLateralControlSpeed */
     minimumSpeed: number;
-    /** Use car's BSM radar to block unsafe lane changes — BlindSpot */
-    bsmMonitoring: boolean;
+    /** Delay lane change when BSM detects a vehicle in the blind spot — AutoLaneChangeBsmDelay */
+    autoLaneChangeBsmDelay: boolean;
     /** Pause lateral control while blinker is active — BlinkerPauseLateralControl */
     blinkerPauseLateral: boolean;
     /** Seconds before lateral re-engages after blinker off — BlinkerLateralReengageDelay */
     blinkerReengageDelay: number;
     /** Use desired path on curves / turns — LaneTurnDesire */
     laneTurnDesire: boolean;
-    /** Speed (kph) at which lane-turn desire activates; 0 = disabled — AdjustLaneTurnSpeed */
-    adjustLaneTurnSpeed: number;
+    /** Maximum speed (kph/mph) for lane turn desire — LaneTurnValue */
+    laneTurnSpeed: number;
   };
 
   // ── 7. Navigation ─────────────────────────────────────────────────────────
@@ -212,24 +217,34 @@ export interface SPConfig {
     hideVegoUI: boolean;
     /** Show GPS-based true speed instead of odometer — TrueVEgoUI */
     trueVegoUI: boolean;
-    /** Show lateral torque bar on HUD — TorqueBar */
+    /** Show lateral torque / steering arc overlay on HUD — TorqueBar */
     torqueBar: boolean;
-    /** Show blind spot warning indicators on HUD — BlindSpotDetection */
+    /** Show blind spot warning indicators on HUD — BlindSpot (display) */
     blindSpotHUD: boolean;
-    /** Show steering arc overlay on HUD — SteeringArc */
-    steeringArc: boolean;
-    /** Display metrics below the lead car chevron — ChevronInfo */
-    chevronInfo: boolean;
+    /**
+     * Display metrics below the lead car chevron — ChevronInfo.
+     * 0 = Off, 1 = Distance, 2 = Speed, 3 = Time, 4 = All
+     */
+    chevronInfo: 0 | 1 | 2 | 3 | 4;
     /** Enable Tesla Rainbow Mode (cosmetic) — RainbowMode */
     rainbowMode: boolean;
     /** Show advanced controls in sunnypilot's own settings UI — ShowAdvancedControls */
     showAdvancedControls: boolean;
     /** UI language for sunnypilot — LanguageSetting */
     language: string;
-    /** Seconds of inactivity before HUD interaction times out — InteractivityTimer */
+    /** Seconds of inactivity before settings UI auto-closes — InteractivityTimeout */
     interactivityTimeout: number;
-    /** Show real-time acceleration bar on the HUD — RealTimeAccelBar */
+    /** Show real-time acceleration/deceleration bar on the HUD — RocketFuel */
     realTimeAccelBar: boolean;
+    /**
+     * Position of extended metrics on the HUD — DisplayMetricsPosition.
+     * 0 = Off, 1 = Bottom, 2 = Right, 3 = Right & Bottom
+     */
+    displayMetricsPosition: 0 | 1 | 2 | 3;
+    /** Show UI debug info overlay — ShowDebugInfo */
+    showDebugInfo: boolean;
+    /** Record and upload microphone audio — RecordAudio */
+    recordAudio: boolean;
   };
 
   // ── 9. Comma AI Core ──────────────────────────────────────────────────────
@@ -267,17 +282,17 @@ export interface SPConfig {
     /** Skip boot animation for faster startup — QuickBootToggle */
     quickBoot: boolean;
     /**
-     * Maximum time (seconds) device stays off-road before auto power-down.
+     * Maximum time (minutes) device stays off-road before auto power-down.
      * 0 = no limit — MaxTimeOffroad
      */
     maxTimeOffroad: number;
     /** Prevent the device from powering down when parked — DisablePowerDown */
     disablePowerDown: boolean;
     /**
-     * When the device wakes up from sleep.
-     * 0 = Off (manual only), 1 = On cable connection, 2 = Always on — WakeupBehavior
+     * Device boot/wake behaviour — DeviceBootMode.
+     * 0 = Standard, 1 = Always Offroad
      */
-    wakeupBehavior: number;
+    deviceBootMode: number;
     /** Disable automatic over-the-air updates (locks installed version) — DisableUpdates */
     disableUpdates: boolean;
   };
@@ -288,8 +303,10 @@ export interface SPConfig {
     teslaCoopSteering: boolean;
     /** Subaru: enable stop-and-go with low-speed ACC — SubaruStopAndGo */
     subaruStopAndGo: boolean;
-    /** Toyota: enforce stock longitudinal instead of SP override — ToyotaEnforceFactoryLong */
+    /** Toyota: enforce stock longitudinal instead of SP override — ToyotaEnforceStockLongitudinal */
     toyotaEnforceFactoryLong: boolean;
+    /** Toyota/Lexus: allow auto-resume in stop-and-go traffic — ToyotaStopAndGoHack */
+    toyotaStopAndGo: boolean;
   };
 }
 
@@ -314,7 +331,8 @@ export function createDefaultConfig(): SPConfig {
       cameraOffset: 0,
       liveTorque: true,
       liveTorqueRelaxed: true,
-      torqueControlTune: 1,
+      torqueControlTune: "",
+      customTorqueParams: false,
       lagdEnabled: true,
       lagdDelay: 0.2,
       useNNModel: false,
@@ -351,11 +369,11 @@ export function createDefaultConfig(): SPConfig {
       enabled: true,
       autoTimer: 0,
       minimumSpeed: 20,
-      bsmMonitoring: false,
+      autoLaneChangeBsmDelay: false,
       blinkerPauseLateral: false,
       blinkerReengageDelay: 0,
       laneTurnDesire: false,
-      adjustLaneTurnSpeed: 0,
+      laneTurnSpeed: 0,
     },
     navigation: {
       osmEnabled: false,
@@ -378,13 +396,15 @@ export function createDefaultConfig(): SPConfig {
       trueVegoUI: false,
       torqueBar: false,
       blindSpotHUD: false,
-      steeringArc: false,
-      chevronInfo: false,
+      chevronInfo: 0,
       rainbowMode: false,
       showAdvancedControls: false,
-      language: "main_en",
-      interactivityTimeout: 90,
+      language: "en",
+      interactivityTimeout: 30,
       realTimeAccelBar: false,
+      displayMetricsPosition: 0,
+      showDebugInfo: false,
+      recordAudio: false,
     },
     commaAI: {
       recordDrives: true,
@@ -405,13 +425,14 @@ export function createDefaultConfig(): SPConfig {
       quickBoot: false,
       maxTimeOffroad: 0,
       disablePowerDown: false,
-      wakeupBehavior: 0,
+      deviceBootMode: 0,
       disableUpdates: false,
     },
     vehicleSpecific: {
       teslaCoopSteering: false,
       subaruStopAndGo: false,
       toyotaEnforceFactoryLong: false,
+      toyotaStopAndGo: false,
     },
   };
 }

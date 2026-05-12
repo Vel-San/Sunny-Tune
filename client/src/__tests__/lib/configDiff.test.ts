@@ -24,6 +24,7 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       liveTorque: true,
       liveTorqueRelaxed: true,
       torqueControlTune: 1,
+      customTorqueParams: false,
       lagdEnabled: true,
       lagdDelay: 0.2,
       useNNModel: false,
@@ -60,11 +61,11 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       enabled: true,
       autoTimer: 1,
       minimumSpeed: 20,
-      bsmMonitoring: false,
+      autoLaneChangeBsmDelay: false,
       blinkerPauseLateral: false,
       blinkerReengageDelay: 0,
       laneTurnDesire: false,
-      adjustLaneTurnSpeed: 0,
+      laneTurnSpeed: 0,
     },
     navigation: {
       osmEnabled: false,
@@ -87,13 +88,15 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       torqueBar: false,
       trueVegoUI: false,
       blindSpotHUD: false,
-      steeringArc: false,
-      chevronInfo: false,
+      chevronInfo: 0,
       rainbowMode: false,
       showAdvancedControls: false,
-      language: "main_en",
-      interactivityTimeout: 90,
+      language: "en",
+      interactivityTimeout: 30,
       realTimeAccelBar: false,
+      displayMetricsPosition: 0,
+      showDebugInfo: false,
+      recordAudio: false,
     },
     commaAI: {
       recordDrives: true,
@@ -114,13 +117,14 @@ function makeConfig(overrides: Partial<SPConfig> = {}): SPConfig {
       quickBoot: false,
       maxTimeOffroad: 0,
       disablePowerDown: false,
-      wakeupBehavior: 0,
+      deviceBootMode: 0,
       disableUpdates: false,
     },
     vehicleSpecific: {
       teslaCoopSteering: false,
       subaruStopAndGo: false,
       toyotaEnforceFactoryLong: false,
+      toyotaStopAndGo: false,
     },
   };
   return { ...base, ...overrides };
@@ -291,13 +295,13 @@ describe("computeConfigDiff", () => {
     expect(entry!.newValue).toBe("On");
   });
 
-  it("detects a change in laneChange.adjustLaneTurnSpeed (number)", () => {
+  it("detects a change in laneChange.laneTurnSpeed (number)", () => {
     const original = makeConfig();
     const modified = makeConfig({
-      laneChange: { ...makeConfig().laneChange, adjustLaneTurnSpeed: 50 },
+      laneChange: { ...makeConfig().laneChange, laneTurnSpeed: 50 },
     });
     const diff = computeConfigDiff(original, modified);
-    const entry = diff.find((d) => d.field.includes("adjustLaneTurnSpeed"));
+    const entry = diff.find((d) => d.field.includes("laneTurnSpeed"));
     expect(entry).toBeDefined();
     expect(entry!.oldValue).toBe("0");
     expect(entry!.newValue).toBe("50");
@@ -360,13 +364,14 @@ describe("computeConfigDiff", () => {
         quickBoot: false,
         maxTimeOffroad: 0,
         disablePowerDown: false,
-        wakeupBehavior: 0,
+        deviceBootMode: 0,
         disableUpdates: false,
       },
       vehicleSpecific: {
         teslaCoopSteering: false,
         subaruStopAndGo: false,
         toyotaEnforceFactoryLong: false,
+        toyotaStopAndGo: false,
       },
     });
     expect(computeConfigDiff(cfg, cfg)).toEqual([]);

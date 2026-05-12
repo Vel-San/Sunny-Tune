@@ -158,14 +158,13 @@ describe("FIELD_HELP — critical SP keys are present", () => {
     "DevUIInfo",
     "OnroadUploads",
     "BlindSpotDetection",
-    "SteeringArc",
     "TrueVEgoUI",
     "ChevronInfo",
     "RainbowMode",
     "ShowAdvancedControls",
     "LanguageSetting",
-    "InteractivityTimer",
-    "RealTimeAccelBar",
+    "InteractivityTimeout",
+    "RocketFuel",
     "Brightness",
     "OnroadBrightnessDelay",
     "OnroadScreenOffTimer",
@@ -187,12 +186,12 @@ describe("FIELD_HELP — critical SP keys are present", () => {
     "QuickBootToggle",
     "MaxTimeOffroad",
     "DisablePowerDown",
-    "WakeupBehavior",
+    "DeviceBootMode",
     "DisableUpdates",
     // Vehicle-specific
     "TeslaCoopSteering",
     "SubaruStopAndGo",
-    "ToyotaEnforceFactoryLong",
+    "ToyotaEnforceStockLongitudinal",
   ];
 
   for (const key of requiredKeys) {

@@ -5,8 +5,8 @@
 [![CodeQL](https://img.shields.io/badge/CodeQL-enabled-blue?logo=github&logoColor=white)](https://github.com/Vel-San/Sunny-Tune/security/code-scanning)
 
 [![Live](https://img.shields.io/badge/Live-sunny--tune.vercel.app-black?logo=vercel&logoColor=white)](https://sunny-tune.vercel.app)
-[![API](https://img.shields.io/badge/API-Railway-7B2FBE?logo=railway&logoColor=white)](https://railway.app)
-[![Version](https://img.shields.io/badge/version-2.2.3-blue)](CHANGELOG.md)
+[![API](https://img.shields.io/badge/API-Vercel_Serverless-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue)](CHANGELOG.md)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -63,9 +63,7 @@
   - [Verified Vehicle List](#verified-vehicle-list)
   - [SP Version Compatibility Filter](#sp-version-compatibility-filter)
   - [Configuration Sharing](#configuration-sharing)
-  - [Deploying Online (Vercel + Railway)](#deploying-online-vercel--railway)
-    - [One-time setup](#one-time-setup)
-    - [Manual deployment (without GitHub Actions)](#manual-deployment-without-github-actions)
+  - [Deploying Online (Vercel — Frontend \& Backend)](#deploying-online-vercel--frontend--backend)
   - [GitHub Actions Workflows](#github-actions-workflows)
   - [Project Structure](#project-structure)
 
@@ -608,89 +606,99 @@ All social counts (`likeCount`, `ratingCount`, `commentCount`, `cloneCount`, `vi
 
 ---
 
-## Deploying Online (Vercel + Railway)
+## Deploying Online (Vercel — Frontend & Backend)
 
-The recommended production hosting is **Vercel** (frontend) + **Railway** (backend API + PostgreSQL). The `deploy.yml` GitHub Actions workflow automates both deployments on every push to `main`.
+Both the frontend and backend run on **Vercel** — completely free, no credit card required, no sleep or cold-start issues.
+
+- **Frontend:** existing `client/` Vercel project (unchanged)
+- **Backend:** a second Vercel project pointing at the `server/` directory, running as a serverless Node.js function via `@vercel/node`
+
+```
+Browser → Vercel (client/) → /api/* rewrite → Vercel (server/) → Neon PostgreSQL
+```
 
 ### One-time setup
 
-**1. Deploy the API to Railway**
+**1. Deploy the backend to Vercel**
 
-1. Create a new project at [railway.app](https://railway.app) and add a **PostgreSQL** plugin.
-2. Add a service for the server — point it at the GitHub repo, set the root directory to `server/`, and use `server/Dockerfile`.
-3. Set all required environment variables in the Railway service dashboard (same as `server/.env`):
-   `DATABASE_URL`, `NODE_ENV=production`, `PORT=3001`, `CORS_ORIGIN`, `TOKEN_SECRET`, `ADMIN_SECRET_HASH` (or `ADMIN_SECRET`), `ADMIN_ALLOWED_IPS` (optional).
-4. Note the public Railway URL (e.g. `https://sunnytune-server.up.railway.app`).
-5. Generate a Railway API token: **Account → Tokens → New Token**.
+1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import this GitHub repo.
+2. On the configuration screen set **Root Directory** to `server`.
+3. Leave the framework preset as **Other** (Node.js auto-detected).
+4. Set all required environment variables before clicking Deploy:
 
-**2. Deploy the frontend to Vercel**
+| Variable            | Value                                                                   |
+| ------------------- | ----------------------------------------------------------------------- |
+| `DATABASE_URL`      | `postgresql://USER:PASSWORD@HOST/DB?sslmode=require`                    |
+| `NODE_ENV`          | `production`                                                            |
+| `PORT`              | `3001`                                                                  |
+| `TOKEN_SECRET`      | _(run `openssl rand -hex 32` to generate)_                              |
+| `ADMIN_SECRET_HASH` | _(run `cd server && npm run hash-secret -- "your-secret"` to generate)_ |
+| `CORS_ORIGIN`       | `https://YOUR_FRONTEND.vercel.app`                                      |
 
-1. Import the repo into [vercel.com](https://vercel.com) — set the **root directory** to `client/`.
-2. Add the build env var: `VITE_API_URL=https://your-server.up.railway.app`
-3. Deploy once manually to create the project. Then run locally:
-   ```bash
-   npm install -g vercel
-   cd client && vercel link
-   # Note the org ID and project ID printed, or check .vercel/project.json
-   ```
-4. Update the `/api` rewrite destination in `client/vercel.json` to point to your Railway URL:
-   ```json
-   {
-     "source": "/api/(.*)",
-     "destination": "https://your-server.up.railway.app/api/$1"
-   }
-   ```
-5. Generate a Vercel access token: **Settings → Tokens → Create Token**.
+5. Click **Deploy** — note the backend URL (e.g. `https://sunny-tune-server.vercel.app`).
 
-**3. Add secrets & variables to GitHub**
+**2. Update the frontend rewrite**
 
-In your repo: **Settings → Secrets and variables → Actions**
+Update the `/api` rewrite destination in `client/vercel.json` to your backend URL:
 
-| Type     | Name                | Value                                    |
-| -------- | ------------------- | ---------------------------------------- |
-| Secret   | `VERCEL_TOKEN`      | Vercel personal access token from step 2 |
-| Secret   | `VERCEL_ORG_ID`     | Org ID from `.vercel/project.json`       |
-| Secret   | `VERCEL_PROJECT_ID` | Project ID from `.vercel/project.json`   |
-| Variable | `VITE_API_URL`      | Your Railway public URL                  |
-
-> **Railway** does not need a GitHub Actions secret. Connect it natively instead: Railway service → Settings → Source → this repo, Root Directory = `server`.
-
-Once those are set, every push to `main` triggers the deploy workflow automatically.
-
-### Manual deployment (without GitHub Actions)
-
-```bash
-# Server — Railway CLI
-npm install -g @railway/cli
-railway login
-cd server && railway up --service=server
-
-# Client — Vercel CLI
-npm install -g vercel
-vercel --prod
+```json
+{
+  "source": "/api/(.*)",
+  "destination": "https://your-backend.vercel.app/api/$1"
+}
 ```
 
-> **Migrations:** The server `Dockerfile` CMD runs `prisma migrate deploy` before starting the server, so Railway applies pending migrations on every deploy automatically.
+Push to `main` — the frontend auto-redeploys.
 
-> **CORS:** Set `CORS_ORIGIN` on Railway to your Vercel deployment URL (e.g. `https://sunnytune.vercel.app`).
+**3. Auto-deploy is already active**
+
+Both Vercel projects are connected to this GitHub repo via native integration. Every push to `main` automatically triggers a production deploy — no GitHub Actions secrets or workflow files needed. You can see deployment status in:
+
+- Vercel Dashboard → Project → Deployments
+- GitHub repo → commits → the green ✔ / Vercel bot check
+
+### Database migrations
+
+The `postinstall` script in `server/package.json` runs `prisma generate` automatically during every Vercel build. To apply a new schema migration against the hosted Neon DB:
+
+```bash
+cd server
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require" \
+npx prisma migrate deploy
+```
+
+### Manual redeploy
+
+Vercel Dashboard → Project → Deployments → Redeploy (works for both projects).
+
+Or via CLI:
+
+```bash
+# Backend
+cd server && vercel --prod
+
+# Frontend
+cd client && vercel --prod
+```
 
 ---
 
 ## GitHub Actions Workflows
 
-Nine workflows live in `.github/workflows/`:
+Eight workflows live in `.github/workflows/`:
 
 | Workflow              | File                    | Trigger                      | What it does                                                                           |
 | --------------------- | ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
 | **CI**                | `ci.yml`                | Push / PR to `main`          | Installs deps, runs all tests (server + client), type-checks, builds both packages     |
 | **CodeQL**            | `codeql.yml`            | Push / PR / weekly           | GitHub code scanning — static analysis for JS/TS security vulnerabilities              |
-| **Deploy**            | `deploy.yml`            | Push to `main` / manual      | Deploys server → Railway, then client → Vercel (requires secrets — see above)          |
 | **Lighthouse**        | `lighthouse.yml`        | PR to `main`                 | Runs Lighthouse CI against the PR preview; posts performance scores as a status check  |
 | **Dependency Review** | `dependency-review.yml` | PR to `main`                 | Blocks PRs that introduce dependencies with known CVEs                                 |
 | **Secret Scan**       | `secret-scan.yml`       | Push / PR                    | Scans commit diff for accidentally committed secrets/tokens                            |
 | **PR Labeler**        | `pr-labeler.yml`        | PR opened / edited           | Automatically applies labels (`client`, `server`, `docs`, etc.) based on changed paths |
 | **Stale**             | `stale.yml`             | Daily schedule               | Marks issues and PRs stale after 60 days of inactivity; closes after 7 more days       |
 | **Create Labels**     | `create-labels.yml`     | Manual (`workflow_dispatch`) | Creates all standard labels used by the PR labeler — run once after making repo public |
+
+> **Deployments are handled by Vercel's native GitHub integration**, not by a workflow file. Both the frontend (`client/`) and backend (`server/`) Vercel projects are connected to this repo and auto-deploy on every push to `main`.
 
 ---
 

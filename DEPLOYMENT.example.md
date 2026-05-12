@@ -7,11 +7,11 @@
 
 ## Live URLs
 
-| Service               | URL                                        |
-| --------------------- | ------------------------------------------ |
-| **Frontend (Vercel)** | https://YOUR_APP.vercel.app                |
-| **API (Railway)**     | https://YOUR_APP-production.up.railway.app |
-| **Database**          | your-neon-or-postgres-host.example.com     |
+| Service               | URL                                     |
+| --------------------- | --------------------------------------- |
+| **Frontend (Vercel)** | https://YOUR_APP.vercel.app             |
+| **API (Vercel)**      | https://YOUR_BACKEND_PROJECT.vercel.app |
+| **Database**          | your-neon-or-postgres-host.example.com  |
 
 ---
 
@@ -26,29 +26,26 @@
 | Host     | your-host.neon.tech                                  |
 | Full URL | `postgresql://USER:PASSWORD@HOST/DB?sslmode=require` |
 
-> The actual password is set directly in Railway as `DATABASE_URL`. Never commit it.
+> The actual password is set in Vercel's Environment Variables as `DATABASE_URL`. Never commit it.
 
 ---
 
-## 2. Railway (API Server)
+## 2. Vercel (API / Backend Server)
 
-| Field           | Value                                      |
-| --------------- | ------------------------------------------ |
-| Project Name    | YOUR_PROJECT_NAME                          |
-| Project ID      | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
-| Service Name    | YOUR_SERVICE_NAME                          |
-| Service ID      | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
-| Environment     | production                                 |
-| Environment ID  | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`     |
-| Public URL      | https://YOUR_APP-production.up.railway.app |
-| Builder         | Dockerfile                                 |
-| Root Directory  | `/server`                                  |
-| Dockerfile path | `/server/Dockerfile`                       |
-| GitHub source   | `YOUR_USERNAME/YOUR_REPO` → branch `main`  |
+| Field          | Value                                   |
+| -------------- | --------------------------------------- |
+| Project Name   | YOUR_BACKEND_PROJECT_NAME               |
+| Public URL     | https://YOUR_BACKEND_PROJECT.vercel.app |
+| Root Directory | `server`                                |
+| Framework      | Other (Node.js, auto-detected)          |
+| Branch         | `main`                                  |
+| GitHub source  | `YOUR_USERNAME/YOUR_REPO`               |
 
-### Railway Environment Variables
+> `server/vercel.json` routes all requests to `src/index.ts` via `@vercel/node`. The `postinstall` script runs `prisma generate` automatically at build time.
 
-Set these in Railway → Service → Variables:
+### Backend Environment Variables
+
+Set these in Vercel → Project → Settings → Environment Variables:
 
 | Variable            | Value                                                                   |
 | ------------------- | ----------------------------------------------------------------------- |
@@ -57,7 +54,7 @@ Set these in Railway → Service → Variables:
 | `PORT`              | `3001`                                                                  |
 | `TOKEN_SECRET`      | _(run `openssl rand -hex 32` to generate)_                              |
 | `ADMIN_SECRET_HASH` | _(run `cd server && npm run hash-secret -- "your-secret"` to generate)_ |
-| `CORS_ORIGIN`       | `https://YOUR_APP.vercel.app`                                           |
+| `CORS_ORIGIN`       | `https://YOUR_FRONTEND.vercel.app`                                      |
 
 ---
 
@@ -82,39 +79,35 @@ Set these in Railway → Service → Variables:
 ### Rewrites (client/vercel.json)
 
 ```
-/api/(.*) → https://YOUR_RAILWAY_URL.up.railway.app/api/$1
+/api/(.*) → https://YOUR_BACKEND_PROJECT.vercel.app/api/$1
 ```
 
-Update `client/vercel.json` with your Railway URL before deploying.
+Update `client/vercel.json` with your backend Vercel URL before deploying.
 
 ---
 
-## 4. GitHub Actions Secrets
+## 4. Auto-Deploy (Native Vercel GitHub Integration)
 
-If using CLI-based GitHub Actions deploys (the default uses native integrations — no secrets needed):
+Both Vercel projects (frontend and backend) are connected to this GitHub repo via Vercel's native GitHub integration — **no secrets or workflow files required**.
 
-| Type   | Name                | Notes                             |
-| ------ | ------------------- | --------------------------------- |
-| Secret | `VERCEL_TOKEN`      | Vercel → Settings → Tokens        |
-| Secret | `VERCEL_ORG_ID`     | From local `.vercel/project.json` |
-| Secret | `VERCEL_PROJECT_ID` | From local `.vercel/project.json` |
+Every push to `main` automatically triggers a production deploy for each project. Status appears as a commit check in GitHub (green ✔ from the Vercel bot).
+
+To connect a new project: Vercel → Project → Settings → Git → connect repository → set production branch to `main`.
 
 ---
 
 ## 5. Manual Redeploy
 
-### Railway (server)
+Vercel Dashboard → Project → Deployments → Redeploy (works for both projects).
 
-Via dashboard: Railway → Project → Service → Deployments → Redeploy
-
-### Vercel (client)
+Or via CLI:
 
 ```bash
-# From repo root, after running `npx vercel link` locally
-VERCEL_ORG_ID=<your-org-id> \
-VERCEL_PROJECT_ID=<your-project-id> \
-npx vercel build --prod --token=<VERCEL_TOKEN>
-npx vercel deploy --prebuilt --prod --token=<VERCEL_TOKEN>
+# Backend
+cd server && vercel --prod
+
+# Frontend
+cd client && vercel --prod
 ```
 
 ---
@@ -131,11 +124,10 @@ npx prisma migrate deploy
 
 ## 7. Key File Locations
 
-| File                           | Purpose                                      |
-| ------------------------------ | -------------------------------------------- |
-| `server/Dockerfile`            | Production Docker image (Railway)            |
-| `server/railway.toml`          | Railway build/deploy config                  |
-| `client/vercel.json`           | Vercel config: rewrites, headers, output dir |
-| `server/prisma/schema.prisma`  | Database schema                              |
-| `server/prisma/migrations/`    | Migration history                            |
-| `.github/workflows/deploy.yml` | Documents how deploys work (no active jobs)  |
+| File                          | Purpose                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `server/Dockerfile`           | Production Docker image (local Docker deployments) |
+| `server/vercel.json`          | Vercel serverless config (backend)                 |
+| `client/vercel.json`          | Vercel config: rewrites, headers, output dir       |
+| `server/prisma/schema.prisma` | Database schema                                    |
+| `server/prisma/migrations/`   | Migration history                                  |

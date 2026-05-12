@@ -787,20 +787,20 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  InteractivityTimer: {
+  InteractivityTimeout: {
     summary:
-      "Number of seconds of inactivity before the HUD stops responding to touch input.",
+      "Time in seconds after which the settings UI closes automatically if the user is not interacting with the screen.",
     tips: [
-      "Set to 90–120 s for a balance between usability and distraction reduction.",
+      "Set to 30 s (the default) for a balance between usability and distraction reduction.",
       "0 = never time out (always interactive).",
     ],
-    defaultNote: "90 s",
+    defaultNote: "30 s",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  RealTimeAccelBar: {
+  RocketFuel: {
     summary:
-      "Shows a live acceleration and deceleration bar on the HUD while driving.",
+      "Shows an indicator on the left side of the screen to display real-time vehicle acceleration and deceleration. This displays what the car is currently doing, not what the planner is requesting.",
     tips: [
       "Useful for monitoring how aggressively SP is braking or accelerating.",
       "Can help identify tuning issues by watching the bar during drives.",
@@ -1038,16 +1038,17 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  WakeupBehavior: {
-    summary: "Determines when the device wakes up from sleep automatically.",
+  DeviceBootMode: {
+    summary:
+      "Controls state of the device after boot/sleep. Standard: device will boot/wake-up normally. Always Offroad: device will be in offroad mode after boot/wake.",
     tips: [
-      "'On cable connection' is the most common option — wakes when 12 V power connects to USB.",
-      "'Always on' keeps the device running even when parked.",
+      "'Always Offroad' keeps the device in offroad mode after boot/wake, useful for specific setups.",
+      "'Standard' is the default and boots normally into the regular driving state.",
     ],
     tradeoffs: [
-      "'Always on' will drain the car battery over time if no dedicated power is provided.",
+      "'Always Offroad' will prevent automatic onroad mode if always selected.",
     ],
-    defaultNote: "0 (manual only)",
+    defaultNote: "0 (Standard)",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
@@ -1101,12 +1102,80 @@ export const FIELD_HELP: Record<string, FieldHelp> = {
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
   },
 
-  ToyotaEnforceFactoryLong: {
+  ToyotaEnforceStockLongitudinal: {
     summary:
-      "Forces Toyota/Lexus vehicles to use the factory longitudinal (ACC) controller instead of sunnypilot's override.",
+      "Enable this to force Toyota/Lexus to use factory ACC instead of sunnypilot longitudinal control. Factory Toyota longitudinal control will be used.",
     tips: [
       "Toyota/Lexus only. Useful when sunnypilot's longitudinal tuning feels worse than factory ACC.",
       "SP lateral control still works normally — only ACC/braking reverts to factory.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  ToyotaStopAndGoHack: {
+    summary:
+      "Enables stop-and-go ACC functionality on supported Toyota models, allowing the car to come to a complete stop and resume with traffic.",
+    tips: [
+      "Toyota vehicles only. Check SP compatibility list for your model year.",
+      "May require specific firmware versions — test carefully before relying on it.",
+    ],
+    tradeoffs: [
+      "Stop-and-go behaviour may differ from factory — test in a safe environment first.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  CustomTorqueParams: {
+    summary:
+      "Parent gate that unlocks custom torque tuning parameters in the sunnypilot settings UI. Must be ON to access friction and lat-accel overrides.",
+    tips: [
+      "Enable this first, then use the individual override sliders to tune.",
+      "Keep OFF unless you are an advanced user familiar with torque controller tuning.",
+    ],
+    tradeoffs: [
+      "Incorrect values can make steering unsafe — always test in a controlled environment.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  DisplayMetricsPosition: {
+    summary:
+      "Controls where extended HUD metrics (speed, distance, time) are displayed on the onroad screen.",
+    tips: [
+      "0 = Off (no extra metrics), 1 = Bottom, 2 = Right, 3 = Right + Bottom.",
+      "Try 'Bottom' for a clean look; 'Right' works well on wider displays.",
+    ],
+    defaultNote: "0 (Off)",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  ShowDebugInfo: {
+    summary:
+      "Displays a developer debug overlay on the onroad screen with internal sunnypilot state information.",
+    tips: [
+      "Useful for diagnosing unexpected behaviour or reporting issues to developers.",
+      "Turn OFF for normal daily driving — the overlay is visually noisy.",
+    ],
+    tradeoffs: [
+      "Clutters the HUD significantly — not intended for regular use.",
+    ],
+    defaultNote: "OFF",
+    docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
+  },
+
+  RecordAudio: {
+    summary:
+      "Records microphone audio alongside the dashcam footage during drives.",
+    tips: [
+      "Useful for capturing cabin audio for debugging or review alongside video.",
+      "Audio is stored locally with the drive segment — separate from RecordAudioFeedback upload.",
+    ],
+    tradeoffs: [
+      "Increases storage usage for each drive segment.",
+      "Be aware of local privacy laws regarding audio recording in a vehicle.",
     ],
     defaultNote: "OFF",
     docsUrl: "https://community.sunnypilot.ai/c/documentation/114",
