@@ -235,13 +235,24 @@ export const VehicleSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Toyota: Enforce Factory Long"
-        spKey="ToyotaEnforceFactoryLong"
-        description="ToyotaEnforceFactoryLong — force Toyota/Lexus vehicles to use factory longitudinal control instead of sunnypilot's override."
+        label="Toyota: Enforce Stock Longitudinal"
+        spKey="ToyotaEnforceStockLongitudinal"
+        description="ToyotaEnforceStockLongitudinal — enable this to force Toyota/Lexus to use factory ACC instead of sunnypilot longitudinal control. Factory Toyota longitudinal control will be used."
       >
         <Toggle
           checked={vs.toyotaEnforceFactoryLong}
           onChange={(v) => setVs("toyotaEnforceFactoryLong", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Toyota: Stop and Go Hack (Alpha)"
+        spKey="ToyotaStopAndGoHack"
+        description="ToyotaStopAndGoHack — allow some Toyota/Lexus cars to auto resume during stop and go traffic. Only applicable to certain models that are able to use longitudinal control. Alpha — use at your own risk."
+      >
+        <Toggle
+          checked={vs.toyotaStopAndGo}
+          onChange={(v) => setVs("toyotaStopAndGo", v)}
         />
       </ParamRow>
     </ConfigSection>

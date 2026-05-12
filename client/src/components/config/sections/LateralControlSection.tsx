@@ -8,9 +8,9 @@ import { Toggle } from "../../ui/Toggle";
 import { ConfigSection, ParamRow } from "../ConfigSection";
 
 const TUNE_OPTS = [
-  { value: "0", label: "0 — Comma stock (upstream defaults)" },
-  { value: "1", label: "1 — SP (recommended)" },
-  { value: "2", label: "2 — SP+ aggressive" },
+  { value: "", label: "Default (upstream stock values)" },
+  { value: "1", label: "v1.0" },
+  { value: "0", label: "v0.0" },
 ];
 
 const MADS_STEERING_OPTS = [
@@ -137,14 +137,30 @@ export const LateralControlSection: React.FC = () => {
 
       {/* ─── Torque model selection ─── */}
       <ParamRow
-        label="Torque Control Tune"
+        label="Torque Control Tune Version"
         spKey="TorqueControlTune"
-        description="TorqueControlTune — tuning preset for the torque lateral controller."
+        description="TorqueControlTune — select the version of Torque Control Tune to use. Default uses upstream stock values."
       >
         <Select
           value={String(lat.torqueControlTune)}
-          onChange={(v) => set("torqueControlTune", parseInt(v) as 0 | 1 | 2)}
+          onChange={(v) =>
+            set(
+              "torqueControlTune",
+              (v === "" ? "" : v === "1" ? 1 : 0) as "" | 0 | 1,
+            )
+          }
           options={TUNE_OPTS}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Enable Custom Torque Tuning"
+        spKey="CustomTorqueParams"
+        description="CustomTorqueParams — enables custom tuning for Torque lateral control. Required parent toggle for manual friction and lat accel overrides."
+      >
+        <Toggle
+          checked={lat.customTorqueParams}
+          onChange={(v) => set("customTorqueParams", v)}
         />
       </ParamRow>
 
@@ -306,6 +322,7 @@ export const LateralControlSection: React.FC = () => {
         <Toggle
           checked={lat.torqueOverride.enabled}
           onChange={(v) => setOverride("enabled", v)}
+          disabled={!lat.customTorqueParams}
         />
       </ParamRow>
 
@@ -371,13 +388,13 @@ export const LateralControlSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Blind Spot Monitoring"
-        spKey="BlindSpot"
-        description="BlindSpot — integrate BSM radar data to block the lane change when a vehicle is detected in the blind spot."
+        label="BSM Delay for Lane Change"
+        spKey="AutoLaneChangeBsmDelay"
+        description="AutoLaneChangeBsmDelay — delay the auto lane change when blind spot monitoring (BSM) detects a vehicle in your blind spot."
       >
         <Toggle
-          checked={lc.bsmMonitoring}
-          onChange={(v) => setLc("bsmMonitoring", v)}
+          checked={lc.autoLaneChangeBsmDelay}
+          onChange={(v) => setLc("autoLaneChangeBsmDelay", v)}
           disabled={!lc.enabled}
         />
       </ParamRow>
@@ -385,7 +402,7 @@ export const LateralControlSection: React.FC = () => {
       <ParamRow
         label="Use Lane Turn Desires"
         spKey="LaneTurnDesire"
-        description="LaneTurnDesire — use the desired-path planner on curves and turns for smoother lane-following."
+        description="LaneTurnDesire — force the model to plan a turn intent based on blinker direction at intersections."
       >
         <Toggle
           checked={lc.laneTurnDesire}
@@ -394,13 +411,13 @@ export const LateralControlSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Adjust Lane Turn Speed"
-        spKey="AdjustLaneTurnSpeed"
-        description="AdjustLaneTurnSpeed — speed limit (kph) at which lane-turn desire activates. 0 — always active. Requires Lane Turn Desires — ON (ShowAdvancedControls)."
+        label="Max Lane Turn Speed"
+        spKey="LaneTurnValue"
+        description="LaneTurnValue — set the maximum speed for lane turn desires. 0 = always active."
       >
         <NumberInput
-          value={lc.adjustLaneTurnSpeed}
-          onChange={(v) => setLc("adjustLaneTurnSpeed", v)}
+          value={lc.laneTurnSpeed}
+          onChange={(v) => setLc("laneTurnSpeed", v)}
           min={0}
           max={130}
           step={5}

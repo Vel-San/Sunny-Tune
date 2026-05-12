@@ -15,9 +15,11 @@ const MAX_OFFROAD_OPTS = [
 ];
 
 const WAKEUP_OPTS = [
-  { value: "0", label: "Off (manual only)" },
-  { value: "1", label: "On USB cable connection" },
-  { value: "2", label: "Always on" },
+  { value: "0", label: "Standard — boot/wake normally" },
+  {
+    value: "1",
+    label: "Always Offroad — device stays in offroad mode after boot/wake",
+  },
 ];
 
 export const AdvancedSection: React.FC = () => {
@@ -90,12 +92,12 @@ export const AdvancedSection: React.FC = () => {
 
       <ParamRow
         label="Wake Up Behavior"
-        spKey="WakeupBehavior"
-        description="WakeupBehavior — when the device wakes from sleep automatically."
+        spKey="DeviceBootMode"
+        description="DeviceBootMode — controls state of the device after boot/sleep. Standard: device will boot/wake-up normally. Always Offroad: device will be in offroad mode after boot/wake."
       >
         <Select
-          value={String(a.wakeupBehavior)}
-          onChange={(v) => set("wakeupBehavior", parseInt(v))}
+          value={String(a.deviceBootMode)}
+          onChange={(v) => set("deviceBootMode", parseInt(v))}
           options={WAKEUP_OPTS}
         />
       </ParamRow>

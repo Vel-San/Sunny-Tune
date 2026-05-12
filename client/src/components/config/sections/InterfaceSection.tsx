@@ -26,28 +26,44 @@ const BRIGHTNESS_DELAY_OPTS = [
 ];
 
 const LANG_OPTS = [
-  { value: "main_en", label: "English" },
-  { value: "main_ko", label: "Korean" },
-  { value: "main_ja", label: "Japanese" },
-  { value: "main_de", label: "German" },
-  { value: "main_es", label: "Spanish" },
-  { value: "main_fr", label: "French" },
-  { value: "main_pt-BR", label: "Portuguese (Brazil)" },
-  { value: "main_it", label: "Italian" },
-  { value: "main_nl", label: "Dutch" },
-  { value: "main_pl", label: "Polish" },
-  { value: "main_tr", label: "Turkish" },
-  { value: "main_zh-Hans", label: "Chinese (Simplified)" },
-  { value: "main_zh-Hant", label: "Chinese (Traditional)" },
+  { value: "en", label: "English" },
+  { value: "ko", label: "Korean" },
+  { value: "ja", label: "Japanese" },
+  { value: "de", label: "German" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "pt-BR", label: "Portuguese (Brazil)" },
+  { value: "it", label: "Italian" },
+  { value: "nl", label: "Dutch" },
+  { value: "pl", label: "Polish" },
+  { value: "tr", label: "Turkish" },
+  { value: "zh-Hans", label: "Chinese (Simplified)" },
+  { value: "zh-Hant", label: "Chinese (Traditional)" },
 ];
 
 const INTERACTIVITY_OPTS = [
-  { value: "0", label: "Never" },
-  { value: "30", label: "30 seconds" },
+  { value: "0", label: "Default" },
+  { value: "10", label: "10 seconds" },
+  { value: "20", label: "20 seconds" },
+  { value: "30", label: "30 seconds (default)" },
   { value: "60", label: "1 minute" },
-  { value: "90", label: "1.5 minutes (default)" },
   { value: "120", label: "2 minutes" },
   { value: "300", label: "5 minutes" },
+];
+
+const CHEVRON_OPTS = [
+  { value: "0", label: "Off" },
+  { value: "1", label: "Distance" },
+  { value: "2", label: "Speed" },
+  { value: "3", label: "Time" },
+  { value: "4", label: "All" },
+];
+
+const METRICS_POSITION_OPTS = [
+  { value: "0", label: "Off" },
+  { value: "1", label: "Bottom" },
+  { value: "2", label: "Right" },
+  { value: "3", label: "Right & Bottom" },
 ];
 
 export const InterfaceSection: React.FC = () => {
@@ -142,32 +158,21 @@ export const InterfaceSection: React.FC = () => {
       </ParamRow>
 
       <ParamRow
-        label="Torque Bar"
+        label="Steering Arc (Torque Bar)"
         spKey="TorqueBar"
-        description="TorqueBar — display a visual bar showing the current lateral torque output on the HUD."
+        description="TorqueBar — display steering arc on the driving screen when lateral control is enabled."
       >
         <Toggle checked={ui.torqueBar} onChange={(v) => set("torqueBar", v)} />
       </ParamRow>
 
       <ParamRow
         label="Show Blind Spot Warnings"
-        spKey="BlindSpotDetection"
-        description="BlindSpotDetection — display blind spot warning indicators on HUD when vehicles are detected in adjacent lanes."
+        spKey="BlindSpot"
+        description="BlindSpot — display blind spot warning indicators on the HUD as long as your car has BSM supported."
       >
         <Toggle
           checked={ui.blindSpotHUD}
           onChange={(v) => set("blindSpotHUD", v)}
-        />
-      </ParamRow>
-
-      <ParamRow
-        label="Steering Arc"
-        spKey="SteeringArc"
-        description="SteeringArc — show a steering arc overlay indicating the projected path based on current steering angle."
-      >
-        <Toggle
-          checked={ui.steeringArc}
-          onChange={(v) => set("steeringArc", v)}
         />
       </ParamRow>
 
@@ -185,11 +190,12 @@ export const InterfaceSection: React.FC = () => {
       <ParamRow
         label="Metrics Below Chevron"
         spKey="ChevronInfo"
-        description="ChevronInfo — display additional metrics (distance to lead, speed delta) below the lead-car chevron."
+        description="ChevronInfo — display additional metrics below the lead-car chevron. Off = hidden, Distance = gap to lead, Speed = relative speed, Time = time gap, All = all metrics."
       >
-        <Toggle
-          checked={ui.chevronInfo}
-          onChange={(v) => set("chevronInfo", v)}
+        <Select
+          value={String(ui.chevronInfo)}
+          onChange={(v) => set("chevronInfo", parseInt(v) as 0 | 1 | 2 | 3 | 4)}
+          options={CHEVRON_OPTS}
         />
       </ParamRow>
 
@@ -251,8 +257,8 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Interactivity Timeout"
-        spKey="InteractivityTimer"
-        description="InteractivityTimer — seconds of inactivity before the HUD becomes non-interactive."
+        spKey="InteractivityTimeout"
+        description="InteractivityTimeout — time after which the settings UI closes automatically if the user is not interacting with the screen."
       >
         <Select
           value={String(ui.interactivityTimeout)}
@@ -263,12 +269,48 @@ export const InterfaceSection: React.FC = () => {
 
       <ParamRow
         label="Real-time Accel Bar"
-        spKey="RealTimeAccelBar"
-        description="RealTimeAccelBar — show a live acceleration/deceleration bar on the HUD."
+        spKey="RocketFuel"
+        description="RocketFuel — show an indicator on the left side of the screen to display real-time vehicle acceleration and deceleration. This displays what the car is currently doing, not what the planner is requesting."
       >
         <Toggle
           checked={ui.realTimeAccelBar}
           onChange={(v) => set("realTimeAccelBar", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Display Metrics Position"
+        spKey="DisplayMetricsPosition"
+        description="DisplayMetricsPosition — choose where extended metrics from various sources are displayed on the HUD."
+      >
+        <Select
+          value={String(ui.displayMetricsPosition)}
+          onChange={(v) =>
+            set("displayMetricsPosition", parseInt(v) as 0 | 1 | 2 | 3)
+          }
+          options={METRICS_POSITION_OPTS}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="UI Debug Mode"
+        spKey="ShowDebugInfo"
+        description="ShowDebugInfo — enable the UI debug info overlay."
+      >
+        <Toggle
+          checked={ui.showDebugInfo}
+          onChange={(v) => set("showDebugInfo", v)}
+        />
+      </ParamRow>
+
+      <ParamRow
+        label="Record Microphone Audio"
+        spKey="RecordAudio"
+        description="RecordAudio — record and upload microphone audio while driving. The audio will be included in the dashcam video in comma connect."
+      >
+        <Toggle
+          checked={ui.recordAudio}
+          onChange={(v) => set("recordAudio", v)}
         />
       </ParamRow>
 

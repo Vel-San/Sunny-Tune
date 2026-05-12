@@ -8,7 +8,8 @@ import { createDefaultConfig } from "../types/config";
  *
  * - SpeedLimitMode: old `enabled: boolean` → new `mode: 0|1|2|3`
  * - SLCOffsetType:  `fixed_mph` / `fixed_kph` → `fixed`
- * - New interface fields: default to false if missing (blindSpotHUD, steeringArc, trueVegoUI, chevronInfo, rainbowMode)
+ * - New interface fields: default to false if missing (blindSpotHUD, trueVegoUI, chevronInfo, rainbowMode, showDebugInfo, recordAudio)
+ * - New laneChange fields: autoLaneChangeBsmDelay, laneTurnSpeed
  * - New speedControl fields: default to false if missing (icbmEnabled)
  */
 function normalizeConfig(raw: SPConfig): SPConfig {
